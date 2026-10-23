@@ -18,6 +18,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
           <p class="font-semibold">Recorrer</p>
           <nav class="mt-3 flex flex-col items-start gap-2" aria-label="Navegación del pie">
             <a routerLink="/products" class="min-h-8 text-[#b8b8b2] hover:text-white">Colección</a>
+            <a routerLink="/equipos" class="min-h-8 text-[#b8b8b2] hover:text-white">Remeras para equipos</a>
             <a routerLink="/about" class="min-h-8 text-[#b8b8b2] hover:text-white">El estudio</a>
             <a routerLink="/cart" class="min-h-8 text-[#b8b8b2] hover:text-white">Carrito</a>
           </nav>

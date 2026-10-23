@@ -5,7 +5,7 @@
   --surface: #e7e7e1;
   --ink: #0b0b0b;
   --muted: #555550;
-  --accent: #ed1c2f;
+  --accent: #d9182b;
   --accent-ink: #ffffff;
   --field-dark: #0b0b0b;
   --field-dark-ink: #f4f4f0;
@@ -174,7 +174,6 @@ button {
 
 @keyframes section-rise {
   from {
-    opacity: 0.35;
     transform: translateY(28px);
   }
 }
@@ -218,6 +217,10 @@ button {
   to {
     transform: scale(1.05) translateY(2%);
   }
+}
+
+.quote-slip {
+  clip-path: polygon(0 0, 100% 0, 100% 96%, 94% 100%, 88% 96%, 82% 100%, 76% 96%, 70% 100%, 64% 96%, 58% 100%, 52% 96%, 46% 100%, 40% 96%, 34% 100%, 28% 96%, 22% 100%, 16% 96%, 10% 100%, 4% 96%, 0 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
