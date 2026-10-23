@@ -42,7 +42,7 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
           <div class="mt-16 bg-[#0b0b0b] px-5 py-20 text-[#f4f4f0] md:px-10">
             <h2 class="max-w-[9ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl">Todavía no elegiste una obra</h2>
             <p class="mt-8 max-w-md text-lg leading-relaxed text-[#b8b8b2]">Agregá remeras desde la colección para empezar a armar tu pedido.</p>
-            <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-[#ed1c2f] px-6 font-semibold text-white hover:bg-[#c91425]">
+            <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-[#d9182b] px-6 font-semibold text-white hover:bg-[#c91425]">
               Explorar la colección
             </a>
           </div>
@@ -82,7 +82,7 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                     </p-inputNumber>
                     <button 
                       (click)="removeItem(item)"
-                      class="min-h-11 text-sm font-semibold text-[#ed1c2f] underline decoration-2 underline-offset-4 hover:text-[#c91425]">
+                      class="min-h-11 text-sm font-semibold text-[#d9182b] underline decoration-2 underline-offset-4 hover:text-[#c91425]">
                       Eliminar
                     </button>
                   </div>
@@ -167,7 +167,7 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                 <button
                   type="button"
                   (click)="checkout()"
-                  class="min-h-14 w-full bg-[#ed1c2f] px-5 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425]"
+                  class="min-h-14 w-full bg-[#d9182b] px-5 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425]"
                 >
                   Finalizar por WhatsApp
                 </button>
@@ -176,7 +176,7 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                   Tu pedido se confirma vía WhatsApp y se paga por transferencia.
                 </p>
 
-                <a routerLink="/products" class="flex min-h-12 items-center justify-center font-semibold underline decoration-2 underline-offset-4 hover:text-[#ed1c2f]">
+                <a routerLink="/products" class="flex min-h-12 items-center justify-center font-semibold underline decoration-2 underline-offset-4 hover:text-[#d9182b]">
                   Seguir comprando
                 </a>
               </div>

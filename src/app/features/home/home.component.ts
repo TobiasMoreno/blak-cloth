@@ -40,9 +40,15 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           </p>
           <a
             routerLink="/products"
-            class="mt-6 inline-flex min-h-12 items-center bg-[#ed1c2f] px-6 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425]"
+            class="mt-6 inline-flex min-h-12 items-center bg-[#d9182b] px-6 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425]"
           >
             Ver colección
+          </a>
+          <a
+            routerLink="/equipos"
+            class="mt-2 flex min-h-11 w-fit items-center whitespace-nowrap text-sm font-semibold text-[#f4f4f0] underline decoration-[#d9182b] decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#d9182b]"
+          >
+            Remeras para tu equipo →
           </a>
         </div>
 
@@ -81,7 +87,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
                   [attr.aria-selected]="activeDesign() === index"
                   (click)="activeDesign.set(index)"
                   [class]="activeDesign() === index
-                    ? 'min-h-11 text-left font-semibold text-[#ed1c2f]'
+                    ? 'min-h-11 text-left font-semibold text-[#0b0b0b] underline decoration-[#d9182b] decoration-2 underline-offset-8'
                     : 'min-h-11 text-left font-semibold text-[#555550] transition-colors duration-200 hover:text-[#0b0b0b]'"
                 >
                   {{ product.name }}
@@ -104,7 +110,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
               </p>
               <a
                 [routerLink]="['/product', selectedProduct().id]"
-                class="flex min-h-16 items-center justify-between bg-[#0b0b0b] px-5 font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#ed1c2f]"
+                class="flex min-h-16 items-center justify-between bg-[#0b0b0b] px-5 font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#d9182b]"
               >
                 Ver esta remera
                 <span aria-hidden="true">↗</span>
@@ -114,7 +120,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         </div>
       </section>
 
-      <section class="section-rise bg-[#ed1c2f] px-4 py-24 text-white md:px-8 md:py-36" aria-labelledby="wear-art-title">
+      <section class="section-rise bg-[#d9182b] px-4 py-24 text-white md:px-8 md:py-36" aria-labelledby="wear-art-title">
         <div class="grid gap-12 md:grid-cols-12 md:items-end">
           <div class="md:col-span-4">
             <img
@@ -223,7 +229,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 
       <a
         routerLink="/products"
-        class="group relative block min-h-[52svh] overflow-hidden bg-[#ed1c2f] px-4 py-8 text-white transition-colors duration-200 hover:bg-[#0b0b0b] md:px-8"
+        class="group relative block min-h-[52svh] overflow-hidden bg-[#d9182b] px-4 py-8 text-white transition-colors duration-200 hover:bg-[#0b0b0b] md:px-8"
         aria-label="Elegir una remera de la colección"
       >
         <p class="max-w-sm text-lg leading-relaxed">La próxima obra puede salir con vos.</p>

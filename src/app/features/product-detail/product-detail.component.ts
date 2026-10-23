@@ -34,9 +34,9 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
           <!-- Breadcrumbs -->
           <nav aria-label="Breadcrumb" class="mb-10">
             <ol class="flex items-center gap-3 text-sm text-[#555550]">
-              <li><a routerLink="/" class="hover:text-[#ed1c2f]">Inicio</a></li>
+              <li><a routerLink="/" class="hover:text-[#d9182b]">Inicio</a></li>
               <li aria-hidden="true">→</li>
-              <li><a routerLink="/products" class="hover:text-[#ed1c2f]">Colección</a></li>
+              <li><a routerLink="/products" class="hover:text-[#d9182b]">Colección</a></li>
               <li aria-hidden="true">→</li>
               <li class="truncate font-semibold text-[#0b0b0b]" aria-current="page">{{ productData.name }}</li>
             </ol>
@@ -213,7 +213,7 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
                   type="button"
                   [disabled]="!canAddToCart()"
                   (click)="buyNow()"
-                  class="min-h-14 bg-[#ed1c2f] px-5 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425] disabled:cursor-not-allowed disabled:bg-[#aaa]"
+                  class="min-h-14 bg-[#d9182b] px-5 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425] disabled:cursor-not-allowed disabled:bg-[#aaa]"
                 >
                   Agregar e ir al carrito
                 </button>
@@ -229,7 +229,7 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
             <section class="mt-32 md:mt-44">
               <div class="mb-10 flex items-end justify-between gap-5">
                 <h2 class="max-w-[10ch] text-5xl font-black uppercase leading-[0.9] md:text-7xl">También te puede gustar</h2>
-                <a routerLink="/products" class="min-h-11 content-center font-semibold underline decoration-2 underline-offset-4 hover:text-[#ed1c2f]">
+                <a routerLink="/products" class="min-h-11 content-center font-semibold underline decoration-2 underline-offset-4 hover:text-[#d9182b]">
                   Ver todo
                 </a>
               </div>
@@ -246,7 +246,7 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
       <div class="flex min-h-[70svh] items-center bg-[#0b0b0b] px-4 text-[#f4f4f0] md:px-8">
         <div>
           <h1 class="max-w-[10ch] text-7xl font-black uppercase leading-[0.86] md:text-9xl">Producto no encontrado</h1>
-          <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-[#ed1c2f] px-6 font-semibold text-white">
+          <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-[#d9182b] px-6 font-semibold text-white">
             Volver a la colección
           </a>
         </div>

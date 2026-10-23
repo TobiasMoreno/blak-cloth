@@ -7,16 +7,17 @@
       <div>
         <h1
           id="teams-title"
-          class="font-display text-[clamp(4.5rem,9vw,9rem)] font-black uppercase leading-[0.78] tracking-[-0.03em]"
+          class="font-display text-[clamp(4.5rem,15vw,9rem)] font-black uppercase leading-[0.86] tracking-[-0.03em] lg:text-[clamp(4.5rem,9vw,9rem)]"
         >
           <span class="block">Remeras</span>
-          <span class="block whitespace-nowrap text-[0.64em]">para tu equipo</span>
+          <span class="mt-[0.06em] block whitespace-nowrap text-[0.64em]">para tu equipo</span>
         </h1>
         <p class="mt-10 max-w-[32ch] text-lg leading-relaxed text-[#d0d0ca] md:text-xl">
           Diseñamos remeras de algodón para clubes, planteles y grupos que quieren llevar su identidad también afuera de la cancha.
         </p>
         <a
-          href="#configurador"
+          href="/equipos#configurador"
+          (click)="goToConfigurator($event)"
           class="mt-8 inline-flex min-h-14 items-center bg-[#d9182b] px-6 font-semibold text-white transition-colors duration-200 hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
         >
           Diseñar la nuestra
@@ -39,93 +40,91 @@
     </div>
   </section>
 
-  <section id="configurador" class="px-4 py-24 md:px-8 md:py-36" aria-labelledby="configurator-title">
-    <div class="mb-14 grid gap-8 lg:grid-cols-12 lg:items-end">
+  <section
+    #configuratorSection
+    id="configurador"
+    class="px-4 py-20 md:px-8 md:py-28"
+    aria-labelledby="configurator-title"
+  >
+    <div class="mb-10 grid gap-6 lg:grid-cols-12 lg:items-end">
       <h2
+        #configuratorHeading
         id="configurator-title"
-        class="section-rise max-w-[8ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl lg:col-span-7"
+        tabindex="-1"
+        class="section-rise max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl lg:col-span-7 lg:max-w-none"
       >
         Armá la idea
       </h2>
       <p class="section-rise max-w-lg text-lg leading-relaxed text-[#333330] lg:col-span-4 lg:col-start-9">
-        Probá una base para empezar la conversación. Después desarrollamos juntos el diseño final del equipo.
+        Probá una base para empezar la conversación. No es una compra: con estas elecciones te armamos una propuesta y la cotización.
       </p>
     </div>
 
     <div class="grid bg-[#e7e7e1] lg:grid-cols-12">
-      <form class="section-rise p-5 md:p-8 lg:col-span-5 lg:p-10" aria-label="Configurador de remera para equipos">
+      <form
+        [formGroup]="form"
+        class="configurator-form p-5 md:p-8 lg:col-span-5 lg:p-10"
+        aria-label="Configurador de remera para equipos"
+        (submit)="$event.preventDefault()"
+      >
         <label for="team-name" class="block text-xl font-semibold">Nombre del equipo</label>
         <input
           id="team-name"
           type="text"
-          [formControl]="teamNameControl"
-          maxlength="24"
-          autocomplete="organization"
-          class="mt-3 min-h-14 w-full bg-[#f4f4f0] px-4 text-lg text-[#0b0b0b] focus:outline-none"
+          formControlName="teamName"
+          [attr.maxlength]="teamNameMaxLength"
+          autocomplete="off"
+          placeholder="Ej.: Los del Barrio"
+          aria-describedby="team-name-hint"
+          class="mt-3 min-h-14 w-full bg-[#f4f4f0] px-4 text-lg text-[#0b0b0b] placeholder:text-[#62625c] focus:outline-none"
         />
-        <p class="mt-2 text-sm text-[#333330]">Hasta 24 caracteres.</p>
+        <p id="team-name-hint" class="mt-2 flex justify-between gap-4 text-sm text-[#333330]">
+          <span>Si todavía no lo tienen, dejalo vacío.</span>
+          <span class="tabular-nums">{{ teamNameLength() }}/{{ teamNameMaxLength }}</span>
+        </p>
 
-        <fieldset class="mt-10">
+        <fieldset class="mt-8">
           <legend class="text-xl font-semibold">Color de la remera</legend>
           <div class="mt-4 flex flex-wrap gap-3">
             @for (color of colorOptions; track color.id) {
-              <button
-                type="button"
-                (click)="selectColor(color.id)"
-                [attr.aria-pressed]="selectedColor() === color.id"
-                [class]="selectedColor() === color.id
-                  ? 'flex min-h-12 items-center gap-3 bg-[#0b0b0b] px-4 font-semibold text-white'
-                  : 'flex min-h-12 items-center gap-3 bg-[#f4f4f0] px-4 font-semibold text-[#0b0b0b] transition-colors hover:bg-[#d6d6cf]'"
-              >
+              <label class="choice flex min-h-12 cursor-pointer items-center gap-3 px-4 font-semibold">
+                <input type="radio" class="sr-only" formControlName="color" [value]="color.id" />
                 <span
                   class="h-5 w-5 rounded-full border-2 border-[#777770]"
                   [style.background-color]="color.hex"
                   aria-hidden="true"
                 ></span>
                 {{ color.label }}
-              </button>
+              </label>
             }
           </div>
         </fieldset>
 
-        <fieldset class="mt-10">
+        <fieldset class="mt-8">
           <legend class="text-xl font-semibold">Estampa principal</legend>
           <div class="mt-4 grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              (click)="selectPlacement('front')"
-              [attr.aria-pressed]="placement() === 'front'"
-              [class]="placement() === 'front'
-                ? 'min-h-12 bg-[#0b0b0b] px-4 font-semibold text-white'
-                : 'min-h-12 bg-[#f4f4f0] px-4 font-semibold transition-colors hover:bg-[#d6d6cf]'"
-            >
+            <label class="choice flex min-h-12 cursor-pointer items-center justify-center px-4 font-semibold">
+              <input type="radio" class="sr-only" formControlName="placement" value="front" />
               Frente
-            </button>
-            <button
-              type="button"
-              (click)="selectPlacement('back')"
-              [attr.aria-pressed]="placement() === 'back'"
-              [class]="placement() === 'back'
-                ? 'min-h-12 bg-[#0b0b0b] px-4 font-semibold text-white'
-                : 'min-h-12 bg-[#f4f4f0] px-4 font-semibold transition-colors hover:bg-[#d6d6cf]'"
-            >
+            </label>
+            <label class="choice flex min-h-12 cursor-pointer items-center justify-center px-4 font-semibold">
+              <input type="radio" class="sr-only" formControlName="placement" value="back" />
               Espalda
-            </button>
+            </label>
           </div>
         </fieldset>
 
-        <div class="mt-10 grid gap-8 sm:grid-cols-2">
+        <div class="mt-8 grid gap-8 sm:grid-cols-2">
           <div>
             <label for="team-quantity" class="block text-xl font-semibold">Cantidad estimada</label>
             <select
               id="team-quantity"
-              [formControl]="quantityControl"
+              formControlName="quantity"
               class="mt-3 min-h-14 w-full bg-[#f4f4f0] px-4 text-lg focus:outline-none"
             >
-              @for (quantityOption of quantityOptions; track quantityOption) {
-                <option [ngValue]="quantityOption">
-                  {{ quantityOption === 50 ? '50 o más' : quantityOption }}
-                </option>
+              <option [ngValue]="null" disabled>Elegí una opción</option>
+              @for (quantityOption of quantityOptions; track quantityOption.value) {
+                <option [ngValue]="quantityOption.value">{{ quantityOption.label }}</option>
               }
             </select>
           </div>
@@ -133,28 +132,47 @@
           <fieldset>
             <legend class="text-xl font-semibold">¿Ya tienen escudo?</legend>
             <div class="mt-3 flex gap-3">
-              <button
-                type="button"
-                (click)="selectCrestAvailability(true)"
-                [attr.aria-pressed]="hasCrest()"
-                [class]="hasCrest()
-                  ? 'min-h-14 flex-1 bg-[#0b0b0b] px-4 font-semibold text-white'
-                  : 'min-h-14 flex-1 bg-[#f4f4f0] px-4 font-semibold hover:bg-[#d6d6cf]'"
-              >
+              <label class="choice flex min-h-14 flex-1 cursor-pointer items-center justify-center px-4 font-semibold">
+                <input type="radio" class="sr-only" formControlName="hasCrest" [value]="true" />
                 Sí
-              </button>
-              <button
-                type="button"
-                (click)="selectCrestAvailability(false)"
-                [attr.aria-pressed]="!hasCrest()"
-                [class]="!hasCrest()
-                  ? 'min-h-14 flex-1 bg-[#0b0b0b] px-4 font-semibold text-white'
-                  : 'min-h-14 flex-1 bg-[#f4f4f0] px-4 font-semibold hover:bg-[#d6d6cf]'"
-              >
+              </label>
+              <label class="choice flex min-h-14 flex-1 cursor-pointer items-center justify-center px-4 font-semibold">
+                <input type="radio" class="sr-only" formControlName="hasCrest" [value]="false" />
                 No
-              </button>
+              </label>
             </div>
           </fieldset>
+        </div>
+
+        <div class="mt-8 grid gap-6 sm:grid-cols-2">
+          <div>
+            <label for="team-deadline" class="block text-lg font-semibold">
+              ¿Para cuándo? <span class="font-normal text-[#333330]">(opcional)</span>
+            </label>
+            <input
+              id="team-deadline"
+              type="text"
+              formControlName="deadline"
+              maxlength="40"
+              autocomplete="off"
+              placeholder="Ej.: fines de noviembre"
+              class="mt-3 min-h-14 w-full bg-[#f4f4f0] px-4 text-lg text-[#0b0b0b] placeholder:text-[#62625c] focus:outline-none"
+            />
+          </div>
+          <div>
+            <label for="team-location" class="block text-lg font-semibold">
+              Localidad <span class="font-normal text-[#333330]">(opcional)</span>
+            </label>
+            <input
+              id="team-location"
+              type="text"
+              formControlName="location"
+              maxlength="40"
+              autocomplete="address-level2"
+              placeholder="Ej.: Córdoba capital"
+              class="mt-3 min-h-14 w-full bg-[#f4f4f0] px-4 text-lg text-[#0b0b0b] placeholder:text-[#62625c] focus:outline-none"
+            />
+          </div>
         </div>
 
         <a
@@ -163,21 +181,23 @@
           rel="noopener noreferrer"
           class="mt-10 flex min-h-16 items-center justify-between bg-[#d9182b] px-5 font-semibold text-white transition-colors hover:bg-[#0b0b0b]"
         >
-          Pedir una propuesta
+          Pedir propuesta por WhatsApp
           <span aria-hidden="true">↗</span>
         </a>
         <p class="mt-3 text-sm leading-relaxed text-[#333330]">
-          Se abrirá WhatsApp con estas elecciones. Podés adjuntar el escudo y las referencias desde ahí.
+          Abrimos WhatsApp con tus elecciones. No es una compra: te respondemos con una propuesta y su cotización. Desde ahí podés mandar el escudo y las referencias.
         </p>
+        <p class="sr-only" aria-live="polite">{{ interacted() ? previewSummary() : '' }}</p>
       </form>
 
-      <div class="section-rise lg:col-span-7">
+      <div class="sticky top-16 z-10 order-first h-56 self-start md:h-80 lg:order-none lg:col-span-7 lg:h-[calc(100svh-4rem)]">
         <app-team-shirt-preview
           [teamName]="displayTeamName()"
           [shirtColor]="activeColor().hex"
           [shirtColorLabel]="activeColor().label"
           [printColor]="activeColor().printHex"
           [placement]="placement()"
+          [hasCrest]="hasCrest()"
         />
       </div>
     </div>
@@ -208,21 +228,20 @@
 
   <section class="px-4 py-24 md:px-8 md:py-36" aria-labelledby="process-title">
     <h2 id="process-title" class="section-rise max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
-      Del escudo al grupo
+      Cómo trabajamos
     </h2>
 
     <div class="mt-16 grid items-end gap-8 lg:grid-cols-12 lg:gap-3">
       <article class="section-rise lg:col-span-3">
-        <div class="relative min-h-[18rem] overflow-hidden bg-[#d6d6cf] lg:h-[30vh] lg:min-h-0">
-          <img
-            ngSrc="images/teams/team-shirt-detail.jpg"
-            alt="Escudo rojo aplicado sobre una remera negra de algodón"
-            fill
-            sizes="(max-width: 1023px) 100vw, 25vw"
-            class="object-cover"
-          />
+        <div
+          class="flex min-h-[18rem] flex-col justify-between bg-[#0b0b0b] p-6 text-[#f4f4f0] lg:h-[30vh] lg:min-h-[16rem]"
+        >
+          <p class="text-sm text-[#b8b8b2]">Nombre, escudo y colores</p>
+          <p class="font-display text-5xl font-black uppercase leading-[0.86] [overflow-wrap:anywhere]">
+            {{ displayTeamName() }}
+          </p>
         </div>
-        <h3 class="mt-5 text-2xl font-black uppercase">Traés la identidad</h3>
+        <h3 class="mt-5 text-2xl font-black uppercase">1. Traés la identidad</h3>
         <p class="mt-3 max-w-[32ch] leading-relaxed text-[#333330]">
           Nombre, escudo, colores y cualquier referencia que haga único al equipo.
         </p>
@@ -238,7 +257,7 @@
             class="object-cover"
           />
         </div>
-        <h3 class="mt-5 text-2xl font-black uppercase">Diseñamos la pieza</h3>
+        <h3 class="mt-5 text-2xl font-black uppercase">2. Diseñamos y estampamos</h3>
         <p class="mt-3 max-w-[32ch] leading-relaxed text-[#333330]">
           Convertimos ese material en una gráfica que funciona sobre una prenda de uso diario.
         </p>
@@ -254,12 +273,13 @@
             class="object-cover"
           />
         </div>
-        <h3 class="mt-5 text-2xl font-black uppercase">La usa todo el equipo</h3>
+        <h3 class="mt-5 text-2xl font-black uppercase">3. La usa todo el equipo</h3>
         <p class="mt-3 max-w-[32ch] leading-relaxed text-[#333330]">
           Confirmamos las variantes antes de producir y coordinamos juntos la entrega.
         </p>
       </article>
     </div>
+    <p class="mt-10 text-sm text-[#555550]">Imágenes ilustrativas del proceso.</p>
   </section>
 
   <section class="bg-[#0b0b0b] px-4 py-24 text-[#f4f4f0] md:px-8 md:py-36" aria-labelledby="quote-title">
@@ -275,9 +295,10 @@
           [href]="whatsappUrl()"
           target="_blank"
           rel="noopener noreferrer"
-          class="mt-10 inline-flex min-h-14 items-center bg-[#d9182b] px-6 font-semibold text-white transition-colors hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
+          class="mt-10 inline-flex min-h-14 items-center gap-4 bg-[#d9182b] px-6 font-semibold text-white transition-colors hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
         >
-          Cotizar este pedido
+          Pedir propuesta por WhatsApp
+          <span aria-hidden="true">↗</span>
         </a>
       </div>
 
@@ -299,7 +320,11 @@
             </div>
             <div class="flex items-start justify-between gap-6">
               <dt>Cantidad estimada</dt>
-              <dd class="font-semibold tabular-nums">{{ quantity() }}</dd>
+              <dd class="font-semibold tabular-nums">{{ quantityLabel() ?? 'A definir' }}</dd>
+            </div>
+            <div class="flex items-start justify-between gap-6">
+              <dt>Escudo</dt>
+              <dd class="font-semibold">{{ crestLabel() ?? 'A definir' }}</dd>
             </div>
           </dl>
           <div class="mt-10 h-1 bg-[#0b0b0b]" aria-hidden="true"></div>
@@ -316,96 +341,51 @@
       Lo que hay que saber
     </h2>
 
-    <div class="section-rise mt-16 space-y-7 lg:ml-[33.333%]">
-      <details class="group bg-[#e7e7e1] p-6">
-        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
-          ¿Son camisetas de fútbol?
-          <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
-        </summary>
-        <p class="mt-5 max-w-[48ch] leading-relaxed text-[#333330]">
-          No. Son remeras comunes de algodón, pensadas para usar fuera de la cancha y personalizadas con la identidad del equipo.
-        </p>
-      </details>
-
-      <details class="group p-6">
-        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
-          ¿Hay una cantidad mínima?
-          <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
-        </summary>
-        <p class="mt-5 max-w-[48ch] leading-relaxed text-[#333330]">
-          Contanos cuántas necesitan. Confirmamos la viabilidad y armamos una propuesta acorde al volumen del pedido.
-        </p>
-      </details>
-
-      <details class="group p-6">
-        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
-          ¿Podemos mandar nuestro escudo?
-          <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
-        </summary>
-        <p class="mt-5 max-w-[48ch] leading-relaxed text-[#333330]">
-          Sí. Podés enviarlo junto con fotos, colores o referencias por WhatsApp. El equipo debe contar con autorización para usar ese material.
-        </p>
-      </details>
-
-      <details class="group p-6">
-        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
-          ¿Se pueden agregar nombres o números?
-          <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
-        </summary>
-        <p class="mt-5 max-w-[48ch] leading-relaxed text-[#333330]">
-          Lo evaluamos dentro de la propuesta. Decinos cuántas variantes necesitan para contemplarlo desde el comienzo.
-        </p>
-      </details>
-
-      <details class="group p-6">
-        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
-          ¿Qué talles y colores hay?
-          <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
-        </summary>
-        <p class="mt-5 max-w-[48ch] leading-relaxed text-[#333330]">
-          Las variantes se confirman según disponibilidad antes de producir. Así el pedido queda cerrado sin sorpresas.
-        </p>
-      </details>
-
-      <details class="group p-6">
-        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
-          ¿Cuánto tarda el pedido?
-          <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
-        </summary>
-        <p class="mt-5 max-w-[48ch] leading-relaxed text-[#333330]">
-          El plazo se acuerda después de definir diseño, cantidad y disponibilidad. No iniciamos la producción hasta que todo esté confirmado.
-        </p>
-      </details>
+    <div class="section-rise mt-16 divide-y divide-[#c7c7c0] border-y border-[#c7c7c0] lg:ml-[33.333%]">
+      @for (item of faq; track item.question) {
+        <details class="group py-3 md:px-6">
+          <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
+            {{ item.question }}
+            <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+          </summary>
+          <p class="mb-4 mt-3 max-w-[48ch] leading-relaxed text-[#333330]">{{ item.answer }}</p>
+        </details>
+      }
     </div>
   </section>
 
-  <section class="grid min-h-[88svh] bg-[#d9182b] text-white lg:grid-cols-12" aria-labelledby="closing-title">
-    <div class="section-rise relative min-h-[55svh] overflow-hidden lg:col-span-8 lg:min-h-full">
-      <img
-        ngSrc="images/teams/team-hero.jpg"
-        alt="Amigos de un equipo amateur usando sus remeras personalizadas"
-        fill
-        sizes="(max-width: 1023px) 100vw, 67vw"
-        class="product-drift object-cover object-[58%_center]"
-      />
-    </div>
-    <div class="section-rise flex flex-col justify-center px-4 py-16 md:px-8 lg:col-span-4 lg:px-10">
-      <h2 id="closing-title" class="max-w-[9ch] text-5xl font-black uppercase leading-[0.9] md:text-6xl">
+  <section class="on-accent bg-[#d9182b] px-4 py-24 text-white md:px-8 md:py-32" aria-labelledby="closing-title">
+    <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
+      <h2
+        id="closing-title"
+        class="section-rise max-w-[10ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl lg:col-span-7"
+      >
         Que se vea el equipo
       </h2>
-      <p class="mt-6 max-w-[30ch] text-lg leading-relaxed">
-        Contanos cómo se llaman y qué los identifica. Nosotros empezamos por ahí.
-      </p>
-      <p class="mt-6 text-xl font-semibold">La consulta no tiene costo.</p>
-      <a
-        [href]="whatsappUrl()"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="mt-8 flex min-h-14 items-center justify-between bg-[#0b0b0b] px-5 font-semibold text-white transition-colors hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
-      >
-        Hablar por WhatsApp
-        <span aria-hidden="true">↗</span>
-      </a>
+      <div class="section-rise lg:col-span-4 lg:col-start-9">
+        <p class="max-w-[30ch] text-lg leading-relaxed">
+          Contanos cómo se llaman y qué los identifica. Nosotros empezamos por ahí.
+        </p>
+        <p class="mt-6 text-xl font-semibold">La consulta no tiene costo.</p>
+        <a
+          [href]="whatsappUrl()"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-8 flex min-h-14 items-center justify-between bg-[#0b0b0b] px-5 font-semibold text-white transition-colors hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
+        >
+          Pedir propuesta por WhatsApp
+          <span aria-hidden="true">↗</span>
+        </a>
+        @if (!interacted()) {
+          <a
+            href="/equipos#configurador"
+            (click)="goToConfigurator($event)"
+            class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+          >
+            O armá la idea primero
+          </a>
+        }
+      </div>
     </div>
   </section>
 </div>

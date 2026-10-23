@@ -7,7 +7,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
   imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <footer class="flex min-h-[85svh] flex-col justify-between bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:px-8 md:py-12">
+    <footer class="flex flex-col lg:min-h-[85svh] justify-between bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:px-8 md:py-12">
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p class="font-semibold">LM Studio</p>

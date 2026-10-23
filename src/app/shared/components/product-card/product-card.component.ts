@@ -16,9 +16,9 @@ import { CurrencyArsPipe } from '../../pipes/currency-ars.pipe';
         (click)="toggleWishlist($event)"
         [attr.aria-label]="isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos'"
         [attr.aria-pressed]="isFavorite()"
-        class="absolute right-3 top-3 z-10 flex min-h-11 min-w-11 items-center justify-center bg-[#f4f4f0] text-[#0b0b0b] transition-colors duration-200 hover:bg-[#ed1c2f] hover:text-white"
+        class="absolute right-3 top-3 z-10 flex min-h-11 min-w-11 items-center justify-center bg-[#f4f4f0] text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d9182b] hover:text-white"
       >
-        <i [class]="isFavorite() ? 'pi pi-heart-fill text-[#ed1c2f]' : 'pi pi-heart'"></i>
+        <i [class]="isFavorite() ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'"></i>
       </button>
 
       <a [routerLink]="['/product', product().id]" class="block">
@@ -35,7 +35,7 @@ import { CurrencyArsPipe } from '../../pipes/currency-ars.pipe';
 
         <div class="pt-5">
           <div class="flex items-start justify-between gap-4">
-            <h3 class="max-w-[13ch] text-3xl font-black uppercase leading-[0.92] transition-colors duration-200 group-hover:text-[#ed1c2f]">
+            <h3 class="max-w-[13ch] text-3xl font-black uppercase leading-[0.92] transition-colors duration-200 group-hover:text-[#d9182b]">
               {{ product().name }}
             </h3>
             <p class="shrink-0 text-lg font-semibold tabular-nums">

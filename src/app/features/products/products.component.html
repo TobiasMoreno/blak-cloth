@@ -100,7 +100,7 @@
           <button
             type="button"
             (click)="clearAllFilters()"
-            class="mt-6 min-h-11 font-semibold underline decoration-2 underline-offset-4 hover:text-[#ed1c2f]"
+            class="mt-6 min-h-11 font-semibold underline decoration-2 underline-offset-4 hover:text-[#d9182b]"
           >
             Limpiar filtros
           </button>
@@ -124,7 +124,7 @@
           }
         </div>
       } @placeholder {
-        <div class="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3" aria-label="Cargando productos">
+        <div class="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Cargando productos">
           @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
             <div class="aspect-[4/3] bg-[#e7e7e1]"></div>
           }
@@ -142,7 +142,7 @@
       <button
         type="button"
         (click)="clearAllFilters()"
-        class="mt-8 min-h-12 bg-[#ed1c2f] px-6 font-semibold text-white hover:bg-[#c91425]"
+        class="mt-8 min-h-12 bg-[#d9182b] px-6 font-semibold text-white hover:bg-[#c91425]"
       >
         Ver toda la colección
       </button>

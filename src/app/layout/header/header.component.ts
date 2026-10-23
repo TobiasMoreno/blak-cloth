@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  afterNextRender,
+  effect,
+  inject,
+  Injector,
+  signal,
+  viewChild
+} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 
@@ -6,8 +17,12 @@ import { CartService } from '../../core/services/cart.service';
   selector: 'app-header',
   imports: [RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown.escape)': 'onEscape()',
+    '(window:resize)': 'onResize()'
+  },
   template: `
-    <header class="sticky top-0 z-50 bg-[#f4f4f0] text-[#0b0b0b]">
+    <header class="sticky top-0 z-50 bg-[#f4f4f0] text-[#0b0b0b]" (keydown.tab)="trapFocus($event)" (keydown.shift.tab)="trapFocus($event)">
       <nav class="flex min-h-16 items-center justify-between px-4 md:px-8" aria-label="Navegación principal">
         <a
           routerLink="/"
@@ -38,7 +53,7 @@ import { CartService } from '../../core/services/cart.service';
             routerLinkActive="text-[#d9182b]"
             class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
           >
-            Equipos
+            Para equipos
           </a>
           <a
             routerLink="/about"
@@ -65,6 +80,7 @@ import { CartService } from '../../core/services/cart.service';
         </div>
 
         <button
+          #menuToggle
           type="button"
           class="min-h-11 min-w-14 text-right font-semibold md:hidden"
           (click)="toggleMenu()"
@@ -76,7 +92,7 @@ import { CartService } from '../../core/services/cart.service';
       </nav>
 
       @if (mobileMenuOpen()) {
-        <div id="mobile-navigation" class="absolute inset-x-0 top-16 min-h-[calc(100svh-4rem)] bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:hidden">
+        <div #mobileNavigation id="mobile-navigation" class="absolute inset-x-0 top-16 min-h-[calc(100svh-4rem)] bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:hidden">
           <div class="flex flex-col">
             <a routerLink="/" (click)="closeMenu()" class="font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]">
               Inicio
@@ -85,10 +101,10 @@ import { CartService } from '../../core/services/cart.service';
               Colección
             </a>
             <a routerLink="/equipos" (click)="closeMenu()" class="font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]">
-              Equipos
+              Para equipos
             </a>
             <a routerLink="/about" (click)="closeMenu()" class="font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]">
-              Estudio
+              El estudio
             </a>
             <a routerLink="/cart" (click)="closeMenu()" class="mt-12 flex min-h-14 items-center justify-between bg-[#d9182b] px-5 font-semibold text-white">
               Ver carrito
@@ -105,10 +121,22 @@ export class HeaderComponent {
   mobileMenuOpen = signal(false);
   badgeAnimating = signal(false);
 
+  private document = inject(DOCUMENT);
+  private injector = inject(Injector);
+  private menuToggle = viewChild.required<ElementRef<HTMLButtonElement>>('menuToggle');
+  private mobileNavigation = viewChild<ElementRef<HTMLElement>>('mobileNavigation');
   private previousCount = this.cartService.totalItems();
   private animationTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    effect(() => {
+      const open = this.mobileMenuOpen();
+      this.document.body.style.overflow = open ? 'hidden' : '';
+      if (open) {
+        afterNextRender(() => this.menuLinks()[0]?.focus(), { injector: this.injector });
+      }
+    });
+
     effect(() => {
       const count = this.cartService.totalItems();
       if (count > this.previousCount) {
@@ -129,5 +157,44 @@ export class HeaderComponent {
 
   toggleMenu(): void {
     this.mobileMenuOpen.update(open => !open);
+  }
+
+  // El menú es solo mobile: si la ventana crece, se cierra para no dejar el scroll bloqueado.
+  onResize(): void {
+    if (this.mobileMenuOpen() && window.innerWidth >= 768) {
+      this.closeMenu();
+    }
+  }
+
+  onEscape(): void {
+    if (this.mobileMenuOpen()) {
+      this.closeMenu();
+      this.menuToggle().nativeElement.focus();
+    }
+  }
+
+  // Mantiene el foco entre el botón "Cerrar" y los enlaces mientras el menú tapa la página.
+  trapFocus(event: Event): void {
+    if (!this.mobileMenuOpen()) {
+      return;
+    }
+    const focusables = [this.menuToggle().nativeElement, ...this.menuLinks()];
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = this.document.activeElement;
+    const backwards = (event as KeyboardEvent).shiftKey;
+
+    if (backwards && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!backwards && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  private menuLinks(): HTMLElement[] {
+    const menu = this.mobileNavigation()?.nativeElement;
+    return menu ? Array.from(menu.querySelectorAll<HTMLElement>('a')) : [];
   }
 }

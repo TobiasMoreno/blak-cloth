@@ -3,54 +3,65 @@ import { TeamsComponent } from './teams.component';
 
 describe('TeamsComponent', () => {
   beforeEach(async () => {
+    sessionStorage.clear();
     await TestBed.configureTestingModule({
       imports: [TeamsComponent]
     }).compileComponents();
   });
 
-  it('should create the configurator with useful defaults', () => {
-    const fixture = TestBed.createComponent(TeamsComponent);
-    const component = fixture.componentInstance;
+  const messageOf = (component: TeamsComponent) =>
+    new URL(component.whatsappUrl()).searchParams.get('text') ?? '';
 
-    expect(component.displayTeamName()).toBe('Los del Barrio');
+  it('should start without invented choices', () => {
+    const component = TestBed.createComponent(TeamsComponent).componentInstance;
+
+    expect(component.displayTeamName()).toBe('Tu equipo');
     expect(component.activeColor().label).toBe('Negro');
     expect(component.placement()).toBe('front');
-    expect(component.quantity()).toBe(20);
+    expect(component.quantityLabel()).toBeNull();
+    expect(component.hasCrest()).toBeNull();
+    expect(messageOf(component)).toBe('¡Hola! Quiero consultar por remeras de algodón para un equipo.');
   });
 
-  it('should update the shirt configuration', () => {
-    const fixture = TestBed.createComponent(TeamsComponent);
-    const component = fixture.componentInstance;
+  it('should include only the selected configuration in the WhatsApp message', () => {
+    const component = TestBed.createComponent(TeamsComponent).componentInstance;
 
-    component.teamNameControl.setValue('Barrio Sur');
-    component.quantityControl.setValue(30);
-    component.selectColor('red');
-    component.selectPlacement('back');
-    component.selectCrestAvailability(false);
+    component.form.patchValue({
+      teamName: '  Barrio   Sur ',
+      quantity: 50,
+      color: 'red',
+      placement: 'back',
+      hasCrest: false,
+      location: 'Córdoba capital.'
+    });
 
-    expect(component.displayTeamName()).toBe('Barrio Sur');
-    expect(component.activeColor().label).toBe('Rojo');
-    expect(component.placementLabel()).toBe('espalda');
-    expect(component.quantity()).toBe(30);
-    expect(component.hasCrest()).toBe(false);
-  });
-
-  it('should include the selected configuration in the WhatsApp message', () => {
-    const fixture = TestBed.createComponent(TeamsComponent);
-    const component = fixture.componentInstance;
-
-    component.teamNameControl.setValue('Barrio Sur');
-    component.quantityControl.setValue(30);
-    component.selectColor('red');
-    component.selectPlacement('back');
-    component.selectCrestAvailability(false);
-
-    const message = new URL(component.whatsappUrl()).searchParams.get('text');
+    const message = messageOf(component);
 
     expect(message).toContain('Equipo: Barrio Sur.');
-    expect(message).toContain('Cantidad estimada: 30 remeras.');
-    expect(message).toContain('Color base: Rojo.');
+    expect(message).toContain('Cantidad estimada: 50 o más remeras.');
+    expect(message).toContain('Color de la remera: Rojo.');
     expect(message).toContain('Estampa principal: espalda.');
-    expect(message).toContain('Necesitamos ayuda para crear la identidad del equipo.');
+    expect(message).toContain('Escudo: necesitamos ayuda para crearlo.');
+    expect(message).toContain('Localidad: Córdoba capital.');
+    expect(message).not.toContain('Para cuándo');
+  });
+
+  it('should not send a placeholder team name', () => {
+    const component = TestBed.createComponent(TeamsComponent).componentInstance;
+
+    component.form.patchValue({ color: 'off-white' });
+
+    expect(messageOf(component)).not.toContain('Equipo:');
+    expect(messageOf(component)).not.toContain('Escudo');
+  });
+
+  it('should restore the draft after a reload', () => {
+    const first = TestBed.createComponent(TeamsComponent).componentInstance;
+    first.form.patchValue({ teamName: 'Ferro', quantity: 30 });
+
+    const restored = TestBed.createComponent(TeamsComponent).componentInstance;
+
+    expect(restored.teamName()).toBe('Ferro');
+    expect(restored.quantityLabel()).toBe('30');
   });
 });

@@ -64,10 +64,15 @@ body {
   min-height: 100svh;
 }
 
-button,
-a,
-input {
-  font: inherit;
+/* En una capa para que las utilidades de Tailwind (text-*, font-*) puedan sobrescribirla. */
+@layer base {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
 }
 
 a,
@@ -76,8 +81,13 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus-ring, var(--accent));
   outline-offset: 4px;
+}
+
+/* Sobre fondos rojos el anillo rojo desaparece: se usa tinta. */
+.on-accent {
+  --focus-ring: var(--ink);
 }
 
 ::selection {

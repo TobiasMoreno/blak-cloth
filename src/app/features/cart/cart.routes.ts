@@ -4,6 +4,7 @@ import { CartComponent } from './cart.component';
 export const cartRoutes: Route[] = [
   {
     path: '',
+    title: 'Carrito · LM Studio',
     component: CartComponent
   }
 ];

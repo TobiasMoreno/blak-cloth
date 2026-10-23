@@ -82,7 +82,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
         [href]="whatsappUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="group relative block min-h-[50svh] overflow-hidden bg-[#ed1c2f] px-4 py-8 text-white transition-colors duration-200 hover:bg-[#0b0b0b] md:px-8"
+        class="group relative block min-h-[50svh] overflow-hidden bg-[#d9182b] px-4 py-8 text-white transition-colors duration-200 hover:bg-[#0b0b0b] md:px-8"
         aria-label="Conversar con LM Studio por WhatsApp"
       >
         <p class="max-w-sm text-lg leading-relaxed">¿Querés saber algo antes de elegir?</p>
