@@ -1,231 +1,151 @@
-<div class="min-h-screen py-8 md:py-12">
-  <div class="container mx-auto px-4">
-    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">Productos</h1>
+<div class="min-h-[100svh] bg-[#f4f4f0] px-4 pb-28 pt-14 md:px-8 md:pb-40 md:pt-20">
+  <header class="grid gap-10 md:grid-cols-12 md:items-end">
+    <h1 class="max-w-[8ch] text-7xl font-black uppercase leading-[0.82] md:col-span-8 md:text-[clamp(7rem,15vw,15rem)]">
+      Colección
+    </h1>
+    <div class="md:col-span-3 md:col-start-10 md:pb-3">
+      <p class="text-lg leading-relaxed text-[#555550]">
+        {{ filteredProducts().length }} prendas de autor disponibles para coordinar por WhatsApp.
+      </p>
+    </div>
+  </header>
 
-    <!-- Búsqueda y Filtro -->
-    <div class="mb-8 flex flex-col sm:flex-row gap-3">
-      <!-- Búsqueda por nombre -->
-      <div class="flex-1 relative">
-        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        <input
-          type="text"
-          placeholder="Buscar por nombre..."
-          [ngModel]="searchTerm()"
-          (ngModelChange)="searchTerm.set($event)"
-          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-gray-900 placeholder-gray-400"
-        />
+  <section class="mt-16 bg-[#e7e7e1] p-5 md:mt-24 md:p-8" aria-labelledby="filters-title">
+    <div class="grid gap-8 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <h2 id="filters-title" class="text-4xl font-black uppercase">Encontrá la tuya</h2>
+        <label for="product-search" class="mt-8 block font-semibold">Buscar por nombre</label>
+        <div class="mt-3 flex bg-[#f4f4f0]">
+          <input
+            id="product-search"
+            type="search"
+            placeholder="Medusa, Rose, Blak..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            class="min-h-14 min-w-0 flex-1 bg-transparent px-4 text-[#0b0b0b] placeholder:text-[#777770] focus:outline-none"
+          />
+          <span aria-hidden="true" class="flex w-14 items-center justify-center">⌕</span>
+        </div>
       </div>
 
-      <!-- Botones de filtros -->
-      <div class="flex gap-3">
-        <!-- Dropdown de Talles y Colores -->
-        <div class="relative sizes-colors-dropdown-container">
-          <button
-            type="button"
-            (click)="sizesColorsDropdownOpen = !sizesColorsDropdownOpen"
-            [class]="
-              hasSizesOrColors()
-                ? 'cursor-pointer px-4 py-3 bg-gray-900 text-white border border-gray-900 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium'
-                : 'cursor-pointer px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium'
-            "
-          >
-            <i class="pi pi-list"></i>
-            <span>Talles y Colores</span>
-            @if (hasSizesOrColors()) {
-              <span class="ml-1 bg-white text-gray-900 text-xs rounded-full px-2 py-0.5">
-                {{ getSizesColorsCount() }}
-              </span>
-            }
-          </button>
-
-          <!-- Panel de talles y colores -->
-          @if (sizesColorsDropdownOpen) {
-            <div
-              class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 p-6 space-y-6"
+      <div class="lg:col-span-3 lg:col-start-6">
+        <h3 class="text-2xl font-black uppercase">Talles</h3>
+        <div class="mt-4 flex flex-wrap gap-2">
+          @for (size of availableSizes(); track size) {
+            <button
+              type="button"
+              (click)="toggleSize(size)"
+              [attr.aria-pressed]="selectedSizes().includes(size)"
+              [class]="selectedSizes().includes(size)
+                ? 'min-h-12 min-w-12 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
+                : 'min-h-12 min-w-12 bg-[#f4f4f0] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
             >
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-semibold text-gray-900">Talles y Colores</h3>
-                @if (hasSizesOrColors()) {
-                  <button
-                    type="button"
-                    (click)="clearSizesColors()"
-                    class="text-sm text-gray-600 hover:text-gray-900 underline cursor-pointer"
-                  >
-                    Limpiar
-                  </button>
-                }
-              </div>
-
-              <!-- Filtro de talle -->
-              <div>
-                <label class="block text-sm font-medium text-gray-900 mb-3">Talles</label>
-                <div class="flex flex-wrap gap-2">
-                  @for (size of availableSizes(); track size) {
-                    <button
-                      type="button"
-                      (click)="toggleSize(size)"
-                      [attr.aria-pressed]="selectedSizes().includes(size)"
-                      [class]="
-                        selectedSizes().includes(size)
-                          ? 'min-w-12 px-3 py-1.5 border-2 border-black bg-black text-white rounded-md text-sm font-semibold cursor-pointer'
-                          : 'min-w-12 px-3 py-1.5 border-2 border-gray-300 bg-white text-gray-900 rounded-md text-sm font-semibold hover:border-gray-900 cursor-pointer'
-                      "
-                    >
-                      {{ size }}
-                    </button>
-                  }
-                </div>
-              </div>
-
-              <!-- Filtro de color -->
-              <div>
-                <label class="block text-sm font-medium text-gray-900 mb-3">Colores</label>
-                <div class="flex flex-wrap gap-2">
-                  @for (color of availableColors(); track color) {
-                    <button
-                      type="button"
-                      (click)="toggleColor(color)"
-                      [attr.aria-pressed]="selectedColors().includes(color)"
-                      [class]="
-                        selectedColors().includes(color)
-                          ? 'flex items-center gap-2 px-3 py-1.5 border-2 border-black bg-white rounded-md text-sm font-medium text-gray-900 cursor-pointer'
-                          : 'flex items-center gap-2 px-3 py-1.5 border-2 border-gray-300 bg-white rounded-md text-sm font-medium text-gray-900 hover:border-gray-900 cursor-pointer'
-                      "
-                    >
-                      <span
-                        class="inline-block w-4 h-4 rounded-full border border-gray-300"
-                        [style.background-color]="getColorHex(color)"
-                      ></span>
-                      {{ color }}
-                    </button>
-                  }
-                </div>
-              </div>
-            </div>
+              {{ size }}
+            </button>
           }
         </div>
 
-        <!-- Botón de filtros de precio -->
-        <div class="relative filter-dropdown-container">
-          <button
-            type="button"
-            (click)="filterDropdownOpen = !filterDropdownOpen"
-            [class]="
-              hasPriceFilter()
-                ? 'cursor-pointer px-4 py-3 bg-gray-900 text-white border border-gray-900 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 font-medium'
-                : 'cursor-pointer px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium'
-            "
-          >
-            <i class="pi pi-filter"></i>
-            <span>Precio</span>
-            @if (hasPriceFilter()) {
-              <span class="ml-1 bg-white text-gray-900 text-xs rounded-full px-2 py-0.5"> 1 </span>
-            }
-          </button>
-
-          <!-- Panel de filtros de precio -->
-          @if (filterDropdownOpen) {
-            <div
-              class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 p-6"
+        <h3 class="mt-8 text-2xl font-black uppercase">Colores</h3>
+        <div class="mt-4 flex flex-wrap gap-2">
+          @for (color of availableColors(); track color) {
+            <button
+              type="button"
+              (click)="toggleColor(color)"
+              [attr.aria-pressed]="selectedColors().includes(color)"
+              [class]="selectedColors().includes(color)
+                ? 'flex min-h-12 items-center gap-2 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
+                : 'flex min-h-12 items-center gap-2 bg-[#f4f4f0] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
             >
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Precio</h3>
-                @if (hasPriceFilter()) {
-                  <button
-                    type="button"
-                    (click)="clearPriceFilter()"
-                    class="text-sm text-gray-600 hover:text-gray-900 underline cursor-pointer"
-                  >
-                    Limpiar
-                  </button>
-                }
-              </div>
-
-              <!-- Filtro de precio -->
-              <div>
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="text-xs text-gray-600 mb-2 block">Mínimo</label>
-                    <input
-                      type="number"
-                      [ngModel]="minPrice()"
-                      (ngModelChange)="minPrice.set($event ? +$event : null)"
-                      [min]="0"
-                      placeholder="Min"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-gray-900"
-                    />
-                  </div>
-                  <div>
-                    <label class="text-xs text-gray-600 mb-2 block">Máximo</label>
-                    <input
-                      type="number"
-                      [ngModel]="maxPrice()"
-                      (ngModelChange)="maxPrice.set($event ? +$event : null)"
-                      [min]="0"
-                      placeholder="Max"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent bg-white text-gray-900"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+              <span
+                class="h-4 w-4 rounded-full"
+                [style.background-color]="getColorHex(color)"
+                aria-hidden="true"
+              ></span>
+              {{ color }}
+            </button>
           }
         </div>
+      </div>
+
+      <div class="lg:col-span-3 lg:col-start-10">
+        <h3 class="text-2xl font-black uppercase">Precio</h3>
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          <div>
+            <label for="minimum-price" class="block text-sm font-semibold">Mínimo</label>
+            <input
+              id="minimum-price"
+              type="number"
+              [ngModel]="minPrice()"
+              (ngModelChange)="setMinPrice($event)"
+              min="0"
+              placeholder="$0"
+              class="mt-2 min-h-12 w-full bg-[#f4f4f0] px-3 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label for="maximum-price" class="block text-sm font-semibold">Máximo</label>
+            <input
+              id="maximum-price"
+              type="number"
+              [ngModel]="maxPrice()"
+              (ngModelChange)="setMaxPrice($event)"
+              min="0"
+              placeholder="$50.000"
+              class="mt-2 min-h-12 w-full bg-[#f4f4f0] px-3 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        @if (hasActiveFilters() || searchTerm()) {
+          <button
+            type="button"
+            (click)="clearAllFilters()"
+            class="mt-6 min-h-11 font-semibold underline decoration-2 underline-offset-4 hover:text-[#ed1c2f]"
+          >
+            Limpiar filtros
+          </button>
+        }
       </div>
     </div>
+  </section>
 
-    <!-- Resumen de filtros activos -->
-    @if (hasActiveFilters() || searchTerm()) {
-      <div class="mb-6 flex flex-wrap items-center gap-2 text-sm">
-        <span class="text-gray-600"
-          >Mostrando {{ filteredProducts().length }} resultado{{
-            filteredProducts().length === 1 ? '' : 's'
-          }}</span
-        >
-        <button
-          type="button"
-          (click)="clearAllFilters()"
-          class="text-gray-900 hover:text-black underline underline-offset-2 cursor-pointer font-medium"
-        >
-          Limpiar todo
-        </button>
+  @if (filteredProducts().length > 0) {
+    <section class="mt-20" aria-labelledby="results-title">
+      <div class="mb-10 flex items-end justify-between gap-4">
+        <h2 id="results-title" class="text-5xl font-black uppercase md:text-7xl">Todos los diseños</h2>
+        <p class="hidden text-[#555550] sm:block">{{ filteredProducts().length }} resultados</p>
       </div>
-    }
 
-    <!-- Grid de productos -->
-    @if (filteredProducts().length > 0) {
-      <!-- Trigger para carga diferida -->
-      <div #productsTrigger class="h-1"></div>
+      <div #productsTrigger class="h-2" aria-hidden="true"></div>
       @defer (on viewport(productsTrigger)) {
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 gap-x-5 gap-y-16 min-[520px]:grid-cols-2 lg:grid-cols-3">
           @for (product of filteredProducts(); track product.id) {
             <app-product-card [product]="product" />
           }
         </div>
       } @placeholder {
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          @for (placeholder of [1, 2, 3, 4, 5, 6, 7, 8]; track placeholder) {
-            <div class="bg-gray-200 animate-pulse rounded-lg aspect-3/4"></div>
+        <div class="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3" aria-label="Cargando productos">
+          @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+            <div class="aspect-[4/3] bg-[#e7e7e1]"></div>
           }
         </div>
       }
-    } @else {
-      <div class="text-center py-16">
-        <i class="pi pi-search text-5xl text-gray-300 mb-4 block"></i>
-        <p class="text-gray-700 text-lg font-medium mb-2">No se encontraron productos</p>
-        <p class="text-gray-500 mb-6">
-          Probá ajustando los filtros o limpiándolos para ver todos los productos.
-        </p>
-        @if (hasActiveFilters() || searchTerm()) {
-          <p-button
-            label="Limpiar filtros"
-            icon="pi pi-filter-slash"
-            (onClick)="clearAllFilters()"
-            [outlined]="true"
-          >
-          </p-button>
-        }
-      </div>
-    }
-  </div>
+    </section>
+  } @else {
+    <section class="mt-20 bg-[#0b0b0b] px-5 py-20 text-[#f4f4f0] md:px-10" aria-labelledby="empty-title">
+      <h2 id="empty-title" class="max-w-[10ch] text-6xl font-black uppercase leading-[0.9] md:text-8xl">
+        No apareció esa remera
+      </h2>
+      <p class="mt-8 max-w-md text-lg leading-relaxed text-[#b8b8b2]">
+        Probá con otro nombre, talle, color o rango de precio.
+      </p>
+      <button
+        type="button"
+        (click)="clearAllFilters()"
+        class="mt-8 min-h-12 bg-[#ed1c2f] px-6 font-semibold text-white hover:bg-[#c91425]"
+      >
+        Ver toda la colección
+      </button>
+    </section>
+  }
 </div>

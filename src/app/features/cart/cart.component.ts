@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CartService } from '../../core/services/cart.service';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
+import { CartItem } from '../../core/models/cart-item.model';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -33,43 +34,46 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen py-8 md:py-12">
-      <div class="container mx-auto px-4">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8">Carrito de Compras</h1>
+    <div class="min-h-[100svh] bg-[#f4f4f0] px-4 py-14 md:px-8 md:py-20">
+      <div>
+        <h1 class="max-w-[8ch] text-7xl font-black uppercase leading-[0.82] md:text-[clamp(7rem,15vw,15rem)]">Tu carrito</h1>
 
         @if (cartService.isEmpty()) {
-          <div class="text-center py-20 max-w-md mx-auto">
-            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
-              <i class="pi pi-shopping-cart text-4xl text-gray-400"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h2>
-            <p class="text-gray-600 mb-8">Agregá remeras desde el catálogo para empezar a armar tu pedido.</p>
-            <p-button label="Explorar productos" icon="pi pi-arrow-right" iconPos="right" [routerLink]="['/products']" />
+          <div class="mt-16 bg-[#0b0b0b] px-5 py-20 text-[#f4f4f0] md:px-10">
+            <h2 class="max-w-[9ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl">Todavía no elegiste una obra</h2>
+            <p class="mt-8 max-w-md text-lg leading-relaxed text-[#b8b8b2]">Agregá remeras desde la colección para empezar a armar tu pedido.</p>
+            <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-[#ed1c2f] px-6 font-semibold text-white hover:bg-[#c91425]">
+              Explorar la colección
+            </a>
           </div>
         } @else {
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-12">
             <!-- Lista de productos -->
-            <div class="lg:col-span-2 space-y-4">
+            <div class="space-y-5 lg:col-span-8">
               @for (item of cartService.getCartItems()(); track item.productId + item.size + item.color) {
-                <div class="bg-white rounded-lg shadow-sm p-4 flex flex-col sm:flex-row gap-4">
+                <article class="flex flex-col gap-5 bg-[#e7e7e1] p-4 sm:flex-row sm:items-center">
                   <img [ngSrc]="item.image" 
                        [alt]="item.productName"
                        width="150"
                        height="150"
-                       class="w-full sm:w-24 h-24 object-cover rounded">
+                       class="aspect-[4/3] w-full object-cover sm:w-40">
                   
                   <div class="flex-1">
-                    <h3 class="font-semibold text-gray-900 mb-1">{{ item.productName }}</h3>
-                    <p class="text-sm text-gray-600 mb-2">
+                    <h3 class="text-3xl font-black uppercase leading-none">{{ item.productName }}</h3>
+                    <p class="mb-3 mt-3 text-sm text-[#555550]">
                       Talle: {{ item.size }} | Color: {{ item.color }}
                     </p>
-                    <p class="text-lg font-bold text-gray-900">
+                    <p class="text-lg font-semibold tabular-nums">
                       {{ (item.price * item.quantity) | currencyArs }}
                     </p>
                   </div>
 
                   <div class="flex flex-col items-end gap-2">
-                    <p-inputNumber 
+                    <label [for]="'cart-quantity-' + item.productId" class="sr-only">
+                      Cantidad de {{ item.productName }}
+                    </label>
+                    <p-inputNumber
+                      [inputId]="'cart-quantity-' + item.productId"
                       [ngModel]="item.quantity"
                       [min]="1"
                       [max]="5"
@@ -78,29 +82,29 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                     </p-inputNumber>
                     <button 
                       (click)="removeItem(item)"
-                      class="text-red-500 hover:text-red-700 text-sm">
+                      class="min-h-11 text-sm font-semibold text-[#ed1c2f] underline decoration-2 underline-offset-4 hover:text-[#c91425]">
                       Eliminar
                     </button>
                   </div>
-                </div>
+                </article>
               }
             </div>
 
             <!-- Resumen -->
-            <div class="lg:col-span-1">
-              <div class="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Resumen</h2>
+            <div class="lg:col-span-4">
+              <div class="sticky top-24 bg-[#0b0b0b] p-6 text-[#f4f4f0] md:p-8">
+                <h2 class="mb-8 text-5xl font-black uppercase">Resumen</h2>
                 
                 <div class="space-y-3 mb-6">
-                  <div class="flex justify-between text-gray-600">
+                  <div class="flex justify-between text-[#b8b8b2]">
                     <span>Subtotal</span>
                     <span>{{ cartService.totalPrice() | currencyArs }}</span>
                   </div>
-                  <div class="flex justify-between text-gray-600">
+                  <div class="flex justify-between gap-4 text-[#b8b8b2]">
                     <span>Envío</span>
                     <span class="text-sm">Se coordina por WhatsApp</span>
                   </div>
-                  <div class="border-t border-gray-200 pt-3 flex justify-between text-lg font-bold text-gray-900">
+                  <div class="flex justify-between bg-[#292927] p-4 text-xl font-semibold tabular-nums">
                     <span>Total</span>
                     <span>{{ cartService.totalPrice() | currencyArs }}</span>
                   </div>
@@ -108,47 +112,48 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
 
                 <!-- Tipo de entrega -->
                 <div class="mb-6">
-                  <h3 class="text-sm font-semibold text-gray-900 mb-3">Tipo de entrega</h3>
+                  <h3 class="mb-4 text-lg font-semibold">Tipo de entrega</h3>
                   <div class="space-y-3">
                     <div class="flex items-center">
                       <p-radioButton 
                         inputId="retiro"
                         value="retiro"
-                        [(ngModel)]="deliveryType"
+                        [ngModel]="deliveryType()"
                         (ngModelChange)="onDeliveryTypeChange($event)"
                         styleClass="mr-2">
                       </p-radioButton>
-                      <label for="retiro" class="ml-2 text-gray-700 cursor-pointer">Retiro en local</label>
+                      <label for="retiro" class="ml-2 cursor-pointer text-[#f4f4f0]">Retiro en local</label>
                     </div>
                     <div class="flex items-center">
                       <p-radioButton 
                         inputId="envio"
                         value="envio"
-                        [(ngModel)]="deliveryType"
+                        [ngModel]="deliveryType()"
                         (ngModelChange)="onDeliveryTypeChange($event)"
                         styleClass="mr-2">
                       </p-radioButton>
-                      <label for="envio" class="ml-2 text-gray-700 cursor-pointer">Envío a domicilio</label>
+                      <label for="envio" class="ml-2 cursor-pointer text-[#f4f4f0]">Envío a domicilio</label>
                     </div>
                   </div>
                 </div>
 
                 <!-- Campo de dirección (solo si es envío) -->
-                @if (deliveryType === 'envio') {
+                @if (deliveryType() === 'envio') {
                   <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="delivery-address" class="mb-2 block text-sm font-medium text-[#f4f4f0]">
                       Dirección de envío <span class="text-red-500">*</span>
                     </label>
                     <div class="space-y-2">
                       <input
                         type="text"
+                        id="delivery-address"
                         pInputText
                         [ngModel]="deliveryAddress()"
                         (ngModelChange)="onAddressChange($event)"
                         placeholder="Calle, número, barrio"
-                        class="w-full"
+                        class="min-h-12 w-full bg-[#f4f4f0] px-3 text-[#0b0b0b]"
                         [class.border-red-500]="showAddressError() && !deliveryAddress()">
-                      <p class="text-xs text-gray-500 flex items-start gap-1.5">
+                      <p class="flex items-start gap-1.5 text-sm leading-relaxed text-[#b8b8b2]">
                         <i class="pi pi-info-circle mt-0.5"></i>
                         <span>Si no estás seguro de la dirección exacta, podés coordinarla por WhatsApp después.</span>
                       </p>
@@ -159,25 +164,21 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                   </div>
                 }
 
-                <p-button
-                  label="Finalizar compra por WhatsApp"
-                  icon="pi pi-whatsapp"
-                  (onClick)="checkout()"
-                  severity="success"
-                  styleClass="w-full mb-2">
-                </p-button>
+                <button
+                  type="button"
+                  (click)="checkout()"
+                  class="min-h-14 w-full bg-[#ed1c2f] px-5 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425]"
+                >
+                  Finalizar por WhatsApp
+                </button>
 
-                <p class="text-xs text-gray-500 text-center mb-4 flex items-center justify-center gap-1">
-                  <i class="pi pi-info-circle"></i>
+                <p class="mb-4 mt-4 text-center text-sm leading-relaxed text-[#b8b8b2]">
                   Tu pedido se confirma vía WhatsApp y se paga por transferencia.
                 </p>
 
-                <p-button
-                  label="Seguir comprando"
-                  [routerLink]="['/products']"
-                  [text]="true"
-                  styleClass="w-full">
-                </p-button>
+                <a routerLink="/products" class="flex min-h-12 items-center justify-center font-semibold underline decoration-2 underline-offset-4 hover:text-[#ed1c2f]">
+                  Seguir comprando
+                </a>
               </div>
             </div>
           </div>
@@ -231,7 +232,7 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
 export class CartComponent {
   cartService = inject(CartService);
 
-  deliveryType: 'retiro' | 'envio' | null = null;
+  deliveryType = signal<'retiro' | 'envio' | null>(null);
   deliveryAddress = signal<string>('');
   showAddressError = signal(false);
   showConfirmDialog = signal(false);
@@ -242,23 +243,23 @@ export class CartComponent {
     const savedAddress = this.loadDeliveryAddress();
     
     if (savedType) {
-      this.deliveryType = savedType;
+      this.deliveryType.set(savedType);
     }
     if (savedAddress) {
       this.deliveryAddress.set(savedAddress);
     }
   }
 
-  updateQuantity(item: any, quantity: number): void {
+  updateQuantity(item: CartItem, quantity: number): void {
     this.cartService.updateQuantity(item.productId, item.size, item.color, quantity);
   }
 
-  removeItem(item: any): void {
+  removeItem(item: CartItem): void {
     this.cartService.removeItem(item.productId, item.size, item.color);
   }
 
   onDeliveryTypeChange(type: 'retiro' | 'envio'): void {
-    this.deliveryType = type;
+    this.deliveryType.set(type);
     this.saveDeliveryType(type);
     
     if (type === 'retiro') {
@@ -280,14 +281,16 @@ export class CartComponent {
   }
 
   checkout(): void {
+    const deliveryType = this.deliveryType();
+
     // Validar que se haya seleccionado un tipo de entrega
-    if (!this.deliveryType) {
+    if (!deliveryType) {
       // Podrías mostrar un mensaje aquí si quieres
       return;
     }
 
     // Validar que si es envío, tenga dirección
-    if (this.deliveryType === 'envio') {
+    if (deliveryType === 'envio') {
       if (!this.deliveryAddress() || this.deliveryAddress().trim() === '') {
         this.showAddressError.set(true);
         return;
@@ -295,10 +298,10 @@ export class CartComponent {
     }
 
     // Guardar la dirección actualizada antes de mostrar el modal
-    if (this.deliveryType === 'envio' && this.deliveryAddress()) {
+    if (deliveryType === 'envio' && this.deliveryAddress()) {
       this.saveDeliveryAddress(this.deliveryAddress());
     }
-    this.saveDeliveryType(this.deliveryType);
+    this.saveDeliveryType(deliveryType);
 
     // Mostrar modal de confirmación
     this.showAddressError.set(false);
@@ -324,9 +327,9 @@ export class CartComponent {
     message += `Total: $${total.toLocaleString('es-AR')}\n\n`;
 
     // Agregar información de entrega
-    if (this.deliveryType === 'retiro') {
+    if (this.deliveryType() === 'retiro') {
       message += 'Tipo de entrega: Retiro en local\n';
-    } else if (this.deliveryType === 'envio') {
+    } else if (this.deliveryType() === 'envio') {
       message += `Tipo de entrega: Envío a domicilio\n`;
       message += `Dirección: ${this.deliveryAddress()}\n`;
     }

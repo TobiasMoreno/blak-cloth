@@ -9,7 +9,6 @@ import { Product } from '../../core/models/product.model';
 import { CartItem } from '../../core/models/cart-item.model';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
-import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
@@ -23,7 +22,6 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
     NgOptimizedImage,
     FormsModule,
     CurrencyArsPipe,
-    ButtonModule,
     InputNumberModule,
     MessageModule,
     ProductCardComponent
@@ -31,22 +29,22 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (product(); as productData) {
-      <div class="min-h-screen py-8 md:py-12">
-        <div class="container mx-auto px-4">
+      <div class="min-h-[100svh] bg-[#f4f4f0] px-4 py-10 md:px-8 md:py-16">
+        <div>
           <!-- Breadcrumbs -->
-          <nav aria-label="Breadcrumb" class="max-w-6xl mx-auto mb-6">
-            <ol class="flex items-center gap-2 text-sm text-gray-500">
-              <li><a routerLink="/" class="hover:text-gray-900 transition-colors">Inicio</a></li>
-              <li aria-hidden="true" class="text-gray-300">/</li>
-              <li><a routerLink="/products" class="hover:text-gray-900 transition-colors">Productos</a></li>
-              <li aria-hidden="true" class="text-gray-300">/</li>
-              <li class="text-gray-900 font-medium truncate" aria-current="page">{{ productData.name }}</li>
+          <nav aria-label="Breadcrumb" class="mb-10">
+            <ol class="flex items-center gap-3 text-sm text-[#555550]">
+              <li><a routerLink="/" class="hover:text-[#ed1c2f]">Inicio</a></li>
+              <li aria-hidden="true">→</li>
+              <li><a routerLink="/products" class="hover:text-[#ed1c2f]">Colección</a></li>
+              <li aria-hidden="true">→</li>
+              <li class="truncate font-semibold text-[#0b0b0b]" aria-current="page">{{ productData.name }}</li>
             </ol>
           </nav>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
+          <div class="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">
             <!-- Imágenes -->
-            <div class="flex gap-3">
+            <div class="flex gap-3 lg:col-span-7">
               @if (productData.images.length > 1) {
                 <div class="flex flex-col gap-2 w-16 md:w-20 shrink-0" role="tablist" aria-label="Imágenes del producto">
                   @for (img of productData.images; track img; let i = $index) {
@@ -56,8 +54,8 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
                       [attr.aria-selected]="activeImage() === i"
                       (click)="activeImage.set(i)"
                       [class]="activeImage() === i
-                        ? 'aspect-square bg-gray-100 rounded-md overflow-hidden border-2 border-black cursor-pointer'
-                        : 'aspect-square bg-gray-100 rounded-md overflow-hidden border-2 border-transparent hover:border-gray-400 cursor-pointer'">
+                        ? 'aspect-square bg-[#e7e7e1] overflow-hidden ring-4 ring-[#0b0b0b] cursor-pointer'
+                        : 'aspect-square bg-[#e7e7e1] overflow-hidden opacity-60 hover:opacity-100 cursor-pointer'">
                       <img [ngSrc]="img"
                            [alt]="productData.name + ' vista ' + (i + 1)"
                            width="200"
@@ -68,28 +66,29 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
                 </div>
               }
               <div class="flex-1">
-                <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <div class="aspect-[4/3] overflow-hidden bg-[#e7e7e1] lg:sticky lg:top-24">
                   <img [ngSrc]="productData.images[activeImage()] || productData.images[0]"
                        [alt]="productData.name"
                        width="1200"
                        height="1200"
-                       class="w-full h-full object-cover"
+                       [style.view-transition-name]="'product-' + productData.id"
+                       class="h-full w-full object-cover"
                        priority>
                 </div>
               </div>
             </div>
 
             <!-- Información del producto -->
-            <div>
-              <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <div class="lg:col-span-4 lg:col-start-9 lg:pt-6">
+              <h1 class="max-w-[11ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
                 {{ productData.name }}
               </h1>
               
-              <p class="text-3xl font-bold text-gray-900 mb-6">
+              <p class="mt-8 text-2xl font-semibold tabular-nums">
                 {{ productData.price | currencyArs }}
               </p>
 
-              <p class="text-gray-600 mb-8 leading-relaxed">
+              <p class="mb-10 mt-8 max-w-[40ch] text-lg leading-relaxed text-[#555550]">
                 {{ productData.description }}
               </p>
 
@@ -112,8 +111,8 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
                         [attr.aria-checked]="selectedSize() === size"
                         (click)="selectedSize.set(size)"
                         [class]="selectedSize() === size
-                          ? 'min-w-12 px-4 py-2 border-2 border-black bg-black text-white rounded-md font-semibold transition-all cursor-pointer'
-                          : 'min-w-12 px-4 py-2 border-2 border-gray-300 bg-white text-gray-900 rounded-md font-semibold hover:border-gray-900 transition-all cursor-pointer'">
+                          ? 'min-h-12 min-w-12 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
+                          : 'min-h-12 min-w-12 bg-[#e7e7e1] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'">
                         {{ size }}
                       </button>
                     }
@@ -139,23 +138,24 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
                         [title]="color"
                         (click)="selectedColor.set(color)"
                         [class]="selectedColor() === color
-                          ? 'flex items-center gap-2 px-3 py-2 border-2 border-black bg-white rounded-md transition-all cursor-pointer'
-                          : 'flex items-center gap-2 px-3 py-2 border-2 border-gray-300 bg-white rounded-md hover:border-gray-900 transition-all cursor-pointer'">
+                          ? 'flex min-h-12 items-center gap-2 bg-[#0b0b0b] px-4 text-[#f4f4f0]'
+                          : 'flex min-h-12 items-center gap-2 bg-[#e7e7e1] px-4 transition-colors duration-200 hover:bg-[#d6d6cf]'">
                         <span
                           class="inline-block w-5 h-5 rounded-full border border-gray-300"
                           [style.background-color]="getColorHex(color)">
                         </span>
-                        <span class="text-sm font-medium text-gray-900">{{ color }}</span>
+                        <span class="text-sm font-medium">{{ color }}</span>
                       </button>
                     }
                   </div>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                  <label for="product-quantity" class="block text-sm font-medium text-gray-700 mb-2">
                     Cantidad (máximo 5 unidades)
                   </label>
-                  <p-inputNumber 
+                  <p-inputNumber
+                    inputId="product-quantity"
                     [ngModel]="quantity()"
                     (ngModelChange)="quantity.set($event)"
                     [min]="1"
@@ -200,26 +200,25 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
               </div>
 
               <!-- Botones de acción -->
-              <div class="flex flex-col sm:flex-row gap-3">
-                <p-button
-                  label="Agregar al carrito"
-                  icon="pi pi-shopping-cart"
+              <div class="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
                   [disabled]="!canAddToCart()"
-                  (onClick)="addToCart()"
-                  [outlined]="true"
-                  styleClass="flex-1">
-                </p-button>
-                <p-button
-                  label="Agregar e ir al carrito"
-                  icon="pi pi-arrow-right"
-                  iconPos="right"
+                  (click)="addToCart()"
+                  class="min-h-14 bg-[#0b0b0b] px-5 font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#333330] disabled:cursor-not-allowed disabled:bg-[#aaa]"
+                >
+                  Agregar al carrito
+                </button>
+                <button
+                  type="button"
                   [disabled]="!canAddToCart()"
-                  (onClick)="buyNow()"
-                  styleClass="flex-1">
-                </p-button>
+                  (click)="buyNow()"
+                  class="min-h-14 bg-[#ed1c2f] px-5 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425] disabled:cursor-not-allowed disabled:bg-[#aaa]"
+                >
+                  Agregar e ir al carrito
+                </button>
               </div>
-              <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
-                <i class="pi pi-whatsapp text-green-600"></i>
+              <p class="mt-4 text-sm leading-relaxed text-[#555550]">
                 El pedido se confirma por WhatsApp después de revisar el carrito.
               </p>
             </div>
@@ -227,14 +226,14 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
 
           <!-- Productos relacionados -->
           @if (relatedProducts().length > 0) {
-            <section class="max-w-6xl mx-auto mt-20">
-              <div class="flex items-end justify-between mb-6">
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-900">También te puede gustar</h2>
-                <a routerLink="/products" class="text-sm text-gray-600 hover:text-gray-900 underline underline-offset-2">
+            <section class="mt-32 md:mt-44">
+              <div class="mb-10 flex items-end justify-between gap-5">
+                <h2 class="max-w-[10ch] text-5xl font-black uppercase leading-[0.9] md:text-7xl">También te puede gustar</h2>
+                <a routerLink="/products" class="min-h-11 content-center font-semibold underline decoration-2 underline-offset-4 hover:text-[#ed1c2f]">
                   Ver todo
                 </a>
               </div>
-              <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              <div class="grid grid-cols-1 gap-x-5 gap-y-16 min-[520px]:grid-cols-2 lg:grid-cols-3">
                 @for (related of relatedProducts(); track related.id) {
                   <app-product-card [product]="related" />
                 }
@@ -244,10 +243,12 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
         </div>
       </div>
     } @else {
-      <div class="min-h-screen flex items-center justify-center">
-        <div class="text-center">
-          <p class="text-gray-600 text-lg mb-4">Producto no encontrado</p>
-          <p-button label="Volver a productos" [routerLink]="['/products']" />
+      <div class="flex min-h-[70svh] items-center bg-[#0b0b0b] px-4 text-[#f4f4f0] md:px-8">
+        <div>
+          <h1 class="max-w-[10ch] text-7xl font-black uppercase leading-[0.86] md:text-9xl">Producto no encontrado</h1>
+          <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-[#ed1c2f] px-6 font-semibold text-white">
+            Volver a la colección
+          </a>
         </div>
       </div>
     }

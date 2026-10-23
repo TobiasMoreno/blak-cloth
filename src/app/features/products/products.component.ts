@@ -1,27 +1,13 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ProductService } from '../../core/services/product.service';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-products',
-  imports: [
-    CommonModule,
-    ProductCardComponent,
-    InputTextModule,
-    ButtonModule,
-    InputNumberModule,
-    FormsModule
-  ],
+  imports: [ProductCardComponent, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    '(document:click)': 'onDocumentClick($event)'
-  },
-  templateUrl:'products.component.html'
+  templateUrl: 'products.component.html'
 })
 export class ProductsComponent {
   private productService = inject(ProductService);
@@ -31,8 +17,6 @@ export class ProductsComponent {
   selectedColors = signal<string[]>([]);
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
-  filterDropdownOpen = false;
-  sizesColorsDropdownOpen = false;
 
   availableSizes = signal<string[]>(this.productService.getAllSizes());
   availableColors = signal<string[]>(this.productService.getAllColors());
@@ -43,21 +27,6 @@ export class ProductsComponent {
            this.minPrice() !== null ||
            this.maxPrice() !== null;
   });
-
-  hasSizesOrColors = computed(() => {
-    return this.selectedSizes().length > 0 || this.selectedColors().length > 0;
-  });
-
-  hasPriceFilter = computed(() => {
-    return this.minPrice() !== null || this.maxPrice() !== null;
-  });
-
-  getSizesColorsCount(): number {
-    let count = 0;
-    if (this.selectedSizes().length > 0) count++;
-    if (this.selectedColors().length > 0) count++;
-    return count;
-  }
 
   filteredProducts = computed(() => {
     return this.productService.getProductsByFilters(
@@ -81,6 +50,14 @@ export class ProductsComponent {
     this.selectedColors.set(
       current.includes(color) ? current.filter(c => c !== color) : [...current, color]
     );
+  }
+
+  setMinPrice(value: number | string | null): void {
+    this.minPrice.set(value === null || value === '' ? null : Number(value));
+  }
+
+  setMaxPrice(value: number | string | null): void {
+    this.maxPrice.set(value === null || value === '' ? null : Number(value));
   }
 
   getColorHex(color: string): string {
@@ -119,13 +96,4 @@ export class ProductsComponent {
     this.clearPriceFilter();
   }
 
-  onDocumentClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.filter-dropdown-container')) {
-      this.filterDropdownOpen = false;
-    }
-    if (!target.closest('.sizes-colors-dropdown-container')) {
-      this.sizesColorsDropdownOpen = false;
-    }
-  }
 }

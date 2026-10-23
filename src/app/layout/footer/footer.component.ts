@@ -1,78 +1,52 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { getWhatsAppUrl, WHATSAPP_NUMBER } from '../../core/constants/whatsapp.constants';
+import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
 
 @Component({
   selector: 'app-footer',
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <footer class="bg-gray-50 border-t border-gray-200 mt-auto">
-      <div class="container mx-auto px-4 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <!-- Brand -->
-          <div>
-            <div class="flex items-center gap-2 mb-4">
-              <span aria-hidden="true"
-                    class="inline-flex items-center justify-center w-9 h-9 bg-black text-white rounded-md font-display font-bold text-sm tracking-tight">
-                LM
-              </span>
-              <span class="font-display font-bold text-xl text-gray-900 tracking-tight">Studio</span>
-            </div>
-            <p class="text-gray-600 text-sm">
-              Remeras artísticas y urbanas diseñadas con pasión.
-            </p>
-          </div>
-
-          <!-- Links -->
-          <div>
-            <h4 class="text-sm font-semibold text-gray-900 mb-4">Navegación</h4>
-            <ul class="space-y-2">
-              <li>
-                <a routerLink="/" class="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                  Home
-                </a>
-              </li>
-              <li>
-                <a routerLink="/products" class="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                  Productos
-                </a>
-              </li>
-              <li>
-                <a routerLink="/about" class="text-gray-600 hover:text-gray-900 text-sm transition-colors">
-                  Sobre nosotros
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Contact -->
-          <div>
-            <h4 class="text-sm font-semibold text-gray-900 mb-4">Contacto</h4>
-            <ul class="space-y-2">
-              <li>
-                <a [href]="whatsappUrl" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   class="text-gray-600 hover:text-gray-900 text-sm transition-colors flex items-center gap-2">
-                  <i class="pi pi-whatsapp"></i>
-                  WhatsApp
-                </a>
-              </li>
-              <li class="text-gray-600 text-sm">
-                Envíos a Córdoba
-              </li>
-              <li class="text-gray-600 text-sm">
-                Pago por transferencia bancaria
-              </li>
-            </ul>
-          </div>
+    <footer class="flex min-h-[85svh] flex-col justify-between bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:px-8 md:py-12">
+      <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <p class="font-semibold">LM Studio</p>
+          <p class="mt-3 max-w-56 leading-relaxed text-[#b8b8b2]">Remeras de autor creadas en Córdoba.</p>
         </div>
 
-        <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-600">
-          <p>&copy; {{ currentYear }} LM Studio. Todos los derechos reservados.</p>
+        <div>
+          <p class="font-semibold">Recorrer</p>
+          <nav class="mt-3 flex flex-col items-start gap-2" aria-label="Navegación del pie">
+            <a routerLink="/products" class="min-h-8 text-[#b8b8b2] hover:text-white">Colección</a>
+            <a routerLink="/about" class="min-h-8 text-[#b8b8b2] hover:text-white">El estudio</a>
+            <a routerLink="/cart" class="min-h-8 text-[#b8b8b2] hover:text-white">Carrito</a>
+          </nav>
         </div>
+
+        <div>
+          <p class="font-semibold">Comprar</p>
+          <p class="mt-3 leading-relaxed text-[#b8b8b2]">Pago por transferencia</p>
+          <p class="leading-relaxed text-[#b8b8b2]">Entrega coordinada en Córdoba</p>
+        </div>
+
+        <div>
+          <p class="font-semibold">Hablemos</p>
+          <a
+            [href]="whatsappUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-3 inline-flex min-h-11 items-center text-[#b8b8b2] underline decoration-transparent underline-offset-4 transition-colors duration-200 hover:text-white hover:decoration-current"
+          >
+            Abrir WhatsApp ↗
+          </a>
+        </div>
+      </div>
+
+      <div class="pt-24">
+        <p class="font-display text-[clamp(5.8rem,19vw,20rem)] font-black uppercase leading-[0.72] tracking-[-0.04em]">
+          LM Studio
+        </p>
+        <p class="mt-8 text-sm text-[#b8b8b2]">© {{ currentYear }} LM Studio</p>
       </div>
     </footer>
   `

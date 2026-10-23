@@ -1,56 +1,139 @@
 @import 'tailwindcss';
 
-/* Brand tokens */
 :root {
-  --brand-ink: #0a0a0a;
-  --brand-accent: #ef3340;
-  --brand-accent-hover: #c81e2a;
+  --bg: #f4f4f0;
+  --surface: #e7e7e1;
+  --ink: #0b0b0b;
+  --muted: #555550;
+  --accent: #ed1c2f;
+  --accent-ink: #ffffff;
+  --field-dark: #0b0b0b;
+  --field-dark-ink: #f4f4f0;
+  --brand-ink: var(--ink);
+  --brand-accent: var(--accent);
+  --brand-accent-hover: #c91425;
+  --font-display: 'Big Shoulders', 'Arial Narrow', sans-serif;
+  --font-text: 'Public Sans', 'Helvetica Neue', sans-serif;
+  --page-margin: clamp(1rem, 2.2vw, 2rem);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
-/* Global styles */
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
-  color: #111827;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-    'Helvetica Neue', sans-serif;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, .font-display {
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
-  letter-spacing: -0.02em;
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-kerning: normal;
+  letter-spacing: -0.015em;
 }
 
-.text-brand-accent { color: var(--brand-accent); }
-.bg-brand-accent { background-color: var(--brand-accent); }
-.bg-brand-accent:hover { background-color: var(--brand-accent-hover); }
-.border-brand-accent { border-color: var(--brand-accent); }
+.text-brand-accent {
+  color: var(--brand-accent);
+}
+
+.bg-brand-accent {
+  background-color: var(--brand-accent);
+}
+
+.bg-brand-accent:hover {
+  background-color: var(--brand-accent-hover);
+}
+
+.border-brand-accent {
+  border-color: var(--brand-accent);
+}
 
 body {
-  min-height: 100vh;
+  min-height: 100svh;
+}
+
+button,
+a,
+input {
+  font: inherit;
+}
+
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: route-leave 180ms ease both;
+}
+
+::view-transition-new(root) {
+  animation: route-arrive 360ms var(--ease-out) 40ms both;
+}
+
+@keyframes route-leave {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes route-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
 }
 
 @keyframes cart-badge-pop {
-  0% { transform: scale(0.4); opacity: 0; }
-  60% { transform: scale(1.25); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .cart-badge-pop {
-  animation: cart-badge-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: cart-badge-pop 240ms var(--ease-out);
 }
 
 @keyframes route-progress {
-  0%   { width: 0%;   opacity: 1; }
-  60%  { width: 70%;  opacity: 1; }
-  100% { width: 90%;  opacity: 1; }
+  0% {
+    width: 0%;
+    opacity: 1;
+  }
+  100% {
+    width: 88%;
+    opacity: 1;
+  }
 }
 
 .route-progress-bar {
@@ -58,8 +141,96 @@ body {
   top: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--brand-accent), #ff6b6b);
+  background: var(--accent);
   z-index: 9999;
-  animation: route-progress 1.4s ease-out forwards;
-  box-shadow: 0 0 8px rgba(239, 51, 64, 0.5);
+  animation: route-progress 1.2s var(--ease-out) forwards;
+}
+
+@keyframes monument-enter-left {
+  from {
+    opacity: 0;
+    transform: translateY(70%);
+  }
+}
+
+@keyframes monument-enter-right {
+  from {
+    opacity: 0;
+    transform: translateY(-70%);
+  }
+}
+
+@keyframes picture-open {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes picture-settle {
+  from {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes section-rise {
+  from {
+    opacity: 0.35;
+    transform: translateY(28px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .monument-enter-left {
+    animation: monument-enter-left 900ms var(--ease-expo) both;
+  }
+
+  .monument-enter-right {
+    animation: monument-enter-right 900ms var(--ease-expo) 90ms both;
+  }
+
+  .picture-open {
+    animation: picture-open 1100ms var(--ease-in-out) 120ms both;
+  }
+
+  .picture-open > img {
+    animation: picture-settle 1300ms var(--ease-expo) 80ms both;
+  }
+
+  @supports (animation-timeline: view()) {
+    .section-rise {
+      animation: section-rise 800ms var(--ease-expo) both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 40%;
+    }
+
+    .product-drift {
+      animation: product-drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+  }
+}
+
+@keyframes product-drift {
+  from {
+    transform: scale(1.05) translateY(-2%);
+  }
+  to {
+    transform: scale(1.05) translateY(2%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
