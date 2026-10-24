@@ -1,0 +1,23 @@
+{
+  "name": "Medusa",
+  "collection": "",
+  "price": 30000,
+  "createdAt": "2026-10-22",
+  "featured": false,
+  "description": "Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.",
+  "images": {
+    "mockup": "mockup.jpeg"
+  },
+  "variants": [
+    {
+      "size": "M",
+      "color": "Negro",
+      "available": true
+    },
+    {
+      "size": "L",
+      "color": "Negro",
+      "available": true
+    }
+  ]
+}

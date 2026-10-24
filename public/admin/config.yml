@@ -1,0 +1,110 @@
+backend:
+  name: github
+  repo: TobiasMoreno/lm-studio
+  branch: main
+  commit_messages:
+    create: 'Catálogo: agregar {{slug}}'
+    update: 'Catálogo: actualizar {{slug}}'
+    delete: 'Catálogo: eliminar {{slug}}'
+    uploadMedia: 'Catálogo: subir {{path}}'
+    deleteMedia: 'Catálogo: borrar {{path}}'
+
+# Para usar el panel en local sin login: `npx decap-server` + `npm start`, y abrir http://localhost:4200/admin/
+local_backend: true
+
+locale: es
+
+media_folder: public/images/uploads
+public_folder: /images/uploads
+
+collections:
+  - name: products
+    label: Remeras
+    label_singular: Remera
+    folder: public/products
+    path: '{{slug}}/index'
+    slug: '{{slug}}'
+    identifier_field: name
+    extension: json
+    format: json
+    create: true
+    # Las fotos se guardan en la misma carpeta que el index.json de cada remera
+    media_folder: ''
+    public_folder: ''
+    sortable_fields: ['name', 'createdAt', 'price']
+    summary: '{{name}} · ${{price}}'
+    editor:
+      preview: false
+    fields:
+      - { name: name, label: Nombre, widget: string }
+      - name: collection
+        label: Colección
+        widget: relation
+        collection: settings
+        file: collections
+        search_fields: ['items.*.name']
+        display_fields: ['items.*.name']
+        value_field: 'items.*.slug'
+        required: false
+      - { name: price, label: Precio (ARS), widget: number, value_type: int, min: 0 }
+      - name: createdAt
+        label: Fecha de alta
+        widget: datetime
+        format: 'YYYY-MM-DD'
+        date_format: 'DD/MM/YYYY'
+        time_format: false
+      - name: featured
+        label: Destacada
+        hint: Aparece en el inicio
+        widget: boolean
+        default: false
+        required: false
+      - { name: description, label: Descripción, widget: text }
+      - name: images
+        label: Fotos
+        widget: object
+        fields:
+          - { name: front, label: Frente, widget: image, required: false }
+          - { name: back, label: Espalda, widget: image, required: false }
+          - name: mockup
+            label: Mockup (frente y espalda juntas)
+            hint: Se usa si no hay foto de frente
+            widget: image
+            required: false
+      - name: variants
+        label: Talles y colores
+        label_singular: Variante
+        widget: list
+        summary: '{{fields.size}} · {{fields.color}}'
+        min: 1
+        fields:
+          - { name: size, label: Talle, widget: select, options: ['S', 'M', 'L', 'XL'] }
+          - name: color
+            label: Color
+            widget: select
+            options: ['Negro', 'Blanco', 'Gris', 'Beige', 'Azul marino', 'Rojo', 'Verde', 'Azul', 'Amarillo']
+          - { name: available, label: Disponible, widget: boolean, default: true }
+
+  - name: settings
+    label: Configuración
+    files:
+      - name: collections
+        label: Colecciones
+        file: public/data/collections.json
+        format: json
+        editor:
+          preview: false
+        fields:
+          - name: items
+            label: Colecciones
+            label_singular: Colección
+            widget: list
+            summary: '{{fields.name}}'
+            fields:
+              - { name: name, label: Nombre, widget: string }
+              - name: slug
+                label: Identificador
+                hint: En minúsculas y con guiones, p. ej. anime o blak-minimal-series
+                widget: string
+                pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', 'Solo minúsculas, números y guiones']
+              - { name: description, label: Descripción, widget: text, required: false }

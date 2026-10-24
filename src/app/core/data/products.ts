@@ -5,7 +5,7 @@ export const PRODUCTS: Product[] = [
     id: '001',
     name: 'Positive Energy',
     price: 30000,
-    images: ['images/products/positive-energy.jpeg'],
+    images: ['products/positive-energy/mockup.jpeg'],
     sizes: ['L'],
     colors: ['Blanco'],
     description: 'Remera con diseño abstracto minimalista, perfecta para el día a día. 100% algodón, cómoda y versátil.'
@@ -14,7 +14,7 @@ export const PRODUCTS: Product[] = [
     id: '002',
     name: 'Stitch Art',
     price: 30000,
-    images: ['images/products/stitch.jpeg'],
+    images: ['products/stitch-art/mockup.jpeg'],
     sizes: ['M', 'L', 'XL'],
     colors: ['Negro'],
     description: 'Diseño urbano inspirado en Stitch 626. Corte moderno y materiales de calidad.'
@@ -23,7 +23,7 @@ export const PRODUCTS: Product[] = [
     id: '003',
     name: 'The Rose System',
     price: 30000,
-    images: ['images/products/the-rose-system.jpeg'],
+    images: ['products/the-rose-system/mockup.jpeg'],
     sizes: ['M', 'L'],
     colors: ['Blanco'],
     description: 'Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.'
@@ -32,7 +32,7 @@ export const PRODUCTS: Product[] = [
     id: '004',
     name: 'Blak Minimal Series 001',
     price: 30000,
-    images: ['images/products/blak-ms-01.jpeg'],
+    images: ['products/blak-minimal-series-001/mockup.jpeg'],
     sizes: ['M', 'L'],
     colors: ['Verde'],
     description: 'Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.'
@@ -41,7 +41,7 @@ export const PRODUCTS: Product[] = [
     id: '005',
     name: 'Blak Minimal Series 002',
     price: 30000,
-    images: ['images/products/blak-ms-02.jpeg'],
+    images: ['products/blak-minimal-series-002/mockup.jpeg'],
     sizes: ['M', 'L'],
     colors: ['Blanco'],
     description: 'Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.'
@@ -50,7 +50,7 @@ export const PRODUCTS: Product[] = [
     id: '006',
     name: 'Medusa',
     price: 30000,
-    images: ['images/products/medusa.jpeg'],
+    images: ['products/medusa/mockup.jpeg'],
     sizes: ['M', 'L'],
     colors: ['Negro'],
     description: 'Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.'
@@ -59,7 +59,7 @@ export const PRODUCTS: Product[] = [
     id: '007',
     name: 'Take Control',
     price: 30000,
-    images: ['images/products/take-control.jpeg'],
+    images: ['products/take-control/mockup.jpeg'],
     sizes: ['M', 'L'],
     colors: ['Negro'],
     description: 'Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.'

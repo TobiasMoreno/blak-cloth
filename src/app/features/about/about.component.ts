@@ -16,7 +16,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
           Un proyecto independiente de Córdoba que convierte gráfica, cultura urbana y obsesiones visuales en prendas.
         </p>
         <img
-          ngSrc="images/products/blak-ms-01.jpeg"
+          ngSrc="products/blak-minimal-series-001/mockup.jpeg"
           alt="Remera verde Blak Minimal Series de LM Studio"
           width="1920"
           height="1200"
@@ -44,7 +44,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
       <section class="grid bg-[#e7e7e1] lg:grid-cols-2" aria-labelledby="process-title">
         <div class="min-h-[55svh] lg:min-h-[88svh]">
           <img
-            ngSrc="images/products/medusa.jpeg"
+            ngSrc="products/medusa/mockup.jpeg"
             alt="Diseño Medusa impreso sobre remera negra"
             width="1920"
             height="1200"

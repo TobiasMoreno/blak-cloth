@@ -1,0 +1,18 @@
+{
+  "name": "Positive Energy",
+  "collection": "",
+  "price": 30000,
+  "createdAt": "2026-10-22",
+  "featured": false,
+  "description": "Remera con diseño abstracto minimalista, perfecta para el día a día. 100% algodón, cómoda y versátil.",
+  "images": {
+    "mockup": "mockup.jpeg"
+  },
+  "variants": [
+    {
+      "size": "L",
+      "color": "Blanco",
+      "available": true
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Stitch Art",
+  "collection": "",
+  "price": 30000,
+  "createdAt": "2026-10-22",
+  "featured": false,
+  "description": "Diseño urbano inspirado en Stitch 626. Corte moderno y materiales de calidad.",
+  "images": {
+    "mockup": "mockup.jpeg"
+  },
+  "variants": [
+    {
+      "size": "M",
+      "color": "Negro",
+      "available": true
+    },
+    {
+      "size": "L",
+      "color": "Negro",
+      "available": true
+    },
+    {
+      "size": "XL",
+      "color": "Negro",
+      "available": true
+    }
+  ]
+}

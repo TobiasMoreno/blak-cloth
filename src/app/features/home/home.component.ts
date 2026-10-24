@@ -34,7 +34,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           class="picture-open absolute inset-x-4 top-[20%] h-[41%] overflow-hidden bg-[#252525] md:inset-y-0 md:left-auto md:right-0 md:top-0 md:h-[72%] md:w-[47%]"
         >
           <img
-            ngSrc="images/products/the-rose-system.jpeg"
+            ngSrc="products/the-rose-system/mockup.jpeg"
             alt="Remeras The Rose System de LM Studio, frente y espalda"
             width="1920"
             height="1200"
@@ -151,7 +151,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         <div class="grid gap-12 md:grid-cols-12 md:items-end">
           <div class="md:col-span-4">
             <img
-              ngSrc="images/products/positive-energy.jpeg"
+              ngSrc="products/positive-energy/mockup.jpeg"
               alt="Remera Positive Energy con ilustración de mariposa"
               width="1920"
               height="1200"
@@ -234,7 +234,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           <div class="space-y-24 lg:col-span-6 lg:col-start-7">
             <article class="section-rise min-h-[70svh]">
               <img
-                ngSrc="images/products/medusa.jpeg"
+                ngSrc="products/medusa/mockup.jpeg"
                 alt="Remera negra Medusa de LM Studio"
                 width="1920"
                 height="1200"
@@ -248,7 +248,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 
             <article class="section-rise min-h-[70svh]">
               <img
-                ngSrc="images/products/blak-ms-01.jpeg"
+                ngSrc="products/blak-minimal-series-001/mockup.jpeg"
                 alt="Remera verde Blak Minimal Series"
                 width="1920"
                 height="1200"
@@ -262,7 +262,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 
             <article class="section-rise min-h-[60svh]">
               <img
-                ngSrc="images/products/take-control.jpeg"
+                ngSrc="products/take-control/mockup.jpeg"
                 alt="Remera negra Take Control de LM Studio"
                 width="1200"
                 height="800"

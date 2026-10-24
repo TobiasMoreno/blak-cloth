@@ -3,10 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "catalog": "node scripts/build-catalog.mjs",
+    "prestart": "npm run catalog",
     "start": "ng serve",
+    "prebuild": "npm run catalog",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "cms": "npx decap-server@3.11.5"
   },
   "prettier": {
     "printWidth": 100,
