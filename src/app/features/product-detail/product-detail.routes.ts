@@ -4,7 +4,7 @@ import { ProductDetailComponent } from './product-detail.component';
 export const productDetailRoutes: Route[] = [
   {
     path: ':id',
-    title: 'Remera · LM Studio',
+    title: 'Remera · BLAK CLOTH',
     component: ProductDetailComponent
   }
 ];

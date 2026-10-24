@@ -5,7 +5,7 @@ describe('ShareButtonsComponent', () => {
   function setup() {
     const fixture = TestBed.createComponent(ShareButtonsComponent);
     fixture.componentRef.setInput('path', '/product/medusa');
-    fixture.componentRef.setInput('title', 'Medusa · LM Studio');
+    fixture.componentRef.setInput('title', 'Medusa · BLAK CLOTH');
     fixture.componentRef.setInput('text', 'Mirá esta remera: Medusa');
     fixture.detectChanges();
     return fixture;

@@ -10,14 +10,14 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgOptimizedImage } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { WishlistService } from '../../core/services/wishlist.service';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown.escape)': 'onEscape()',
@@ -35,10 +35,17 @@ import { WishlistService } from '../../core/services/wishlist.service';
       >
         <a
           routerLink="/"
-          class="flex min-h-11 items-center font-display text-3xl font-black uppercase leading-none tracking-[-0.03em] transition-colors duration-200 hover:text-[#d9182b]"
-          aria-label="LM Studio, inicio"
+          class="flex min-h-11 items-center transition-opacity duration-200 hover:opacity-70"
+          aria-label="BLAK CLOTH, inicio"
         >
-          LM Studio
+          <img
+            ngSrc="images/brand/blak-logo-black.svg"
+            alt=""
+            width="590"
+            height="144"
+            class="h-7 w-auto md:h-8"
+            priority
+          />
         </a>
 
         <div class="hidden items-center gap-8 md:flex">

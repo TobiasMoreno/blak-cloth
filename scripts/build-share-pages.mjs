@@ -8,7 +8,7 @@ const DIST = 'dist/lm-studio/browser';
 // Netlify define URL con la dirección del sitio durante el build
 const SITE_URL = (process.env.URL ?? 'http://localhost:4200').replace(/\/$/, '');
 const ON_NETLIFY = Boolean(process.env.NETLIFY);
-const SITE_NAME = 'LM Studio';
+const SITE_NAME = 'BLAK CLOTH';
 
 const template = readFileSync(join(DIST, 'index.html'), 'utf8');
 const products = JSON.parse(readFileSync(join(DIST, 'data/products.json'), 'utf8'));

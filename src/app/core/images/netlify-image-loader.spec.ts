@@ -17,6 +17,12 @@ describe('netlifyImageLoader', () => {
     expect(netlifyImageLoader({ src: 'https://example.com/a.jpg', width: 640 })).toBe('https://example.com/a.jpg');
   });
 
+  it('sirve los SVG sin pasar por el CDN', () => {
+    expect(netlifyImageLoader({ src: 'images/brand/blak-logo-black.svg', width: 640 })).toBe(
+      'images/brand/blak-logo-black.svg'
+    );
+  });
+
   it('usa el archivo original en desarrollo', () => {
     vi.mocked(angularCore.isDevMode).mockReturnValueOnce(true);
     expect(netlifyImageLoader({ src: 'products/medusa/mockup.jpeg', width: 640 })).toBe('products/medusa/mockup.jpeg');

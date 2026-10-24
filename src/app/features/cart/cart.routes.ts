@@ -4,7 +4,7 @@ import { CartComponent } from './cart.component';
 export const cartRoutes: Route[] = [
   {
     path: '',
-    title: 'Carrito · LM Studio',
+    title: 'Carrito · BLAK CLOTH',
     component: CartComponent
   }
 ];

@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
 
 @Component({
   selector: 'app-footer',
-  imports: [RouterLink],
+  imports: [RouterLink, NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer
@@ -12,7 +13,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
     >
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p class="font-semibold">LM Studio</p>
+          <p class="font-semibold">BLAK CLOTH</p>
           <p class="mt-3 max-w-64 leading-relaxed text-[#b8b8b2]">
             Colección de autor y remeras de algodón para equipos amateurs.
           </p>
@@ -62,12 +63,14 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
       </div>
 
       <div class="pt-24">
-        <p
-          class="font-display text-[clamp(5.8rem,19vw,20rem)] font-black uppercase leading-[0.72] tracking-[-0.04em]"
-        >
-          LM Studio
-        </p>
-        <p class="mt-8 text-sm text-[#b8b8b2]">© {{ currentYear }} LM Studio</p>
+        <img
+          ngSrc="images/brand/blak-logo-white.svg"
+          alt="BLAK CLOTH"
+          width="590"
+          height="144"
+          class="h-auto w-full max-w-[36rem]"
+        />
+        <p class="mt-8 text-sm text-[#b8b8b2]">© {{ currentYear }} BLAK CLOTH</p>
       </div>
     </footer>
   `,

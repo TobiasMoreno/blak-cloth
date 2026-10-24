@@ -4,7 +4,7 @@ import { ProductsComponent } from './products.component';
 export const productsRoutes: Route[] = [
   {
     path: '',
-    title: 'Colección · LM Studio',
+    title: 'Colección · BLAK CLOTH',
     component: ProductsComponent
   }
 ];

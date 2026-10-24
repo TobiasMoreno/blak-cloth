@@ -18,15 +18,20 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           id="home-title"
           class="pointer-events-none absolute inset-0 z-20 font-display font-black uppercase leading-[0.78]"
         >
-          <span
-            class="monument-enter-left absolute left-4 top-4 text-[clamp(7rem,18vw,18rem)] md:left-8 md:top-4 xl:top-4"
-          >
-            LM
+          <span class="monument-enter-left absolute left-4 top-6 md:left-8 md:top-8">
+            <img
+              ngSrc="images/brand/blak-logo-white.svg"
+              alt="BLAK"
+              width="590"
+              height="144"
+              priority
+              class="h-auto w-[calc(100vw-2rem)] max-w-[52rem] md:w-[44vw]"
+            />
           </span>
           <span
             class="monument-enter-right absolute bottom-3 right-4 text-[clamp(5.4rem,14vw,14rem)] md:bottom-0 md:right-8"
           >
-            Studio
+            Cloth
           </span>
         </h1>
 
@@ -35,7 +40,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         >
           <img
             ngSrc="products/the-rose-system/mockup.jpeg"
-            alt="Remeras The Rose System de LM Studio, frente y espalda"
+            alt="Remeras The Rose System de BLAK CLOTH, frente y espalda"
             width="1920"
             height="1200"
             priority
@@ -66,7 +71,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         <p
           class="absolute bottom-6 left-4 z-30 hidden max-w-52 text-sm leading-relaxed text-[#b8b8b2] md:left-8 md:block"
         >
-          Siete diseños. Algodón. Compra coordinada por WhatsApp.
+          {{ designCountLabel() }}. Algodón. Compra coordinada por WhatsApp.
         </p>
       </section>
 
@@ -239,7 +244,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
             <article class="section-rise min-h-[70svh]">
               <img
                 ngSrc="products/medusa/mockup.jpeg"
-                alt="Remera negra Medusa de LM Studio"
+                alt="Remera negra Medusa de BLAK CLOTH"
                 width="1920"
                 height="1200"
                 class="aspect-[4/3] w-full object-cover"
@@ -267,7 +272,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
             <article class="section-rise min-h-[60svh]">
               <img
                 ngSrc="products/take-control/mockup.jpeg"
-                alt="Remera negra Take Control de LM Studio"
+                alt="Remera negra Take Control de BLAK CLOTH"
                 width="1200"
                 height="800"
                 class="aspect-[4/3] w-full object-cover"
@@ -304,4 +309,11 @@ export class HomeComponent {
   activeDesign = signal(0);
   featuredProducts = this.productService.featuredProducts;
   selectedProduct = computed(() => this.featuredProducts()[this.activeDesign()]);
+
+  // Se actualiza solo con el catálogo; mientras carga no muestra "0 diseños"
+  designCountLabel = computed(() => {
+    const count = this.productService.products().length;
+    if (count === 0) return 'Diseños de autor';
+    return `${count} ${count === 1 ? 'diseño' : 'diseños'}`;
+  });
 }

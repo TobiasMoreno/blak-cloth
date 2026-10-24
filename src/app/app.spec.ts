@@ -22,7 +22,8 @@ describe('App', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('header')?.textContent).toContain('LM Studio');
+    const homeLink = compiled.querySelector('header a[aria-label="BLAK CLOTH, inicio"]');
+    expect(homeLink?.querySelector('img')?.getAttribute('src')).toContain('blak-logo-black.svg');
     expect(compiled.querySelector('main')).toBeTruthy();
   });
 });
