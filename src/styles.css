@@ -73,6 +73,14 @@ body {
   textarea {
     font: inherit;
   }
+
+  /* Tailwind 4 ya no pone la manito en los botones: se restaura para todo lo clickeable */
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  select:not(:disabled),
+  label[for] {
+    cursor: pointer;
+  }
 }
 
 a,

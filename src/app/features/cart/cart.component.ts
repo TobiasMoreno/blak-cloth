@@ -98,7 +98,7 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                       type="button"
                       (click)="removeItem(item)"
                       [attr.aria-label]="'Eliminar ' + item.productName + ' talle ' + item.size"
-                      class="min-h-11 cursor-pointer text-sm font-semibold text-[#a3111f] underline decoration-2 underline-offset-4 hover:text-[#7f0d18]">
+                      class="min-h-11 text-sm font-semibold text-[#a3111f] underline decoration-2 underline-offset-4 hover:text-[#7f0d18]">
                       Eliminar
                     </button>
                   </div>
