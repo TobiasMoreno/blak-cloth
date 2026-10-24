@@ -11,7 +11,6 @@ import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
 import { DialogModule } from 'primeng/dialog';
 
 const DELIVERY_TYPE_STORAGE_KEY = 'lm-studio-delivery-type';
@@ -29,7 +28,6 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
     InputNumberModule,
     RadioButtonModule,
     InputTextModule,
-    MessageModule,
     DialogModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,16 +48,32 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
           <div class="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-12">
             <!-- Lista de productos -->
             <div class="space-y-5 lg:col-span-8">
-              @for (item of cartService.getCartItems()(); track item.productId + item.size + item.color) {
+              @for (item of cartService.getCartItems()(); track item.productId + item.size + item.color; let first = $first) {
                 <article class="flex flex-col gap-5 bg-[#e7e7e1] p-4 sm:flex-row sm:items-center">
-                  <img [ngSrc]="item.image" 
-                       [alt]="item.productName"
-                       width="150"
-                       height="150"
-                       class="aspect-[4/3] w-full object-cover sm:w-40">
-                  
+                  <!-- La foto es un atajo para mouse/dedo; el link accesible es el nombre (evita links duplicados) -->
+                  <a
+                    [routerLink]="['/product', item.productId]"
+                    tabindex="-1"
+                    aria-hidden="true"
+                    class="block shrink-0 transition-opacity duration-200 hover:opacity-80"
+                  >
+                    <img [ngSrc]="item.image"
+                         alt=""
+                         width="150"
+                         height="150"
+                         [priority]="first"
+                         class="aspect-[4/3] w-full object-cover sm:w-40">
+                  </a>
+
                   <div class="flex-1">
-                    <h3 class="text-3xl font-black uppercase leading-none">{{ item.productName }}</h3>
+                    <h2 class="text-3xl font-black uppercase leading-none">
+                      <a
+                        [routerLink]="['/product', item.productId]"
+                        class="underline decoration-transparent decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#a3111f] hover:decoration-current"
+                      >
+                        {{ item.productName }}
+                      </a>
+                    </h2>
                     <p class="mb-3 mt-3 text-sm text-[#555550]">
                       Talle: {{ item.size }} | Color: {{ item.color }}
                     </p>
@@ -81,8 +95,10 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                       (ngModelChange)="updateQuantity(item, $event)">
                     </p-inputNumber>
                     <button 
+                      type="button"
                       (click)="removeItem(item)"
-                      class="min-h-11 text-sm font-semibold text-[#d9182b] underline decoration-2 underline-offset-4 hover:text-[#c91425]">
+                      [attr.aria-label]="'Eliminar ' + item.productName + ' talle ' + item.size"
+                      class="min-h-11 cursor-pointer text-sm font-semibold text-[#a3111f] underline decoration-2 underline-offset-4 hover:text-[#7f0d18]">
                       Eliminar
                     </button>
                   </div>
@@ -158,7 +174,9 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
                         <span>Si no estás seguro de la dirección exacta, podés coordinarla por WhatsApp después.</span>
                       </p>
                       @if (showAddressError() && !deliveryAddress()) {
-                        <p-message severity="error" text="Por favor ingresá una dirección de envío" />
+                        <p role="alert" class="bg-[#3a0d12] px-3 py-2 text-sm font-semibold text-[#ffc2c7]">
+                          Ingresá una dirección de envío para continuar.
+                        </p>
                       }
                     </div>
                   </div>

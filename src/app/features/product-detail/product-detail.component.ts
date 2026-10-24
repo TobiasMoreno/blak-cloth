@@ -24,9 +24,8 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
 import { getColorHex } from '../../core/constants/colors.constants';
 import { LEGACY_PRODUCT_IDS } from '../../core/constants/legacy-products.constants';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { MessageModule } from 'primeng/message';
-import { MessageService } from 'primeng/api';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+import { ToastService } from '../../shared/components/toast/toast.service';
 import { ShareButtonsComponent } from '../../shared/components/share-buttons/share-buttons.component';
 
 const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
@@ -39,7 +38,6 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
     FormsModule,
     CurrencyArsPipe,
     InputNumberModule,
-    MessageModule,
     ProductCardComponent,
     ShareButtonsComponent
   ],
@@ -213,15 +211,13 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                     </p-inputNumber>
                     @if (currentCartQuantity() > 0) {
                       @if (availableQuantity() === 0) {
-                        <p-message
-                          severity="error"
-                          styleClass="mt-2"
-                          text="Ya tenés 5 unidades en el carrito (máximo permitido)." />
+                        <p class="mt-2 bg-[#fde8ea] px-3 py-2 text-sm font-semibold text-[#8a1020]">
+                          Ya tenés 5 unidades en el carrito (máximo permitido).
+                        </p>
                       } @else {
-                        <p-message
-                          severity="warn"
-                          styleClass="mt-2"
-                          [text]="'Ya tenés ' + currentCartQuantity() + ' en el carrito. Podés agregar ' + availableQuantity() + ' más.'" />
+                        <p class="mt-2 bg-[#fdf3d0] px-3 py-2 text-sm font-semibold text-[#5c4300]">
+                          Ya tenés {{ currentCartQuantity() }} en el carrito. Podés agregar {{ availableQuantity() }} más.
+                        </p>
                       }
                     } @else {
                       <p class="mt-2 text-sm text-[#555550]">Hasta 5 por pedido. Para más, consultanos por WhatsApp.</p>
@@ -229,15 +225,15 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                   </div>
 
                   @if (showValidationError()) {
-                    <p-message
-                      severity="warn"
-                      [text]="selectedColor() ? 'Elegí un talle para continuar.' : 'Elegí color y talle para continuar.'" />
+                    <p role="alert" class="bg-[#fdf3d0] px-3 py-2 text-sm font-semibold text-[#5c4300]">
+                      {{ selectedColor() ? 'Elegí un talle para continuar.' : 'Elegí color y talle para continuar.' }}
+                    </p>
                   }
 
                   @if (showQuantityExceededError()) {
-                    <p-message
-                      severity="warn"
-                      [text]="'Podés agregar hasta ' + availableQuantity() + ' unidades más de esta remera.'" />
+                    <p role="alert" class="bg-[#fdf3d0] px-3 py-2 text-sm font-semibold text-[#5c4300]">
+                      Podés agregar hasta {{ availableQuantity() }} unidades más de esta remera.
+                    </p>
                   }
                 </div>
 
@@ -311,7 +307,7 @@ export class ProductDetailComponent {
   private router = inject(Router);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
-  private messageService = inject(MessageService);
+  private toastService = inject(ToastService);
   private title = inject(Title);
   private meta = inject(Meta);
   private wishlistService = inject(WishlistService);
@@ -426,12 +422,7 @@ export class ProductDetailComponent {
     const added = this.addSelectionToCart();
     if (!added) return;
 
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Agregado al carrito',
-      detail: `${added.productName} · Talle ${added.size} · ${added.color}`,
-      life: 3000
-    });
+    this.toastService.show('Agregado al carrito', `${added.productName} · Talle ${added.size} · ${added.color}`);
   }
 
   buyNow(): void {
