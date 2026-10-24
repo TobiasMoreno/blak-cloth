@@ -69,10 +69,10 @@ for (const product of products) {
     type: 'product'
   });
 
-  mkdirSync(join(DIST, path), { recursive: true });
-  writeFileSync(join(DIST, path, 'index.html'), html);
-  // Regla explícita para que Netlify sirva esta página antes que el fallback general de la SPA
-  redirects.push(`${path}  ${path}/index.html  200`);
+  // Archivo plano (product/medusa.html), no carpeta con index.html: Netlify lo sirve en /product/medusa
+  // tal cual, mientras que a una carpeta le agrega "/" con un 301 que confunde a WhatsApp y Facebook
+  mkdirSync(join(DIST, 'product'), { recursive: true });
+  writeFileSync(join(DIST, `${path}.html`), html);
 }
 
 // Links viejos con ID numérico → URL nueva (misma tabla que usa la app)
