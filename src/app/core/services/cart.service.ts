@@ -1,5 +1,6 @@
 import { inject, Injectable, signal, computed } from '@angular/core';
 import { CartItem } from '../models/cart-item.model';
+import { LEGACY_PRODUCT_IDS } from '../constants/legacy-products.constants';
 
 const CART_STORAGE_KEY = 'lm-studio-cart';
 const MAX_QUANTITY = 5;
@@ -119,7 +120,12 @@ export class CartService {
   private loadCartFromStorage(): CartItem[] {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const items: CartItem[] = stored ? JSON.parse(stored) : [];
+      // Carritos guardados antes del catálogo con slugs: actualizar ID y foto
+      return items.map(item => {
+        const slug = LEGACY_PRODUCT_IDS[item.productId];
+        return slug ? { ...item, productId: slug, image: `products/${slug}/mockup.jpeg` } : item;
+      });
     } catch {
       return [];
     }

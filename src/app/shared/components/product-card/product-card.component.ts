@@ -3,7 +3,10 @@ import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Product } from '../../../core/models/product.model';
 import { WishlistService } from '../../../core/services/wishlist.service';
+import { getColorHex } from '../../../core/constants/colors.constants';
 import { CurrencyArsPipe } from '../../pipes/currency-ars.pipe';
+
+const NEW_PRODUCT_DAYS = 30;
 
 @Component({
   selector: 'app-product-card',
@@ -14,23 +17,41 @@ import { CurrencyArsPipe } from '../../pipes/currency-ars.pipe';
       <button
         type="button"
         (click)="toggleWishlist($event)"
-        [attr.aria-label]="isFavorite() ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+        [attr.aria-label]="isFavorite() ? 'Quitar ' + product().name + ' de favoritos' : 'Agregar ' + product().name + ' a favoritos'"
         [attr.aria-pressed]="isFavorite()"
         class="absolute right-3 top-3 z-10 flex min-h-11 min-w-11 items-center justify-center bg-[#f4f4f0] text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d9182b] hover:text-white"
       >
-        <i [class]="isFavorite() ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'"></i>
+        <i [class]="isFavorite() ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'" aria-hidden="true"></i>
       </button>
 
+      @if (isNew()) {
+        <span class="absolute left-3 top-3 z-10 bg-[#d9182b] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-white">
+          Nuevo
+        </span>
+      }
+
       <a [routerLink]="['/product', product().id]" class="block">
-        <div class="aspect-[4/3] overflow-hidden bg-[#e7e7e1]">
+        <div class="relative aspect-[4/3] overflow-hidden bg-[#e7e7e1]">
           <img
             [ngSrc]="product().images[0]"
-            [alt]="product().name + ', frente y espalda'"
+            [alt]="product().name"
             width="1200"
             height="800"
+            sizes="(min-width: 1024px) 33vw, (min-width: 520px) 50vw, 100vw"
+            [priority]="priority()"
             [style.view-transition-name]="'product-' + product().id"
             class="h-full w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
           />
+          @if (product().hoverImage; as hoverImage) {
+            <img
+              [ngSrc]="hoverImage"
+              alt=""
+              width="1200"
+              height="800"
+              sizes="(min-width: 1024px) 33vw, (min-width: 520px) 50vw, 100vw"
+              class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            />
+          }
         </div>
 
         <div class="pt-5">
@@ -44,11 +65,15 @@ import { CurrencyArsPipe } from '../../pipes/currency-ars.pipe';
           </div>
 
           <div class="mt-5 flex items-center justify-between gap-4 text-sm text-[#555550]">
-            <span>Talles {{ product().sizes.join(' · ') }}</span>
-            <span [attr.aria-label]="'Colores disponibles: ' + product().colors.join(', ')" class="flex gap-2">
+            @if (product().sizes.length > 0) {
+              <span>Talles {{ product().sizes.join(' · ') }}</span>
+            } @else {
+              <span class="font-semibold text-[#0b0b0b]">Sin stock</span>
+            }
+            <span role="img" [attr.aria-label]="'Colores disponibles: ' + product().colors.join(', ')" class="flex gap-2">
               @for (color of product().colors; track color) {
                 <span
-                  class="inline-block h-4 w-4 rounded-full"
+                  class="inline-block h-4 w-4 rounded-full border border-[#888880]"
                   [style.background-color]="getColorHex(color)"
                   [title]="color"
                 ></span>
@@ -64,26 +89,23 @@ export class ProductCardComponent {
   private wishlistService = inject(WishlistService);
 
   product = input.required<Product>();
+  /** Cargar la foto con prioridad: solo para las tarjetas visibles al entrar a la página. */
+  priority = input(false);
+
+  readonly getColorHex = getColorHex;
+
   isFavorite = computed(() => this.wishlistService.isInWishlist(this.product().id));
+
+  isNew = computed(() => {
+    const createdAt = this.product().createdAt;
+    if (!createdAt) return false;
+    const ageInDays = (Date.now() - new Date(createdAt).getTime()) / 86_400_000;
+    return ageInDays >= 0 && ageInDays <= NEW_PRODUCT_DAYS;
+  });
 
   toggleWishlist(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
     this.wishlistService.toggle(this.product().id);
-  }
-
-  getColorHex(color: string): string {
-    const map: Record<string, string> = {
-      negro: '#111111',
-      blanco: '#ffffff',
-      gris: '#9ca3af',
-      beige: '#e8d9b9',
-      'azul marino': '#1e2a4a',
-      rojo: '#dc2626',
-      verde: '#0b6b3a',
-      azul: '#2563eb',
-      amarillo: '#eab308'
-    };
-    return map[color.toLowerCase()] ?? '#cccccc';
   }
 }

@@ -1,4 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { resolveLegacyProductId } from '../constants/legacy-products.constants';
 
 const WISHLIST_STORAGE_KEY = 'lm-studio-wishlist';
 
@@ -26,7 +27,8 @@ export class WishlistService {
   private loadFromStorage(): string[] {
     try {
       const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const ids: string[] = stored ? JSON.parse(stored) : [];
+      return ids.map(resolveLegacyProductId);
     } catch {
       return [];
     }

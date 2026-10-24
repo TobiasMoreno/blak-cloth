@@ -1,14 +1,30 @@
 import { Injectable, computed } from '@angular/core';
 import { httpResource } from '@angular/common/http';
-import { CatalogEntry, Product, ProductSize } from '../models/product.model';
+import { CatalogEntry, Product, ProductCollection, ProductSize } from '../models/product.model';
+import { resolveLegacyProductId } from '../constants/legacy-products.constants';
 
 const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
+
+export type ProductSort = 'nuevos' | 'precio-asc' | 'precio-desc' | 'nombre';
+
+export interface ProductFilters {
+  search: string;
+  collection: string | null;
+  sizes: string[];
+  colors: string[];
+  minPrice: number | null;
+  maxPrice: number | null;
+  sort: ProductSort;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private catalog = httpResource<unknown>(() => 'data/products.json', { defaultValue: [] });
+  private collectionsFile = httpResource<{ items?: ProductCollection[] }>(() => 'data/collections.json', {
+    defaultValue: {}
+  });
 
   readonly isLoading = this.catalog.isLoading;
   readonly hasError = computed(() => this.catalog.error() !== undefined);
@@ -18,6 +34,13 @@ export class ProductService {
     return Array.isArray(entries) ? entries.flatMap(toProduct) : [];
   });
 
+  /** Solo las colecciones que tienen al menos una remera. */
+  readonly collections = computed(() =>
+    (this.collectionsFile.value().items ?? []).filter(collection =>
+      this.products().some(product => product.collection === collection.slug)
+    )
+  );
+
   readonly allSizes = computed(() =>
     SIZE_ORDER.filter(size => this.products().some(product => product.sizes.includes(size)))
   );
@@ -26,33 +49,38 @@ export class ProductService {
     [...new Set(this.products().flatMap(product => product.colors))].sort()
   );
 
+  readonly priceRange = computed(() => {
+    const prices = this.products().map(product => product.price);
+    return prices.length > 0 ? { min: Math.min(...prices), max: Math.max(...prices) } : null;
+  });
+
   readonly featuredProducts = computed(() => {
     const featured = this.products().filter(product => product.featured);
     return featured.length > 0 ? featured : this.products().slice(0, 3);
   });
 
   getProductById(id: string): Product | undefined {
-    return this.products().find(product => product.id === id);
+    const slug = resolveLegacyProductId(id);
+    return this.products().find(product => product.id === slug);
   }
 
-  getProductsByFilters(
-    selectedSizes: string[] = [],
-    selectedColors: string[] = [],
-    searchTerm: string = '',
-    minPrice: number | null = null,
-    maxPrice: number | null = null
-  ): Product[] {
+  getProductsByFilters(filters: ProductFilters): Product[] {
     let filtered = this.products();
 
     // Búsqueda por nombre
-    if (searchTerm.trim()) {
-      const search = searchTerm.toLowerCase().trim();
+    if (filters.search.trim()) {
+      const search = filters.search.toLowerCase().trim();
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(search)
       );
     }
 
+    if (filters.collection) {
+      filtered = filtered.filter(product => product.collection === filters.collection);
+    }
+
     // Filtro por precio
+    const { minPrice, maxPrice } = filters;
     if (minPrice !== null) {
       filtered = filtered.filter(product => product.price >= minPrice);
     }
@@ -61,27 +89,41 @@ export class ProductService {
     }
 
     // Filtro por talle
-    if (selectedSizes.length > 0) {
+    if (filters.sizes.length > 0) {
       filtered = filtered.filter(product =>
-        selectedSizes.some(size => product.sizes.includes(size as ProductSize))
+        filters.sizes.some(size => product.sizes.includes(size as ProductSize))
       );
     }
 
     // Filtro por color
-    if (selectedColors.length > 0) {
+    if (filters.colors.length > 0) {
       filtered = filtered.filter(product =>
-        selectedColors.some(color => product.colors.includes(color))
+        filters.colors.some(color => product.colors.includes(color))
       );
     }
 
-    return filtered;
+    return sortProducts(filtered, filters.sort);
   }
 
   getRelatedProducts(productId: string, limit = 4): Product[] {
     const current = this.getProductById(productId);
-    const others = this.products().filter(p => p.id !== productId);
+    const others = this.products().filter(p => p.id !== current?.id);
     const sameCollection = others.filter(p => current?.collection && p.collection === current.collection);
     return [...sameCollection, ...others.filter(p => !sameCollection.includes(p))].slice(0, limit);
+  }
+}
+
+function sortProducts(products: Product[], sort: ProductSort): Product[] {
+  switch (sort) {
+    case 'precio-asc':
+      return [...products].sort((a, b) => a.price - b.price);
+    case 'precio-desc':
+      return [...products].sort((a, b) => b.price - a.price);
+    case 'nombre':
+      return [...products].sort((a, b) => a.name.localeCompare(b.name));
+    default:
+      // products.json ya viene ordenado de más nuevo a más viejo
+      return products;
   }
 }
 
@@ -93,7 +135,8 @@ function toProduct(raw: unknown): Product[] {
     return [];
   }
 
-  const images = [entry.images?.front, entry.images?.back, entry.images?.mockup]
+  const { front, back, mockup } = entry.images ?? {};
+  const images = [front, back, mockup]
     .filter((image): image is string => typeof image === 'string' && image.length > 0);
   if (images.length === 0) {
     console.warn(`[catálogo] Se omitió "${entry.slug}": no tiene fotos.`);
@@ -113,6 +156,7 @@ function toProduct(raw: unknown): Product[] {
     createdAt: entry.createdAt ?? null,
     featured: entry.featured === true,
     images,
+    hoverImage: front && back ? back : null,
     sizes: SIZE_ORDER.filter(size => available.some(variant => variant.size === size)),
     colors: [...new Set(available.map(variant => variant.color))],
     variants,
