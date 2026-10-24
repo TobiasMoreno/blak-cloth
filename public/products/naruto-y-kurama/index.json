@@ -1,0 +1,17 @@
+{
+  "featured": false,
+  "variants": [
+    {
+      "available": true,
+      "size": "L",
+      "color": "Negro"
+    }
+  ],
+  "images": {
+    "mockup": "naruto-kurama.jpg"
+  },
+  "createdAt": "2026-10-24",
+  "price": 30000,
+  "name": "Naruto y Kurama",
+  "description": "remera anime"
+}
