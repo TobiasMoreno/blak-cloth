@@ -13,14 +13,15 @@
           <span class="mt-[0.06em] block whitespace-nowrap text-[0.64em]">para tu equipo</span>
         </h1>
         <p class="mt-10 max-w-[32ch] text-lg leading-relaxed text-[#d0d0ca] md:text-xl">
-          Diseñamos remeras de algodón para clubes, planteles y grupos que quieren llevar su identidad también afuera de la cancha.
+          Diseñamos remeras comunes de algodón para equipos de fútbol amateur que quieren llevar su
+          identidad también afuera de la cancha.
         </p>
         <a
           href="/equipos#configurador"
           (click)="goToConfigurator($event)"
           class="mt-8 inline-flex min-h-14 items-center bg-[#d9182b] px-6 font-semibold text-white transition-colors duration-200 hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
         >
-          Diseñar la nuestra
+          Armar una idea
         </a>
       </div>
       <p class="mt-16 max-w-[38ch] text-sm leading-relaxed text-[#b8b8b2]">
@@ -28,22 +29,25 @@
       </p>
     </div>
 
-    <div class="relative min-h-[58svh] overflow-hidden lg:col-span-7 lg:min-h-full">
+    <figure class="relative min-h-[58svh] overflow-hidden lg:col-span-7 lg:min-h-full">
       <img
         ngSrc="images/teams/team-hero.jpg"
-        alt="Equipo amateur reunido con remeras negras de algodón personalizadas"
+        alt="Imagen conceptual de un equipo amateur con remeras negras de algodón personalizadas"
         fill
         priority
         sizes="(max-width: 1023px) 100vw, 58vw"
         class="product-drift object-cover object-center lg:object-[62%_center]"
       />
-    </div>
+      <figcaption class="absolute bottom-0 right-0 bg-[#0b0b0b] px-4 py-3 text-sm text-[#d0d0ca]">
+        Referencia visual del servicio
+      </figcaption>
+    </figure>
   </section>
 
   <section
     #configuratorSection
     id="configurador"
-    class="px-4 py-20 md:px-8 md:py-28"
+    class="scroll-mt-16 px-4 py-20 md:px-8 md:py-28"
     aria-labelledby="configurator-title"
   >
     <div class="mb-10 grid gap-6 lg:grid-cols-12 lg:items-end">
@@ -55,40 +59,78 @@
       >
         Armá la idea
       </h2>
-      <p class="section-rise max-w-lg text-lg leading-relaxed text-[#333330] lg:col-span-4 lg:col-start-9">
-        Probá una base para empezar la conversación. No es una compra: con estas elecciones te armamos una propuesta y la cotización.
+      <p
+        class="section-rise max-w-lg text-lg leading-relaxed text-[#333330] lg:col-span-4 lg:col-start-9"
+      >
+        Elegí una base y revisá el resumen. Esto inicia una consulta: no confirma una compra ni un
+        precio.
       </p>
     </div>
 
     <div class="grid bg-[#e7e7e1] lg:grid-cols-12">
       <form
+        #configuratorForm
         [formGroup]="form"
         class="configurator-form p-5 md:p-8 lg:col-span-5 lg:p-10"
         aria-label="Configurador de remera para equipos"
-        (submit)="$event.preventDefault()"
+        (ngSubmit)="submitProposal()"
       >
-        <label for="team-name" class="block text-xl font-semibold">Nombre del equipo</label>
+        @if (attemptedSubmit() && !requiredChoicesComplete()) {
+          <div id="form-error" class="mb-8 bg-[#d9182b] p-4 font-semibold text-white" role="alert">
+            Falta elegir color, ubicación de la estampa, cantidad y estado del escudo.
+          </div>
+        }
+
+        <label for="team-name" class="block text-xl font-semibold">
+          Nombre del equipo <span class="text-base font-normal text-[#555550]">(opcional)</span>
+        </label>
         <input
           id="team-name"
           type="text"
           formControlName="teamName"
           [attr.maxlength]="teamNameMaxLength"
-          autocomplete="off"
+          autocomplete="organization"
           placeholder="Ej.: Los del Barrio"
           aria-describedby="team-name-hint"
+          [attr.aria-invalid]="form.controls.teamName.invalid ? true : null"
+          (blur)="announcePreview()"
           class="mt-3 min-h-14 w-full bg-[#f4f4f0] px-4 text-lg text-[#0b0b0b] placeholder:text-[#62625c] focus:outline-none"
         />
-        <p id="team-name-hint" class="mt-2 flex justify-between gap-4 text-sm text-[#333330]">
-          <span>Si todavía no lo tienen, dejalo vacío.</span>
-          <span class="tabular-nums">{{ teamNameLength() }}/{{ teamNameMaxLength }}</span>
-        </p>
+        <div id="team-name-hint" class="mt-2 flex justify-between gap-4 text-sm text-[#333330]">
+          <p>
+            {{
+              hasLongName()
+                ? 'Se acomoda en dos líneas en la vista previa.'
+                : 'Si todavía no lo tienen, dejalo vacío.'
+            }}
+          </p>
+          <p class="shrink-0 tabular-nums">{{ teamNameLength() }}/{{ teamNameMaxLength }}</p>
+        </div>
 
-        <fieldset class="mt-8">
-          <legend class="text-xl font-semibold">Color de la remera</legend>
+        <fieldset
+          class="mt-8"
+          [class.field-invalid]="attemptedSubmit() && form.controls.color.invalid"
+          aria-describedby="color-hint color-error"
+        >
+          <legend class="text-xl font-semibold">Color preferido</legend>
+          <p id="color-hint" class="mt-2 text-sm leading-relaxed text-[#555550]">
+            Es una referencia; confirmamos disponibilidad antes de producir.
+          </p>
           <div class="mt-4 flex flex-wrap gap-3">
             @for (color of colorOptions; track color.id) {
-              <label class="choice flex min-h-12 cursor-pointer items-center gap-3 px-4 font-semibold">
-                <input type="radio" class="sr-only" formControlName="color" [value]="color.id" />
+              <label
+                class="choice flex min-h-12 cursor-pointer items-center gap-3 px-4 font-semibold"
+              >
+                <input
+                  type="radio"
+                  class="sr-only"
+                  formControlName="color"
+                  [value]="color.id"
+                  [attr.aria-invalid]="
+                    attemptedSubmit() && form.controls.color.invalid ? true : null
+                  "
+                  (change)="announcePreview()"
+                />
                 <span
                   class="h-5 w-5 rounded-full border-2 border-[#777770]"
                   [style.background-color]="color.hex"
@@ -98,56 +140,136 @@
               </label>
             }
           </div>
+          @if (attemptedSubmit() && form.controls.color.invalid) {
+            <p id="color-error" class="mt-3 font-semibold text-[#b51020]">
+              Elegí un color de referencia.
+            </p>
+          }
         </fieldset>
 
-        <fieldset class="mt-8">
-          <legend class="text-xl font-semibold">Estampa principal</legend>
+        <fieldset
+          class="mt-8"
+          [class.field-invalid]="attemptedSubmit() && form.controls.placement.invalid"
+          aria-describedby="placement-hint placement-error"
+        >
+          <legend class="text-xl font-semibold">¿Dónde va la estampa principal?</legend>
+          <p id="placement-hint" class="mt-2 text-sm text-[#555550]">
+            El escudo puede resolverse aparte en la propuesta.
+          </p>
           <div class="mt-4 grid grid-cols-2 gap-3">
-            <label class="choice flex min-h-12 cursor-pointer items-center justify-center px-4 font-semibold">
-              <input type="radio" class="sr-only" formControlName="placement" value="front" />
+            <label
+              class="choice flex min-h-12 cursor-pointer items-center justify-center px-4 font-semibold"
+            >
+              <input
+                type="radio"
+                class="sr-only"
+                formControlName="placement"
+                value="front"
+                [attr.aria-invalid]="
+                  attemptedSubmit() && form.controls.placement.invalid ? true : null
+                "
+                (change)="announcePreview()"
+              />
               Frente
             </label>
-            <label class="choice flex min-h-12 cursor-pointer items-center justify-center px-4 font-semibold">
-              <input type="radio" class="sr-only" formControlName="placement" value="back" />
+            <label
+              class="choice flex min-h-12 cursor-pointer items-center justify-center px-4 font-semibold"
+            >
+              <input
+                type="radio"
+                class="sr-only"
+                formControlName="placement"
+                value="back"
+                [attr.aria-invalid]="
+                  attemptedSubmit() && form.controls.placement.invalid ? true : null
+                "
+                (change)="announcePreview()"
+              />
               Espalda
             </label>
           </div>
+          @if (attemptedSubmit() && form.controls.placement.invalid) {
+            <p id="placement-error" class="mt-3 font-semibold text-[#b51020]">
+              Elegí frente o espalda.
+            </p>
+          }
         </fieldset>
 
         <div class="mt-8 grid gap-8 sm:grid-cols-2">
           <div>
-            <label for="team-quantity" class="block text-xl font-semibold">Cantidad estimada</label>
+            <label for="team-quantity" class="block text-xl font-semibold"
+              >Cantidad aproximada</label
+            >
             <select
               id="team-quantity"
               formControlName="quantity"
+              aria-describedby="quantity-hint quantity-error"
+              [attr.aria-invalid]="
+                attemptedSubmit() && form.controls.quantity.invalid ? true : null
+              "
               class="mt-3 min-h-14 w-full bg-[#f4f4f0] px-4 text-lg focus:outline-none"
             >
-              <option [ngValue]="null" disabled>Elegí una opción</option>
+              <option [ngValue]="null" disabled>Elegí un tramo</option>
               @for (quantityOption of quantityOptions; track quantityOption.value) {
                 <option [ngValue]="quantityOption.value">{{ quantityOption.label }}</option>
               }
             </select>
+            <p id="quantity-hint" class="mt-2 text-sm text-[#555550]">
+              No hace falta tener el número final.
+            </p>
+            @if (attemptedSubmit() && form.controls.quantity.invalid) {
+              <p id="quantity-error" class="mt-2 font-semibold text-[#b51020]">Elegí un tramo.</p>
+            }
           </div>
 
-          <fieldset>
+          <fieldset
+            [class.field-invalid]="attemptedSubmit() && hasCrest() === null"
+            aria-describedby="crest-hint crest-error"
+          >
             <legend class="text-xl font-semibold">¿Ya tienen escudo?</legend>
             <div class="mt-3 flex gap-3">
-              <label class="choice flex min-h-14 flex-1 cursor-pointer items-center justify-center px-4 font-semibold">
-                <input type="radio" class="sr-only" formControlName="hasCrest" [value]="true" />
+              <label
+                class="choice flex min-h-14 flex-1 cursor-pointer items-center justify-center px-4 font-semibold"
+              >
+                <input
+                  type="radio"
+                  class="sr-only"
+                  formControlName="hasCrest"
+                  [value]="true"
+                  [attr.aria-invalid]="attemptedSubmit() && hasCrest() === null ? true : null"
+                  (change)="announcePreview()"
+                />
                 Sí
               </label>
-              <label class="choice flex min-h-14 flex-1 cursor-pointer items-center justify-center px-4 font-semibold">
-                <input type="radio" class="sr-only" formControlName="hasCrest" [value]="false" />
+              <label
+                class="choice flex min-h-14 flex-1 cursor-pointer items-center justify-center px-4 font-semibold"
+              >
+                <input
+                  type="radio"
+                  class="sr-only"
+                  formControlName="hasCrest"
+                  [value]="false"
+                  [attr.aria-invalid]="attemptedSubmit() && hasCrest() === null ? true : null"
+                  (change)="announcePreview()"
+                />
                 No
               </label>
             </div>
+            <p id="crest-hint" class="mt-2 text-sm text-[#555550]">
+              El archivo se manda después por WhatsApp.
+            </p>
+            @if (attemptedSubmit() && hasCrest() === null) {
+              <p id="crest-error" class="mt-2 font-semibold text-[#b51020]">
+                Indicá si el escudo ya existe.
+              </p>
+            }
           </fieldset>
         </div>
 
         <div class="mt-8 grid gap-6 sm:grid-cols-2">
           <div>
             <label for="team-deadline" class="block text-lg font-semibold">
-              ¿Para cuándo? <span class="font-normal text-[#333330]">(opcional)</span>
+              Fecha objetivo <span class="font-normal text-[#555550]">(opcional)</span>
             </label>
             <input
               id="team-deadline"
@@ -161,7 +283,7 @@
           </div>
           <div>
             <label for="team-location" class="block text-lg font-semibold">
-              Localidad <span class="font-normal text-[#333330]">(opcional)</span>
+              Localidad <span class="font-normal text-[#555550]">(opcional)</span>
             </label>
             <input
               id="team-location"
@@ -175,27 +297,67 @@
           </div>
         </div>
 
-        <a
-          [href]="whatsappUrl()"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="mt-10 flex min-h-16 items-center justify-between bg-[#d9182b] px-5 font-semibold text-white transition-colors hover:bg-[#0b0b0b]"
+        <label for="team-notes" class="mt-8 block text-lg font-semibold">
+          Algo más que debamos saber <span class="font-normal text-[#555550]">(opcional)</span>
+        </label>
+        <textarea
+          id="team-notes"
+          formControlName="notes"
+          [attr.maxlength]="notesMaxLength"
+          rows="4"
+          placeholder="Nombres, números, otra cantidad o una idea especial"
+          aria-describedby="notes-hint"
+          class="mt-3 w-full resize-y bg-[#f4f4f0] p-4 text-lg text-[#0b0b0b] placeholder:text-[#62625c] focus:outline-none"
+        ></textarea>
+        <p id="notes-hint" class="mt-2 text-right text-sm text-[#555550] tabular-nums">
+          {{ notesLength() }}/{{ notesMaxLength }}
+        </p>
+
+        <section class="mt-10 bg-[#0b0b0b] p-5 text-[#f4f4f0]" aria-labelledby="review-title">
+          <h3 id="review-title" class="text-2xl font-black uppercase">Revisá la consulta</h3>
+          <dl class="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-sm text-[#b8b8b2]">Color preferido</dt>
+              <dd class="font-semibold">{{ colorLabel() }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm text-[#b8b8b2]">Estampa principal</dt>
+              <dd class="font-semibold">{{ placementLabel() }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm text-[#b8b8b2]">Cantidad</dt>
+              <dd class="font-semibold">{{ quantityLabel() }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm text-[#b8b8b2]">Escudo</dt>
+              <dd class="font-semibold">{{ crestLabel() }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <button
+          type="submit"
+          aria-describedby="whatsapp-hint"
+          class="mt-4 flex min-h-16 w-full items-center justify-between bg-[#d9182b] px-5 text-left font-semibold text-white transition-colors hover:bg-[#0b0b0b]"
         >
           Pedir propuesta por WhatsApp
           <span aria-hidden="true">↗</span>
-        </a>
-        <p class="mt-3 text-sm leading-relaxed text-[#333330]">
-          Abrimos WhatsApp con tus elecciones. No es una compra: te respondemos con una propuesta y su cotización. Desde ahí podés mandar el escudo y las referencias.
+        </button>
+        <p id="whatsapp-hint" class="mt-3 text-sm leading-relaxed text-[#333330]">
+          Se abre en una pestaña nueva con este resumen. No se envía nada automáticamente y no
+          confirma una compra.
         </p>
-        <p class="sr-only" aria-live="polite">{{ interacted() ? previewSummary() : '' }}</p>
+        <p class="sr-only" aria-live="polite">{{ previewAnnouncement() }}</p>
       </form>
 
-      <div class="sticky top-16 z-10 order-first h-56 self-start md:h-80 lg:order-none lg:col-span-7 lg:h-[calc(100svh-4rem)]">
+      <div
+        class="mobile-preview sticky top-16 z-10 order-first h-44 self-start md:h-52 lg:order-none lg:col-span-7 lg:h-[calc(100svh-4rem)]"
+      >
         <app-team-shirt-preview
           [teamName]="displayTeamName()"
-          [shirtColor]="activeColor().hex"
-          [shirtColorLabel]="activeColor().label"
-          [printColor]="activeColor().printHex"
+          [shirtColor]="previewColor()"
+          [shirtColorLabel]="colorLabel()"
+          [printColor]="previewPrintColor()"
           [placement]="placement()"
           [hasCrest]="hasCrest()"
         />
@@ -203,31 +365,44 @@
     </div>
   </section>
 
-  <section class="grid bg-[#d9182b] text-white lg:min-h-[86svh] lg:grid-cols-12" aria-labelledby="cotton-title">
-    <div class="section-rise relative min-h-[58svh] lg:col-span-7 lg:min-h-full">
+  <section
+    class="grid bg-[#d9182b] text-white lg:min-h-[86svh] lg:grid-cols-12"
+    aria-labelledby="cotton-title"
+  >
+    <figure class="section-rise relative min-h-[58svh] lg:col-span-7 lg:min-h-full">
       <img
         ngSrc="images/teams/team-shirt-detail.jpg"
-        alt="Detalle de una remera negra de algodón con un escudo rojo estampado"
+        alt="Imagen conceptual del detalle de una remera negra de algodón con estampa roja"
         fill
         sizes="(max-width: 1023px) 100vw, 58vw"
         class="object-cover"
       />
-    </div>
-    <div class="section-rise flex flex-col justify-center px-4 py-20 md:px-8 lg:col-span-5 lg:px-12">
-      <h2 id="cotton-title" class="max-w-[9ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
-        No es la de juego
+    </figure>
+    <div
+      class="section-rise flex flex-col justify-center px-4 py-20 md:px-8 lg:col-span-5 lg:px-12"
+    >
+      <h2
+        id="cotton-title"
+        class="max-w-[10ch] text-6xl font-black uppercase leading-[0.86] xl:text-8xl"
+      >
+        Uso diario
       </h2>
       <p class="mt-8 max-w-[30ch] text-xl leading-relaxed md:text-2xl">
-        Es la remera que representa al equipo en los viajes, la tribuna, el tercer tiempo y todos los días.
+        La remera que representa al equipo en los viajes, la tribuna, el tercer tiempo y todos los
+        días.
       </p>
-      <p class="mt-8 max-w-[38ch] leading-relaxed text-white">
-        Algodón, calce cotidiano y una gráfica pensada para que el club se reconozca sin parecer una camiseta técnica.
+      <p class="mt-8 max-w-[38ch] leading-relaxed">
+        Algodón y una gráfica pensada para que el grupo se reconozca sin parecer una camiseta
+        técnica.
       </p>
     </div>
   </section>
 
-  <section class="px-4 py-24 md:px-8 md:py-36" aria-labelledby="process-title">
-    <h2 id="process-title" class="section-rise max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
+  <section class="px-4 py-24 md:px-8 md:pb-20 md:pt-36" aria-labelledby="process-title">
+    <h2
+      id="process-title"
+      class="section-rise max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl"
+    >
       Cómo trabajamos
     </h2>
 
@@ -237,7 +412,9 @@
           class="flex min-h-[18rem] flex-col justify-between bg-[#0b0b0b] p-6 text-[#f4f4f0] lg:h-[30vh] lg:min-h-[16rem]"
         >
           <p class="text-sm text-[#b8b8b2]">Nombre, escudo y colores</p>
-          <p class="font-display text-5xl font-black uppercase leading-[0.86] [overflow-wrap:anywhere]">
+          <p
+            class="font-display text-5xl font-black uppercase leading-[0.86] [overflow-wrap:anywhere]"
+          >
             {{ displayTeamName() }}
           </p>
         </div>
@@ -251,15 +428,15 @@
         <div class="relative min-h-[24rem] overflow-hidden bg-[#c7c7c0] lg:h-[44vh] lg:min-h-0">
           <img
             ngSrc="images/teams/team-printing.jpg"
-            alt="Proceso de estampado en rojo sobre una remera negra"
+            alt="Imagen conceptual de un proceso de estampado rojo sobre una remera negra"
             fill
             sizes="(max-width: 1023px) 100vw, 33vw"
             class="object-cover"
           />
         </div>
-        <h3 class="mt-5 text-2xl font-black uppercase">2. Diseñamos y estampamos</h3>
+        <h3 class="mt-5 text-2xl font-black uppercase">2. Recibís la propuesta</h3>
         <p class="mt-3 max-w-[32ch] leading-relaxed text-[#333330]">
-          Convertimos ese material en una gráfica que funciona sobre una prenda de uso diario.
+          Revisamos el material y definimos diseño, variantes, cotización y plazo antes de producir.
         </p>
       </article>
 
@@ -267,94 +444,112 @@
         <div class="relative min-h-[30rem] overflow-hidden bg-[#b8b8b2] lg:h-[60vh] lg:min-h-0">
           <img
             ngSrc="images/teams/team-finished.jpg"
-            alt="Pedido terminado de remeras negras y crudas personalizadas"
+            alt="Imagen conceptual de un pedido terminado de remeras negras y crudas personalizadas"
             fill
             sizes="(max-width: 1023px) 100vw, 42vw"
             class="object-cover"
           />
         </div>
-        <h3 class="mt-5 text-2xl font-black uppercase">3. La usa todo el equipo</h3>
+        <h3 class="mt-5 text-2xl font-black uppercase">3. Confirmamos y producimos</h3>
         <p class="mt-3 max-w-[32ch] leading-relaxed text-[#333330]">
-          Confirmamos las variantes antes de producir y coordinamos juntos la entrega.
+          Con talles, opciones y alcance acordados, coordinamos la producción y la entrega.
         </p>
       </article>
     </div>
-    <p class="mt-10 text-sm text-[#555550]">Imágenes ilustrativas del proceso.</p>
+    <p class="mt-10 max-w-[62ch] text-sm leading-relaxed text-[#555550]">
+      Las imágenes son referencias visuales del servicio. Cada propuesta parte del material real del
+      equipo.
+    </p>
   </section>
 
-  <section class="bg-[#0b0b0b] px-4 py-24 text-[#f4f4f0] md:px-8 md:py-36" aria-labelledby="quote-title">
-    <div class="grid gap-16 lg:grid-cols-12">
-      <div class="section-rise lg:col-span-6">
-        <h2 id="quote-title" class="max-w-[11ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
-          Cotización clara
-        </h2>
-        <p class="mt-8 max-w-lg text-lg leading-relaxed text-[#d0d0ca]">
-          Cada pedido se cotiza según la cantidad, la prenda y la complejidad de la estampa. Antes de producir, sabés exactamente qué incluye.
+  <section
+    class="bg-[#0b0b0b] px-4 py-24 text-[#f4f4f0] md:px-8 md:pb-20 md:pt-24"
+    aria-labelledby="summary-title"
+  >
+    <div class="grid gap-8 lg:grid-cols-12 lg:items-end">
+      <h2
+        id="summary-title"
+        class="section-rise max-w-[11ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl lg:col-span-7"
+      >
+        Resumen de la idea
+      </h2>
+      <p
+        class="section-rise max-w-lg text-lg leading-relaxed text-[#d0d0ca] lg:col-span-4 lg:col-start-9"
+      >
+        La cotización se arma después de revisar estas elecciones, el material y las variantes del
+        pedido.
+      </p>
+    </div>
+
+    <div class="section-rise mt-16 bg-[#f4f4f0] p-6 text-[#0b0b0b] md:p-10">
+      <p class="font-display text-4xl font-black uppercase [overflow-wrap:anywhere] md:text-6xl">
+        {{ displayTeamName() }}
+      </p>
+      <dl class="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt class="text-sm text-[#555550]">Color preferido</dt>
+          <dd class="mt-1 text-xl font-semibold">{{ colorLabel() }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-[#555550]">Estampa principal</dt>
+          <dd class="mt-1 text-xl font-semibold">{{ placementLabel() }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-[#555550]">Cantidad aproximada</dt>
+          <dd class="mt-1 text-xl font-semibold tabular-nums">{{ quantityLabel() }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-[#555550]">Escudo</dt>
+          <dd class="mt-1 text-xl font-semibold">{{ crestLabel() }}</dd>
+        </div>
+      </dl>
+      <div
+        class="mt-12 flex flex-col gap-5 bg-[#e7e7e1] p-5 md:flex-row md:items-center md:justify-between"
+      >
+        <p class="max-w-[42ch] leading-relaxed">
+          Revisá que las cuatro decisiones estén completas antes de abrir WhatsApp.
         </p>
-        <a
-          [href]="whatsappUrl()"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="mt-10 inline-flex min-h-14 items-center gap-4 bg-[#d9182b] px-6 font-semibold text-white transition-colors hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
+        <button
+          type="button"
+          (click)="submitProposal()"
+          class="flex min-h-14 shrink-0 items-center justify-between gap-6 bg-[#d9182b] px-6 font-semibold text-white transition-colors hover:bg-[#0b0b0b]"
         >
           Pedir propuesta por WhatsApp
           <span aria-hidden="true">↗</span>
-        </a>
-      </div>
-
-      <div class="section-rise lg:col-span-4 lg:col-start-9">
-        <div class="quote-slip bg-[#f4f4f0] p-7 pb-12 text-[#0b0b0b]">
-          <p class="text-center text-xl font-black uppercase">{{ displayTeamName() }}</p>
-          <dl class="mt-10 space-y-5">
-            <div class="flex items-start justify-between gap-6">
-              <dt>Diseño personalizado</dt>
-              <dd class="font-semibold">Incluido</dd>
-            </div>
-            <div class="flex items-start justify-between gap-6">
-              <dt>Remera de algodón</dt>
-              <dd class="font-semibold">{{ activeColor().label }}</dd>
-            </div>
-            <div class="flex items-start justify-between gap-6">
-              <dt>Estampa principal</dt>
-              <dd class="font-semibold capitalize">{{ placementLabel() }}</dd>
-            </div>
-            <div class="flex items-start justify-between gap-6">
-              <dt>Cantidad estimada</dt>
-              <dd class="font-semibold tabular-nums">{{ quantityLabel() ?? 'A definir' }}</dd>
-            </div>
-            <div class="flex items-start justify-between gap-6">
-              <dt>Escudo</dt>
-              <dd class="font-semibold">{{ crestLabel() ?? 'A definir' }}</dd>
-            </div>
-          </dl>
-          <div class="mt-10 h-1 bg-[#0b0b0b]" aria-hidden="true"></div>
-          <div class="mt-5 text-right">
-            <p class="font-display text-3xl font-black uppercase">Presupuesto según pedido</p>
-          </div>
-        </div>
+        </button>
       </div>
     </div>
   </section>
 
-  <section class="px-4 py-24 md:px-8 md:py-36" aria-labelledby="faq-title">
-    <h2 id="faq-title" class="section-rise max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
+  <section class="px-4 py-24 md:px-8 md:pb-20 md:pt-24" aria-labelledby="faq-title">
+    <h2
+      id="faq-title"
+      class="section-rise max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl"
+    >
       Lo que hay que saber
     </h2>
 
-    <div class="section-rise mt-16 divide-y divide-[#c7c7c0] border-y border-[#c7c7c0] lg:ml-[33.333%]">
+    <div class="section-rise mt-16 space-y-2 lg:ml-[33.333%]">
       @for (item of faq; track item.question) {
-        <details class="group py-3 md:px-6">
-          <summary class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold">
+        <details class="group bg-[#e7e7e1] px-4 py-3 md:px-6">
+          <summary
+            class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-5 text-xl font-semibold"
+          >
             {{ item.question }}
-            <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+            <span class="text-3xl transition-transform group-open:rotate-45" aria-hidden="true"
+              >+</span
+            >
           </summary>
-          <p class="mb-4 mt-3 max-w-[48ch] leading-relaxed text-[#333330]">{{ item.answer }}</p>
+          <p class="mb-4 mt-3 max-w-[54ch] leading-relaxed text-[#333330]">{{ item.answer }}</p>
         </details>
       }
     </div>
   </section>
 
-  <section class="on-accent bg-[#d9182b] px-4 py-24 text-white md:px-8 md:py-32" aria-labelledby="closing-title">
+  <section
+    class="on-accent bg-[#d9182b] px-4 py-24 text-white md:px-8 md:py-32"
+    aria-labelledby="closing-title"
+  >
     <div class="grid gap-10 lg:grid-cols-12 lg:items-end">
       <h2
         id="closing-title"
@@ -364,25 +559,24 @@
       </h2>
       <div class="section-rise lg:col-span-4 lg:col-start-9">
         <p class="max-w-[30ch] text-lg leading-relaxed">
-          Contanos cómo se llaman y qué los identifica. Nosotros empezamos por ahí.
+          Armá una base con lo que ya saben. Lo que falte se define en la conversación.
         </p>
         <p class="mt-6 text-xl font-semibold">La consulta no tiene costo.</p>
-        <a
-          [href]="whatsappUrl()"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="mt-8 flex min-h-14 items-center justify-between bg-[#0b0b0b] px-5 font-semibold text-white transition-colors hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
+        <button
+          type="button"
+          (click)="submitProposal()"
+          class="mt-8 flex min-h-14 w-full items-center justify-between bg-[#0b0b0b] px-5 font-semibold text-white transition-colors hover:bg-[#f4f4f0] hover:text-[#0b0b0b]"
         >
           Pedir propuesta por WhatsApp
           <span aria-hidden="true">↗</span>
-        </a>
-        @if (!interacted()) {
+        </button>
+        @if (!requiredChoicesComplete()) {
           <a
             href="/equipos#configurador"
             (click)="goToConfigurator($event)"
             class="mt-4 inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
           >
-            O armá la idea primero
+            Completar la idea primero
           </a>
         }
       </div>

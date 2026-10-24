@@ -14,16 +14,25 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         class="relative min-h-[calc(100svh-4rem)] overflow-hidden bg-[#0b0b0b] text-[#f4f4f0]"
         aria-labelledby="home-title"
       >
-        <h1 id="home-title" class="pointer-events-none absolute inset-0 z-20 font-display font-black uppercase leading-[0.78]">
-          <span class="monument-enter-left absolute left-4 top-4 text-[clamp(7rem,18vw,18rem)] md:left-8 md:top-4 xl:top-4">
+        <h1
+          id="home-title"
+          class="pointer-events-none absolute inset-0 z-20 font-display font-black uppercase leading-[0.78]"
+        >
+          <span
+            class="monument-enter-left absolute left-4 top-4 text-[clamp(7rem,18vw,18rem)] md:left-8 md:top-4 xl:top-4"
+          >
             LM
           </span>
-          <span class="monument-enter-right absolute bottom-3 right-4 text-[clamp(5.4rem,14vw,14rem)] md:bottom-0 md:right-8">
+          <span
+            class="monument-enter-right absolute bottom-3 right-4 text-[clamp(5.4rem,14vw,14rem)] md:bottom-0 md:right-8"
+          >
             Studio
           </span>
         </h1>
 
-        <div class="picture-open absolute inset-x-4 top-[20%] h-[41%] overflow-hidden bg-[#252525] md:inset-y-0 md:left-auto md:right-0 md:top-0 md:h-[72%] md:w-[47%]">
+        <div
+          class="picture-open absolute inset-x-4 top-[20%] h-[41%] overflow-hidden bg-[#252525] md:inset-y-0 md:left-auto md:right-0 md:top-0 md:h-[72%] md:w-[47%]"
+        >
           <img
             ngSrc="images/products/the-rose-system.jpeg"
             alt="Remeras The Rose System de LM Studio, frente y espalda"
@@ -34,7 +43,9 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           />
         </div>
 
-        <div class="absolute left-4 top-[64%] z-30 max-w-[17rem] md:left-8 md:top-[40%] md:max-w-sm">
+        <div
+          class="absolute left-4 top-[64%] z-30 max-w-[17rem] md:left-8 md:top-[40%] md:max-w-sm"
+        >
           <p class="text-lg leading-snug text-[#f4f4f0] md:text-xl">
             Remeras de autor con gráfica urbana, creadas en Córdoba para vestir una idea propia.
           </p>
@@ -52,14 +63,19 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           </a>
         </div>
 
-        <p class="absolute bottom-6 left-4 z-30 hidden max-w-52 text-sm leading-relaxed text-[#b8b8b2] md:left-8 md:block">
+        <p
+          class="absolute bottom-6 left-4 z-30 hidden max-w-52 text-sm leading-relaxed text-[#b8b8b2] md:left-8 md:block"
+        >
           Siete diseños. Algodón. Compra coordinada por WhatsApp.
         </p>
       </section>
 
       <section class="section-rise px-4 py-24 md:px-8 md:py-36" aria-labelledby="drop-title">
         <div class="mb-12 grid gap-8 md:grid-cols-12 md:items-end">
-          <h2 id="drop-title" class="max-w-[8ch] text-6xl font-black uppercase leading-[0.88] md:col-span-7 md:text-8xl">
+          <h2
+            id="drop-title"
+            class="max-w-[8ch] text-6xl font-black uppercase leading-[0.88] md:col-span-7 md:text-8xl"
+          >
             El drop actual
           </h2>
           <p class="max-w-md text-lg leading-relaxed text-[#555550] md:col-span-4 md:col-start-9">
@@ -79,16 +95,22 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           </div>
 
           <div class="flex flex-col justify-between p-5 md:p-8 lg:p-10">
-            <div class="flex flex-wrap gap-x-6 gap-y-3" role="tablist" aria-label="Diseños destacados">
+            <div
+              class="flex flex-wrap gap-x-6 gap-y-3"
+              role="tablist"
+              aria-label="Diseños destacados"
+            >
               @for (product of featuredProducts; track product.id; let index = $index) {
                 <button
                   type="button"
                   role="tab"
                   [attr.aria-selected]="activeDesign() === index"
                   (click)="activeDesign.set(index)"
-                  [class]="activeDesign() === index
-                    ? 'min-h-11 text-left font-semibold text-[#0b0b0b] underline decoration-[#d9182b] decoration-2 underline-offset-8'
-                    : 'min-h-11 text-left font-semibold text-[#555550] transition-colors duration-200 hover:text-[#0b0b0b]'"
+                  [class]="
+                    activeDesign() === index
+                      ? 'min-h-11 text-left font-semibold text-[#0b0b0b] underline decoration-[#d9182b] decoration-2 underline-offset-8'
+                      : 'min-h-11 text-left font-semibold text-[#555550] transition-colors duration-200 hover:text-[#0b0b0b]'
+                  "
                 >
                   {{ product.name }}
                 </button>
@@ -105,7 +127,9 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
             </div>
 
             <div class="grid gap-3 sm:grid-cols-2">
-              <p class="flex min-h-16 items-center bg-[#d6d6cf] px-5 text-xl font-semibold tabular-nums">
+              <p
+                class="flex min-h-16 items-center bg-[#d6d6cf] px-5 text-xl font-semibold tabular-nums"
+              >
                 {{ selectedProduct().price | currencyArs }}
               </p>
               <a
@@ -120,7 +144,10 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         </div>
       </section>
 
-      <section class="section-rise bg-[#d9182b] px-4 py-24 text-white md:px-8 md:py-36" aria-labelledby="wear-art-title">
+      <section
+        class="section-rise bg-[#d9182b] px-4 py-24 text-white md:px-8 md:py-36"
+        aria-labelledby="wear-art-title"
+      >
         <div class="grid gap-12 md:grid-cols-12 md:items-end">
           <div class="md:col-span-4">
             <img
@@ -132,32 +159,49 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
             />
           </div>
           <div class="md:col-span-7 md:col-start-6">
-            <h2 id="wear-art-title" class="max-w-[9ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl">
+            <h2
+              id="wear-art-title"
+              class="max-w-[9ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl"
+            >
               Arte para usar
             </h2>
             <p class="mt-8 max-w-[32ch] text-xl leading-relaxed md:text-2xl">
-              Cada prenda nace como una composición gráfica. El algodón es el soporte; la calle termina la obra.
+              Cada prenda nace como una composición gráfica. El algodón es el soporte; la calle
+              termina la obra.
             </p>
           </div>
         </div>
       </section>
 
-      <section class="grid min-h-[84svh] bg-[#f4f4f0] lg:grid-cols-12" aria-labelledby="teams-home-title">
-        <div class="relative min-h-[56svh] overflow-hidden lg:col-span-7 lg:min-h-full">
+      <section
+        class="grid min-h-[84svh] bg-[#f4f4f0] lg:grid-cols-12"
+        aria-labelledby="teams-home-title"
+      >
+        <figure class="relative min-h-[56svh] overflow-hidden lg:col-span-7 lg:min-h-full">
           <img
             ngSrc="images/teams/team-hero.jpg"
-            alt="Equipo amateur reunido con remeras negras personalizadas"
+            alt="Imagen conceptual de un equipo amateur con remeras negras de algodón personalizadas"
             fill
             sizes="(max-width: 1023px) 100vw, 58vw"
             class="object-cover object-[58%_center]"
           />
-        </div>
-        <div class="section-rise flex flex-col justify-center px-4 py-20 md:px-8 lg:col-span-5 lg:px-12">
-          <h2 id="teams-home-title" class="max-w-[8ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
+          <figcaption
+            class="absolute bottom-0 right-0 bg-[#0b0b0b] px-4 py-3 text-sm text-[#d0d0ca]"
+          >
+            Referencia visual del servicio
+          </figcaption>
+        </figure>
+        <div
+          class="section-rise flex flex-col justify-center px-4 py-20 md:px-8 lg:col-span-5 lg:px-12"
+        >
+          <h2
+            id="teams-home-title"
+            class="max-w-[8ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl"
+          >
             Tu equipo. Su remera.
           </h2>
           <p class="mt-8 max-w-[34ch] text-xl leading-relaxed text-[#555550]">
-            Diseñamos remeras de algodón personalizadas para clubes, planteles y grupos amateurs.
+            Diseñamos remeras comunes de algodón para equipos de fútbol amateur, clubes y planteles.
           </p>
           <a
             routerLink="/equipos"
@@ -168,11 +212,17 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         </div>
       </section>
 
-      <section class="bg-[#0b0b0b] px-4 py-24 text-[#f4f4f0] md:px-8 md:py-36" aria-labelledby="buy-title">
+      <section
+        class="bg-[#0b0b0b] px-4 py-24 text-[#f4f4f0] md:px-8 md:py-36"
+        aria-labelledby="buy-title"
+      >
         <div class="grid gap-16 lg:grid-cols-12">
           <div class="lg:col-span-5">
             <div class="lg:sticky lg:top-28">
-              <h2 id="buy-title" class="max-w-[8ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl">
+              <h2
+                id="buy-title"
+                class="max-w-[8ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl"
+              >
                 De la obra a vos
               </h2>
               <p class="mt-8 max-w-sm text-lg leading-relaxed text-[#b8b8b2]">
@@ -220,7 +270,8 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
               />
               <h3 class="mt-8 text-4xl font-black uppercase">Cerralo por WhatsApp</h3>
               <p class="mt-4 max-w-[38ch] text-lg leading-relaxed text-[#b8b8b2]">
-                Recibimos tu pedido armado, confirmamos disponibilidad y coordinamos pago y entrega en Córdoba.
+                Recibimos tu pedido armado, confirmamos disponibilidad y coordinamos pago y entrega
+                en Córdoba.
               </p>
             </article>
           </div>
@@ -234,12 +285,14 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
       >
         <p class="max-w-sm text-lg leading-relaxed">La próxima obra puede salir con vos.</p>
         <span aria-hidden="true" class="absolute right-4 top-6 text-5xl md:right-8">↗</span>
-        <span class="absolute inset-x-4 bottom-0 font-display text-[clamp(8rem,27vw,28rem)] font-black uppercase leading-[0.72] tracking-[-0.04em] md:inset-x-8">
+        <span
+          class="absolute inset-x-4 bottom-0 font-display text-[clamp(8rem,27vw,28rem)] font-black uppercase leading-[0.72] tracking-[-0.04em] md:inset-x-8"
+        >
           Elegí
         </span>
       </a>
     </div>
-  `
+  `,
 })
 export class HomeComponent {
   private productService = inject(ProductService);
@@ -247,6 +300,6 @@ export class HomeComponent {
   activeDesign = signal(0);
   featuredProducts = this.productService
     .getAllProducts()
-    .filter(product => ['003', '006', '007'].includes(product.id));
+    .filter((product) => ['003', '006', '007'].includes(product.id));
   selectedProduct = computed(() => this.featuredProducts[this.activeDesign()]);
 }

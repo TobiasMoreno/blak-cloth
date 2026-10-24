@@ -7,7 +7,7 @@ import {
   inject,
   Injector,
   signal,
-  viewChild
+  viewChild,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -19,14 +19,21 @@ import { CartService } from '../../core/services/cart.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown.escape)': 'onEscape()',
-    '(window:resize)': 'onResize()'
+    '(window:resize)': 'onResize()',
   },
   template: `
-    <header class="sticky top-0 z-50 bg-[#f4f4f0] text-[#0b0b0b]" (keydown.tab)="trapFocus($event)" (keydown.shift.tab)="trapFocus($event)">
-      <nav class="flex min-h-16 items-center justify-between px-4 md:px-8" aria-label="Navegación principal">
+    <header
+      class="sticky top-0 z-50 bg-[#f4f4f0] text-[#0b0b0b]"
+      (keydown.tab)="trapFocus($event)"
+      (keydown.shift.tab)="trapFocus($event)"
+    >
+      <nav
+        class="flex min-h-16 items-center justify-between px-4 md:px-8"
+        aria-label="Navegación principal"
+      >
         <a
           routerLink="/"
-          class="font-display text-3xl font-black uppercase leading-none tracking-[-0.03em] transition-colors duration-200 hover:text-[#d9182b]"
+          class="flex min-h-11 items-center font-display text-3xl font-black uppercase leading-none tracking-[-0.03em] transition-colors duration-200 hover:text-[#d9182b]"
           aria-label="LM Studio, inicio"
         >
           LM Studio
@@ -36,6 +43,7 @@ import { CartService } from '../../core/services/cart.service';
           <a
             routerLink="/"
             routerLinkActive="text-[#d9182b]"
+            ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: true }"
             class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
           >
@@ -44,6 +52,7 @@ import { CartService } from '../../core/services/cart.service';
           <a
             routerLink="/products"
             routerLinkActive="text-[#d9182b]"
+            ariaCurrentWhenActive="page"
             class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
           >
             Colección
@@ -51,6 +60,7 @@ import { CartService } from '../../core/services/cart.service';
           <a
             routerLink="/equipos"
             routerLinkActive="text-[#d9182b]"
+            ariaCurrentWhenActive="page"
             class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
           >
             Para equipos
@@ -58,12 +68,15 @@ import { CartService } from '../../core/services/cart.service';
           <a
             routerLink="/about"
             routerLinkActive="text-[#d9182b]"
+            ariaCurrentWhenActive="page"
             class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
           >
             El estudio
           </a>
           <a
             routerLink="/cart"
+            routerLinkActive="bg-[#d9182b]"
+            ariaCurrentWhenActive="page"
             class="relative flex min-h-11 items-center gap-2 bg-[#0b0b0b] px-4 text-sm font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#d9182b]"
             aria-label="Abrir carrito"
           >
@@ -92,21 +105,56 @@ import { CartService } from '../../core/services/cart.service';
       </nav>
 
       @if (mobileMenuOpen()) {
-        <div #mobileNavigation id="mobile-navigation" class="absolute inset-x-0 top-16 min-h-[calc(100svh-4rem)] bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:hidden">
+        <div
+          #mobileNavigation
+          id="mobile-navigation"
+          class="fixed inset-x-0 bottom-0 top-16 overflow-y-auto bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:hidden"
+        >
           <div class="flex flex-col">
-            <a routerLink="/" (click)="closeMenu()" class="font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]">
+            <a
+              routerLink="/"
+              routerLinkActive="text-[#d9182b]"
+              [routerLinkActiveOptions]="{ exact: true }"
+              ariaCurrentWhenActive="page"
+              (click)="closeMenu()"
+              class="flex min-h-16 items-center font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]"
+            >
               Inicio
             </a>
-            <a routerLink="/products" (click)="closeMenu()" class="font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]">
+            <a
+              routerLink="/products"
+              routerLinkActive="text-[#d9182b]"
+              ariaCurrentWhenActive="page"
+              (click)="closeMenu()"
+              class="flex min-h-16 items-center font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]"
+            >
               Colección
             </a>
-            <a routerLink="/equipos" (click)="closeMenu()" class="font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]">
+            <a
+              routerLink="/equipos"
+              routerLinkActive="text-[#d9182b]"
+              ariaCurrentWhenActive="page"
+              (click)="closeMenu()"
+              class="flex min-h-16 items-center font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]"
+            >
               Para equipos
             </a>
-            <a routerLink="/about" (click)="closeMenu()" class="font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]">
+            <a
+              routerLink="/about"
+              routerLinkActive="text-[#d9182b]"
+              ariaCurrentWhenActive="page"
+              (click)="closeMenu()"
+              class="flex min-h-16 items-center font-display text-6xl font-black uppercase leading-[1.05] hover:text-[#d9182b]"
+            >
               El estudio
             </a>
-            <a routerLink="/cart" (click)="closeMenu()" class="mt-12 flex min-h-14 items-center justify-between bg-[#d9182b] px-5 font-semibold text-white">
+            <a
+              routerLink="/cart"
+              routerLinkActive="outline outline-2 outline-white"
+              ariaCurrentWhenActive="page"
+              (click)="closeMenu()"
+              class="mt-12 flex min-h-14 items-center justify-between bg-[#d9182b] px-5 font-semibold text-white"
+            >
               Ver carrito
               <span>{{ cartService.totalItems() }} prendas</span>
             </a>
@@ -114,7 +162,7 @@ import { CartService } from '../../core/services/cart.service';
         </div>
       }
     </header>
-  `
+  `,
 })
 export class HeaderComponent {
   cartService = inject(CartService);
@@ -156,7 +204,7 @@ export class HeaderComponent {
   }
 
   toggleMenu(): void {
-    this.mobileMenuOpen.update(open => !open);
+    this.mobileMenuOpen.update((open) => !open);
   }
 
   // El menú es solo mobile: si la ventana crece, se cierra para no dejar el scroll bloqueado.
