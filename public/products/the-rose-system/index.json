@@ -6,7 +6,9 @@
   "featured": true,
   "description": "Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.",
   "images": {
-    "mockup": "mockup.jpeg"
+    "mockup": "mockup.jpeg",
+    "front": "remera_frente.png",
+    "back": "remera_dorso.png"
   },
   "variants": [
     {
