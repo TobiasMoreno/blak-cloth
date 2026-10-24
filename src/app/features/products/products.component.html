@@ -1,7 +1,11 @@
 <div class="min-h-[100svh] bg-[#f4f4f0] px-4 pb-28 pt-10 md:px-8 md:pb-40 md:pt-14">
   <header class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-    <h1 class="text-6xl font-black uppercase leading-[0.85] md:text-8xl">Colección</h1>
-    <p class="text-lg text-[#555550]">Diseños de autor · pedidos por WhatsApp</p>
+    <h1 class="text-6xl font-black uppercase leading-[0.85] md:text-8xl">
+      {{ onlyFavorites() ? 'Favoritas' : 'Colección' }}
+    </h1>
+    <p class="text-lg text-[#555550]">
+      {{ onlyFavorites() ? 'Las remeras que guardaste con el corazón' : 'Diseños de autor · pedidos por WhatsApp' }}
+    </p>
   </header>
 
   <!-- Barra fija: búsqueda, orden y colecciones -->
@@ -47,19 +51,32 @@
       }
     </div>
 
-    @if (collections().length > 0) {
+    @if (showCollectionBar()) {
       <div class="-mx-4 mt-3 overflow-x-auto px-4 md:-mx-8 md:px-8" role="group" aria-label="Colecciones">
         <div class="flex w-max gap-2">
           <button
             type="button"
             (click)="selectCollection(null)"
-            [attr.aria-pressed]="selectedCollection() === null"
-            [class]="selectedCollection() === null
+            [attr.aria-pressed]="selectedCollection() === null && !onlyFavorites()"
+            [class]="selectedCollection() === null && !onlyFavorites()
               ? 'min-h-11 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
               : 'min-h-11 bg-[#e7e7e1] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
           >
             Todas
           </button>
+          @if (favoritesCount() > 0 || onlyFavorites()) {
+            <button
+              type="button"
+              (click)="showFavorites()"
+              [attr.aria-pressed]="onlyFavorites()"
+              [class]="onlyFavorites()
+                ? 'flex min-h-11 items-center gap-2 whitespace-nowrap bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
+                : 'flex min-h-11 items-center gap-2 whitespace-nowrap bg-[#e7e7e1] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
+            >
+              <i class="pi pi-heart-fill text-[#d9182b]" aria-hidden="true"></i>
+              Favoritas <span class="tabular-nums">({{ favoritesCount() }})</span>
+            </button>
+          }
           @for (collection of collections(); track collection.slug) {
             <button
               type="button"
@@ -208,6 +225,23 @@
           </button>
         </div>
       }
+    </section>
+  } @else if (onlyFavorites() && favoritesCount() === 0) {
+    <section class="mt-8 bg-[#e7e7e1] px-5 py-20 md:px-10" aria-labelledby="empty-favorites-title">
+      <h2 id="empty-favorites-title" class="max-w-[12ch] text-6xl font-black uppercase leading-[0.9] md:text-8xl">
+        Todavía no guardaste remeras
+      </h2>
+      <p class="mt-8 max-w-md text-lg leading-relaxed text-[#555550]">
+        Tocá el <i class="pi pi-heart" aria-hidden="true"></i><span class="sr-only">corazón</span> en cualquier remera
+        para guardarla acá y encontrarla rápido después.
+      </p>
+      <button
+        type="button"
+        (click)="clearAllFilters()"
+        class="mt-8 min-h-12 bg-[#0b0b0b] px-6 font-semibold text-[#f4f4f0] hover:bg-[#d9182b]"
+      >
+        Ver la colección
+      </button>
     </section>
   } @else {
     <section class="mt-8 bg-[#0b0b0b] px-5 py-20 text-[#f4f4f0] md:px-10" aria-labelledby="empty-title">

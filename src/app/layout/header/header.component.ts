@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   afterNextRender,
+  computed,
   effect,
   inject,
   Injector,
@@ -12,6 +13,7 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
+import { WishlistService } from '../../core/services/wishlist.service';
 
 @Component({
   selector: 'app-header',
@@ -74,6 +76,20 @@ import { CartService } from '../../core/services/cart.service';
             El estudio
           </a>
           <a
+            routerLink="/products"
+            [queryParams]="{ favoritas: 1 }"
+            [attr.aria-label]="favoritesLabel()"
+            class="flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
+          >
+            <i
+              [class]="wishlistService.totalItems() > 0 ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'"
+              aria-hidden="true"
+            ></i>
+            @if (wishlistService.totalItems() > 0) {
+              <span class="tabular-nums" aria-hidden="true">{{ wishlistService.totalItems() }}</span>
+            }
+          </a>
+          <a
             routerLink="/cart"
             routerLinkActive="bg-[#d9182b]"
             ariaCurrentWhenActive="page"
@@ -92,16 +108,33 @@ import { CartService } from '../../core/services/cart.service';
           </a>
         </div>
 
-        <button
-          #menuToggle
-          type="button"
-          class="min-h-11 min-w-14 text-right font-semibold md:hidden"
-          (click)="toggleMenu()"
-          [attr.aria-expanded]="mobileMenuOpen()"
-          aria-controls="mobile-navigation"
-        >
-          {{ mobileMenuOpen() ? 'Cerrar' : 'Menú' }}
-        </button>
+        <div class="flex items-center gap-2 md:hidden">
+          <a
+            routerLink="/products"
+            [queryParams]="{ favoritas: 1 }"
+            [attr.aria-label]="favoritesLabel()"
+            (click)="closeMenu()"
+            class="flex min-h-11 min-w-11 items-center justify-center gap-1 font-semibold"
+          >
+            <i
+              [class]="wishlistService.totalItems() > 0 ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'"
+              aria-hidden="true"
+            ></i>
+            @if (wishlistService.totalItems() > 0) {
+              <span class="text-sm tabular-nums" aria-hidden="true">{{ wishlistService.totalItems() }}</span>
+            }
+          </a>
+          <button
+            #menuToggle
+            type="button"
+            class="min-h-11 min-w-14 text-right font-semibold"
+            (click)="toggleMenu()"
+            [attr.aria-expanded]="mobileMenuOpen()"
+            aria-controls="mobile-navigation"
+          >
+            {{ mobileMenuOpen() ? 'Cerrar' : 'Menú' }}
+          </button>
+        </div>
       </nav>
 
       @if (mobileMenuOpen()) {
@@ -166,7 +199,13 @@ import { CartService } from '../../core/services/cart.service';
 })
 export class HeaderComponent {
   cartService = inject(CartService);
+  wishlistService = inject(WishlistService);
   mobileMenuOpen = signal(false);
+
+  favoritesLabel = computed(() => {
+    const count = this.wishlistService.totalItems();
+    return count === 0 ? 'Favoritas' : `Favoritas, ${count} ${count === 1 ? 'guardada' : 'guardadas'}`;
+  });
   badgeAnimating = signal(false);
 
   private document = inject(DOCUMENT);

@@ -9,6 +9,7 @@ const WISHLIST_STORAGE_KEY = 'lm-studio-wishlist';
 export class WishlistService {
   private items = signal<string[]>(this.loadFromStorage());
 
+  readonly ids = this.items.asReadonly();
   totalItems = computed(() => this.items().length);
 
   isInWishlist(productId: string): boolean {

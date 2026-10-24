@@ -11,13 +11,16 @@ import {
   signal,
   untracked
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { WishlistService } from '../../core/services/wishlist.service';
 import { FormsModule } from '@angular/forms';
 import { ProductService, ProductSort } from '../../core/services/product.service';
 import { getColorHex } from '../../core/constants/colors.constants';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 
 const PAGE_SIZE = 12;
+const FILTERS_SYNC_STATE = 'filtersSync';
 
 const SORT_OPTIONS: { value: ProductSort; label: string }[] = [
   { value: 'nuevos', label: 'Más nuevas' },
@@ -39,20 +42,26 @@ export class ProductsComponent {
   private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private injector = inject(Injector);
 
-  // El estado inicial sale de la URL, así los filtros se pueden compartir y sobreviven al botón "atrás"
-  private initialParams = this.route.snapshot.queryParamMap;
+  private wishlistService = inject(WishlistService);
 
   readonly sortOptions = SORT_OPTIONS;
   readonly getColorHex = getColorHex;
 
-  searchTerm = signal(this.initialParams.get('q') ?? '');
-  selectedCollection = signal<string | null>(this.initialParams.get('coleccion'));
-  selectedSizes = signal<string[]>(splitParam(this.initialParams.get('talle')));
-  selectedColors = signal<string[]>(splitParam(this.initialParams.get('color')));
-  minPrice = signal<number | null>(toNumber(this.initialParams.get('min')));
-  maxPrice = signal<number | null>(toNumber(this.initialParams.get('max')));
-  sort = signal<ProductSort>(toSort(this.initialParams.get('orden')));
+  // Los filtros viven en la URL (ver constructor): se pueden compartir y sobreviven al botón "atrás"
+  searchTerm = signal('');
+  selectedCollection = signal<string | null>(null);
+  onlyFavorites = signal(false);
+  selectedSizes = signal<string[]>([], { equal: sameItems });
+  selectedColors = signal<string[]>([], { equal: sameItems });
+  minPrice = signal<number | null>(null);
+  maxPrice = signal<number | null>(null);
+  sort = signal<ProductSort>('nuevos');
   filtersOpen = signal(false);
+
+  favoritesCount = this.wishlistService.totalItems;
+  showCollectionBar = computed(() =>
+    this.collections().length > 0 || this.favoritesCount() > 0 || this.onlyFavorites()
+  );
 
   isLoading = this.productService.isLoading;
   collections = this.productService.collections;
@@ -75,11 +84,14 @@ export class ProductsComponent {
   );
 
   hasActiveFilters = computed(() =>
-    this.activeFilterCount() > 0 || this.searchTerm().trim() !== '' || this.selectedCollection() !== null
+    this.activeFilterCount() > 0 ||
+    this.searchTerm().trim() !== '' ||
+    this.selectedCollection() !== null ||
+    this.onlyFavorites()
   );
 
-  filteredProducts = computed(() =>
-    this.productService.getProductsByFilters({
+  filteredProducts = computed(() => {
+    const products = this.productService.getProductsByFilters({
       search: this.searchTerm(),
       collection: this.selectedCollection(),
       sizes: this.selectedSizes(),
@@ -87,8 +99,11 @@ export class ProductsComponent {
       minPrice: this.minPrice(),
       maxPrice: this.maxPrice(),
       sort: this.sort()
-    })
-  );
+    });
+    if (!this.onlyFavorites()) return products;
+    const favorites = this.wishlistService.ids();
+    return products.filter(product => favorites.includes(product.id));
+  });
 
   // Vuelve a la primera página cada vez que cambian los resultados
   visibleCount = linkedSignal({ source: this.filteredProducts, computation: () => PAGE_SIZE });
@@ -96,22 +111,54 @@ export class ProductsComponent {
   remainingCount = computed(() => Math.max(0, this.filteredProducts().length - this.visibleCount()));
 
   constructor() {
+    // URL → filtros. Se escucha siempre (no solo al entrar) porque el corazón del encabezado
+    // navega a /products?favoritas=1 aunque ya estemos en esta página
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(params => {
+      // Ignorar las navegaciones que hace este mismo componente: si llegaran tarde
+      // (p. ej. mientras se tipea en el buscador) pisarían lo último que se escribió
+      if (this.router.currentNavigation()?.extras.state?.[FILTERS_SYNC_STATE]) return;
+      this.searchTerm.set(params.get('q') ?? '');
+      this.selectedCollection.set(params.get('coleccion'));
+      this.onlyFavorites.set(params.get('favoritas') === '1');
+      this.selectedSizes.set(splitParam(params.get('talle')));
+      this.selectedColors.set(splitParam(params.get('color')));
+      this.minPrice.set(toNumber(params.get('min')));
+      this.maxPrice.set(toNumber(params.get('max')));
+      this.sort.set(toSort(params.get('orden')));
+    });
+
+    // Filtros → URL
     effect(() => {
       const queryParams = {
         q: this.searchTerm().trim() || null,
         coleccion: this.selectedCollection(),
+        favoritas: this.onlyFavorites() ? 1 : null,
         talle: this.selectedSizes().join(',') || null,
         color: this.selectedColors().join(',') || null,
         min: this.minPrice(),
         max: this.maxPrice(),
         orden: this.sort() === 'nuevos' ? null : this.sort()
       };
-      untracked(() => this.router.navigate([], { relativeTo: this.route, queryParams, replaceUrl: true }));
+      untracked(() =>
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams,
+          replaceUrl: true,
+          state: { [FILTERS_SYNC_STATE]: true }
+        })
+      );
     });
   }
 
+  // Colecciones y favoritas funcionan como pestañas: se elige una sola vista a la vez
   selectCollection(slug: string | null): void {
     this.selectedCollection.set(slug);
+    this.onlyFavorites.set(false);
+  }
+
+  showFavorites(): void {
+    this.selectedCollection.set(null);
+    this.onlyFavorites.set(true);
   }
 
   toggleSize(size: string): void {
@@ -151,11 +198,16 @@ export class ProductsComponent {
   clearAllFilters(): void {
     this.searchTerm.set('');
     this.selectedCollection.set(null);
+    this.onlyFavorites.set(false);
     this.selectedSizes.set([]);
     this.selectedColors.set([]);
     this.minPrice.set(null);
     this.maxPrice.set(null);
   }
+}
+
+function sameItems(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((item, index) => item === b[index]);
 }
 
 function splitParam(value: string | null): string[] {
