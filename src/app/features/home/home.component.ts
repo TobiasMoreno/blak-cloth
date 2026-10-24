@@ -83,11 +83,12 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           </p>
         </div>
 
+        @if (selectedProduct(); as selected) {
         <div class="grid min-h-[78svh] bg-[#e7e7e1] lg:grid-cols-2">
           <div class="relative min-h-[52svh] overflow-hidden bg-[#d5d5ce] lg:min-h-full">
             <img
-              [ngSrc]="selectedProduct().images[0]"
-              [alt]="selectedProduct().name + ', frente y espalda'"
+              [ngSrc]="selected.images[0]"
+              [alt]="selected.name + ', frente y espalda'"
               width="1920"
               height="1200"
               class="h-full w-full object-cover"
@@ -100,7 +101,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
               role="tablist"
               aria-label="Diseños destacados"
             >
-              @for (product of featuredProducts; track product.id; let index = $index) {
+              @for (product of featuredProducts(); track product.id; let index = $index) {
                 <button
                   type="button"
                   role="tab"
@@ -119,10 +120,10 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 
             <div class="my-16 max-w-lg lg:my-8">
               <h3 class="text-5xl font-black uppercase leading-[0.9] md:text-7xl">
-                {{ selectedProduct().name }}
+                {{ selected.name }}
               </h3>
               <p class="mt-8 max-w-[38ch] text-lg leading-relaxed text-[#555550]">
-                {{ selectedProduct().description }}
+                {{ selected.description }}
               </p>
             </div>
 
@@ -130,10 +131,10 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
               <p
                 class="flex min-h-16 items-center bg-[#d6d6cf] px-5 text-xl font-semibold tabular-nums"
               >
-                {{ selectedProduct().price | currencyArs }}
+                {{ selected.price | currencyArs }}
               </p>
               <a
-                [routerLink]="['/product', selectedProduct().id]"
+                [routerLink]="['/product', selected.id]"
                 class="flex min-h-16 items-center justify-between bg-[#0b0b0b] px-5 font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#d9182b]"
               >
                 Ver esta remera
@@ -142,6 +143,9 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
             </div>
           </div>
         </div>
+        } @else {
+          <div class="min-h-[78svh] bg-[#e7e7e1]" role="status" aria-label="Cargando diseños destacados"></div>
+        }
       </section>
 
       <section
@@ -298,8 +302,6 @@ export class HomeComponent {
   private productService = inject(ProductService);
 
   activeDesign = signal(0);
-  featuredProducts = this.productService
-    .getAllProducts()
-    .filter((product) => ['003', '006', '007'].includes(product.id));
-  selectedProduct = computed(() => this.featuredProducts[this.activeDesign()]);
+  featuredProducts = this.productService.featuredProducts;
+  selectedProduct = computed(() => this.featuredProducts()[this.activeDesign()]);
 }

@@ -18,8 +18,9 @@ export class ProductsComponent {
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
 
-  availableSizes = signal<string[]>(this.productService.getAllSizes());
-  availableColors = signal<string[]>(this.productService.getAllColors());
+  isLoading = this.productService.isLoading;
+  availableSizes = this.productService.allSizes;
+  availableColors = this.productService.allColors;
 
   hasActiveFilters = computed(() => {
     return this.selectedSizes().length > 0 ||

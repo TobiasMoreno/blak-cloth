@@ -3,7 +3,7 @@
   "collection": "",
   "price": 30000,
   "createdAt": "2026-10-22",
-  "featured": false,
+  "featured": true,
   "description": "Diseño limpio y minimalista. Ideal para combinar con cualquier outfit.",
   "images": {
     "mockup": "mockup.jpeg"

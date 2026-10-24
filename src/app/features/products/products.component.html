@@ -109,7 +109,13 @@
     </div>
   </section>
 
-  @if (filteredProducts().length > 0) {
+  @if (isLoading()) {
+    <div class="mt-20 grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Cargando productos">
+      @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
+        <div class="aspect-[4/3] bg-[#e7e7e1]"></div>
+      }
+    </div>
+  } @else if (filteredProducts().length > 0) {
     <section class="mt-20" aria-labelledby="results-title">
       <div class="mb-10 flex items-end justify-between gap-4">
         <h2 id="results-title" class="text-5xl font-black uppercase md:text-7xl">Todos los diseños</h2>

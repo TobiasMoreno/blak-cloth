@@ -242,6 +242,8 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
           }
         </div>
       </div>
+    } @else if (isLoading()) {
+      <div class="min-h-[100svh] bg-[#f4f4f0]" role="status" aria-label="Cargando remera"></div>
     } @else {
       <div class="flex min-h-[70svh] items-center bg-[#0b0b0b] px-4 text-[#f4f4f0] md:px-8">
         <div>
@@ -261,7 +263,11 @@ export class ProductDetailComponent {
   private cartService = inject(CartService);
   private messageService = inject(MessageService);
 
-  product = signal<Product | null>(null);
+  private productId = this.route.snapshot.paramMap.get('id');
+  isLoading = this.productService.isLoading;
+  product = computed<Product | null>(() =>
+    this.productId ? this.productService.getProductById(this.productId) ?? null : null
+  );
   selectedSize = signal<string | null>(null);
   selectedColor = signal<string | null>(null);
   quantity = signal<number>(1);
@@ -300,16 +306,6 @@ export class ProductDetailComponent {
   canAddSelectedQuantity = computed(() => {
     return this.quantity() <= this.availableQuantity();
   });
-
-  constructor() {
-    const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      const foundProduct = this.productService.getProductById(productId);
-      if (foundProduct) {
-        this.product.set(foundProduct);
-      }
-    }
-  }
 
   addToCart(): void {
     if (!this.canAddToCart()) {
