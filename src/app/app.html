@@ -8,10 +8,14 @@
   @if (isNavigating()) {
     <div class="route-progress-bar" role="progressbar" aria-label="Cargando página"></div>
   }
-  <app-header />
+  @if (!isManagementRoute()) {
+    <app-header />
+  }
   <main id="main-content" tabindex="-1" class="min-h-[100svh] bg-[#f4f4f0]">
     <router-outlet />
   </main>
-  <app-footer />
+  @if (!isManagementRoute()) {
+    <app-footer />
+  }
   <app-toast />
 </div>

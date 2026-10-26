@@ -44,3 +44,8 @@ Thumbs.db
 
 # Catálogo generado por scripts/build-catalog.mjs
 /public/data/products.json
+.taste-skill
+
+
+# Credenciales de Google Drive (se generan en Netlify con scripts/build-drive-config.mjs)
+/public/config/google-drive.json
