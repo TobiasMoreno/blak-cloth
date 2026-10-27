@@ -264,7 +264,7 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
               <div class="mt-10 border-t border-[#d6d6cf] pt-6">
                 <app-share-buttons
                   [path]="'/product/' + productData.id"
-                  [title]="productData.name + ' · BLAK CLOTH'"
+                  [title]="productData.name + ' · BLAK Streetwear'"
                   [text]="'Mirá esta remera: ' + productData.name" />
               </div>
             </div>
@@ -405,7 +405,7 @@ export class ProductDetailComponent {
     effect(() => {
       const productData = this.product();
       if (!productData) return;
-      this.title.setTitle(`${productData.name} · BLAK CLOTH`);
+      this.title.setTitle(`${productData.name} · BLAK`);
       this.meta.updateTag({ name: 'description', content: productData.description || defaultDescription });
     });
     inject(DestroyRef).onDestroy(() => this.meta.updateTag({ name: 'description', content: defaultDescription }));

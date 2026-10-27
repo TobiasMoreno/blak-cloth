@@ -5,7 +5,7 @@ import { CartComponent } from './cart.component';
 export const cartRoutes: Route[] = [
   {
     path: '',
-    title: 'Carrito · BLAK CLOTH',
+    title: 'Carrito · BLAK',
     component: CartComponent,
     providers: [provideRoutePrimeNG()]
   }

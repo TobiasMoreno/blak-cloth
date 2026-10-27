@@ -13,9 +13,9 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
     >
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p class="font-semibold">BLAK CLOTH</p>
+          <p class="font-semibold">BLAK</p>
           <p class="mt-3 max-w-64 leading-relaxed text-[#b8b8b2]">
-            Colección de autor y remeras de algodón para equipos amateurs.
+            Streetwear de autor y remeras personalizadas para equipos.
           </p>
         </div>
 
@@ -65,12 +65,12 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
       <div class="pt-24">
         <img
           ngSrc="images/brand/blak-logo-white.svg"
-          alt="BLAK CLOTH"
+          alt="BLAK"
           width="590"
           height="144"
           class="h-auto w-full max-w-[36rem]"
         />
-        <p class="mt-8 text-sm text-[#b8b8b2]">© {{ currentYear }} BLAK CLOTH</p>
+        <p class="mt-8 text-sm text-[#b8b8b2]">© {{ currentYear }} BLAK</p>
       </div>
     </footer>
   `,

@@ -1,7 +1,7 @@
 # Google Drive para Costos y Cotizador
 
 La sección `/gestion` guarda un único archivo `blak-costos.json` dentro de una carpeta visible
-`BLAK CLOTH` en Google Drive. El archivo no contiene credenciales y solo resulta accesible para las
+`BLAK` en Google Drive. El archivo no contiene credenciales y solo resulta accesible para las
 cuentas con las que se comparta.
 
 ## Configuración de Google Cloud
@@ -33,7 +33,7 @@ navegador. No agregar un `client_secret`, tokens de acceso ni contraseñas al re
 ## Primer uso con dos personas
 
 1. La primera persona entra a `/gestion`, conecta su cuenta y crea el espacio de trabajo.
-2. Desde el enlace **Abrir carpeta en Drive**, comparte la carpeta `BLAK CLOTH` con permiso de editor.
+2. Desde el enlace **Abrir carpeta en Drive**, comparte la carpeta `BLAK` con permiso de editor.
 3. La segunda persona entra con su cuenta, elige **Vincular archivo compartido** y selecciona
    `blak-costos.json`.
 4. En los siguientes accesos la aplicación encuentra ese archivo automáticamente para cada cuenta.

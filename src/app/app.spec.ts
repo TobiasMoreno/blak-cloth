@@ -21,7 +21,7 @@ describe('App', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    const homeLink = compiled.querySelector('header a[aria-label="BLAK CLOTH, inicio"]');
+    const homeLink = compiled.querySelector('header a[aria-label="BLAK, inicio"]');
     expect(homeLink?.querySelector('img')?.getAttribute('src')).toContain('blak-logo-black.svg');
     expect(compiled.querySelector('main')).toBeTruthy();
   });

@@ -28,11 +28,6 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
               class="h-auto w-[calc(100vw-2rem)] max-w-[52rem] md:w-[44vw]"
             />
           </span>
-          <span
-            class="monument-enter-right absolute bottom-3 right-4 text-[clamp(5.4rem,14vw,14rem)] md:bottom-0 md:right-8"
-          >
-            Cloth
-          </span>
         </h1>
 
         <div
@@ -40,7 +35,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
         >
           <img
             ngSrc="products/the-rose-system/mockup.jpeg"
-            alt="Remeras The Rose System de BLAK CLOTH, frente y espalda"
+            alt="Remeras The Rose System de BLAK, frente y espalda"
             width="1920"
             height="1200"
             priority
@@ -52,7 +47,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           class="absolute left-4 top-[64%] z-30 max-w-[17rem] md:left-8 md:top-[40%] md:max-w-sm"
         >
           <p class="text-lg leading-snug text-[#f4f4f0] md:text-xl">
-            Remeras de autor con gráfica urbana, creadas en Córdoba para vestir una idea propia.
+            Streetwear de autor creado en Córdoba para vestir una idea propia.
           </p>
           <a
             routerLink="/products"
@@ -244,7 +239,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
             <article class="section-rise min-h-[70svh]">
               <img
                 ngSrc="products/medusa/mockup.jpeg"
-                alt="Remera negra Medusa de BLAK CLOTH"
+                alt="Remera negra Medusa de BLAK"
                 width="1920"
                 height="1200"
                 class="aspect-[4/3] w-full object-cover"
@@ -272,7 +267,7 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
             <article class="section-rise min-h-[60svh]">
               <img
                 ngSrc="products/take-control/mockup.jpeg"
-                alt="Remera negra Take Control de BLAK CLOTH"
+                alt="Remera negra Take Control de BLAK"
                 width="1200"
                 height="800"
                 class="aspect-[4/3] w-full object-cover"

@@ -4,7 +4,7 @@ import { HomeComponent } from './home.component';
 export const homeRoutes: Route[] = [
   {
     path: '',
-    title: 'BLAK CLOTH · Remeras Artísticas',
+    title: 'BLAK · Remeras de autor',
     component: HomeComponent
   }
 ];

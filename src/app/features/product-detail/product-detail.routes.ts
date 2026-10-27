@@ -5,7 +5,7 @@ import { ProductDetailComponent } from './product-detail.component';
 export const productDetailRoutes: Route[] = [
   {
     path: ':id',
-    title: 'Remera · BLAK CLOTH',
+    title: 'Remera · BLAK',
     component: ProductDetailComponent,
     providers: [provideRoutePrimeNG()]
   }

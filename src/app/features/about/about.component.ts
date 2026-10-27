@@ -17,7 +17,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
         </p>
         <img
           ngSrc="products/blak-minimal-series-001/mockup.jpeg"
-          alt="Remera verde Blak Minimal Series de BLAK CLOTH"
+          alt="Remera verde Blak Minimal Series de BLAK"
           width="1920"
           height="1200"
           priority
@@ -32,7 +32,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
           </h2>
           <div class="md:col-span-6 md:col-start-7">
             <p class="text-2xl leading-snug md:text-4xl">
-              BLAK CLOTH nace de la pasión por el arte y el diseño urbano. Cada remera empieza con una imagen que merece salir del papel.
+              BLAK nace de la pasión por el arte, la gráfica y la cultura urbana. Cada remera empieza con una imagen que merece salir del papel.
             </p>
             <p class="mt-10 max-w-[52ch] text-lg leading-relaxed text-[#555550]">
               Trabajamos para personas que buscan algo distinto, auténtico y con identidad propia. No diseñamos una prenda para completar un catálogo: construimos una composición que se sostiene por sí misma y después la llevamos al algodón.
@@ -83,7 +83,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
         target="_blank"
         rel="noopener noreferrer"
         class="group relative block min-h-[50svh] overflow-hidden bg-[#d9182b] px-4 py-8 text-white transition-colors duration-200 hover:bg-[#0b0b0b] md:px-8"
-        aria-label="Conversar con BLAK CLOTH por WhatsApp"
+        aria-label="Conversar con BLAK por WhatsApp"
       >
         <p class="max-w-sm text-lg leading-relaxed">¿Querés saber algo antes de elegir?</p>
         <span aria-hidden="true" class="absolute right-4 top-6 text-5xl md:right-8">↗</span>
@@ -95,5 +95,5 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
   `
 })
 export class AboutComponent {
-  whatsappUrl = getWhatsAppUrl('Hola! Me gustaría conocer más sobre BLAK CLOTH.');
+  whatsappUrl = getWhatsAppUrl('Hola! Me gustaría conocer más sobre BLAK.');
 }

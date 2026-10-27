@@ -30,13 +30,13 @@ import { WishlistService } from '../../core/services/wishlist.service';
       (keydown.shift.tab)="trapFocus($event)"
     >
       <nav
-        class="flex min-h-16 items-center justify-between px-4 md:px-8"
+        class="flex min-h-16 items-center justify-between px-4 md:grid md:grid-cols-[1fr_auto_1fr] md:px-8"
         aria-label="Navegación principal"
       >
         <a
           routerLink="/"
-          class="flex min-h-11 items-center transition-opacity duration-200 hover:opacity-70"
-          aria-label="BLAK CLOTH, inicio"
+          class="flex min-h-11 items-center transition-opacity duration-200 hover:opacity-70 md:justify-self-start"
+          aria-label="BLAK, inicio"
         >
           <img
             ngSrc="images/brand/blak-logo-black.svg"
@@ -48,7 +48,7 @@ import { WishlistService } from '../../core/services/wishlist.service';
           />
         </a>
 
-        <div class="hidden items-center gap-8 md:flex">
+        <div class="hidden items-center gap-8 md:flex md:justify-self-center">
           <a
             routerLink="/"
             routerLinkActive="text-[#d9182b]"
@@ -82,6 +82,9 @@ import { WishlistService } from '../../core/services/wishlist.service';
           >
             El estudio
           </a>
+        </div>
+
+        <div class="hidden items-center gap-2 md:flex md:justify-self-end">
           <a
             routerLink="/products"
             [queryParams]="{ favoritas: 1 }"

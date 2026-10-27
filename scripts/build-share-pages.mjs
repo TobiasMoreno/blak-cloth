@@ -8,7 +8,8 @@ const DIST = 'dist/lm-studio/browser';
 // Netlify define URL con la dirección del sitio durante el build
 const SITE_URL = (process.env.URL ?? 'http://localhost:4200').replace(/\/$/, '');
 const ON_NETLIFY = Boolean(process.env.NETLIFY);
-const SITE_NAME = 'BLAK CLOTH';
+const SITE_NAME = 'BLAK Streetwear';
+const TAB_BRAND_NAME = 'BLAK';
 
 const template = readFileSync(join(DIST, 'index.html'), 'utf8');
 const products = JSON.parse(readFileSync(join(DIST, 'data/products.json'), 'utf8'));
@@ -61,7 +62,7 @@ for (const product of products) {
   const path = `/product/${product.slug}`;
 
   const html = renderPage({
-    title: `${product.name} · ${SITE_NAME}`,
+    title: `${product.name} · ${TAB_BRAND_NAME}`,
     description: [details, product.description].filter(Boolean).join(' — '),
     url: SITE_URL + path,
     image: shareImageUrl(image),

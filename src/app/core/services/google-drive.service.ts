@@ -111,7 +111,7 @@ export class GoogleDriveService {
 
   async createWorkspace(initialContent: unknown): Promise<LoadedDriveWorkspace> {
     const folder = await this.createFileMetadata({
-      name: 'BLAK CLOTH',
+      name: 'BLAK',
       mimeType: 'application/vnd.google-apps.folder',
       appProperties: { [FOLDER_PROPERTY_KEY]: FOLDER_PROPERTY_VALUE },
     });
