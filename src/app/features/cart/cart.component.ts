@@ -34,7 +34,7 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'lm-studio-delivery-address';
   template: `
     <div class="min-h-[100svh] bg-[#f4f4f0] px-4 py-14 md:px-8 md:py-20">
       <div>
-        <h1 class="max-w-[8ch] text-7xl font-black uppercase leading-[0.82] md:text-[clamp(7rem,15vw,15rem)]">Tu carrito</h1>
+        <h1 class="max-w-[8ch] text-7xl font-black uppercase leading-[0.82] ">Tu carrito</h1>
 
         @if (cartService.isEmpty()) {
           <div class="mt-16 bg-[#0b0b0b] px-5 py-20 text-[#f4f4f0] md:px-10">
