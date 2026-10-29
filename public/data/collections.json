@@ -4,6 +4,11 @@
       "name": "Blak Minimal Series",
       "slug": "blak-minimal-series",
       "description": "Diseños limpios y minimalistas."
+    },
+    {
+      "name": "Anime",
+      "slug": "anime",
+      "description": "anime"
     }
   ]
 }
