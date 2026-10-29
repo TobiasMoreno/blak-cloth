@@ -12,66 +12,53 @@ import { ClothesRackComponent } from './clothes-rack.component';
   template: `
     <div class="overflow-clip bg-[#f4f4f0]">
       <section
-        class="relative min-h-[calc(100svh-4rem)] overflow-hidden bg-[#0b0b0b] text-[#f4f4f0]"
+        class="flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-[#0b0b0b] text-[#f4f4f0]"
         aria-labelledby="home-title"
       >
-        <h1
-          id="home-title"
-          class="pointer-events-none absolute inset-0 z-20 font-display font-black uppercase leading-[0.78]"
-        >
-          <span class="monument-enter-left absolute left-4 top-6 md:left-8 md:top-8">
+        <h1 id="home-title" class="px-4 pt-5 md:px-8 md:pt-8">
+          <span class="monument-enter-left block">
             <img
               ngSrc="images/brand/blak-logo-white.svg"
               alt="BLAK"
               width="590"
               height="144"
               priority
-              class="h-auto w-[calc(100vw-2rem)] max-w-[52rem] md:w-[44vw]"
+              class="h-auto w-[calc(100vw-2rem)] max-w-[52rem] md:w-[38vw]"
             />
           </span>
         </h1>
 
-        <div
-          class="picture-open absolute inset-x-4 top-[20%] h-[41%] overflow-hidden bg-[#252525] md:inset-y-0 md:left-auto md:right-0 md:top-0 md:h-[72%] md:w-[47%]"
-        >
-          <img
-            ngSrc="products/the-rose-system/mockup.jpeg"
-            alt="Remeras The Rose System de BLAK, frente y espalda"
-            width="1920"
-            height="1200"
-            priority
-            class="product-drift h-full w-full object-cover object-center"
-          />
-        </div>
+        <!-- El perchero ocupa el espacio libre del hero y queda centrado en él -->
+        <app-clothes-rack class="flex flex-1 flex-col justify-center py-6 md:py-8" />
 
         <div
-          class="absolute left-4 top-[64%] z-30 max-w-[17rem] md:left-8 md:top-[40%] md:max-w-sm"
+          class="flex flex-col gap-6 px-4 pb-6 md:flex-row md:items-end md:justify-between md:px-8 md:pb-8"
         >
-          <p class="text-lg leading-snug text-[#f4f4f0] md:text-xl">
-            Streetwear de autor creado en Córdoba para vestir una idea propia.
+          <div class="max-w-sm">
+            <p class="text-lg leading-snug text-[#f4f4f0] md:text-xl">
+              Streetwear de autor creado en Córdoba para vestir una idea propia.
+            </p>
+            <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
+              <a
+                routerLink="/products"
+                class="inline-flex min-h-12 items-center bg-[#d9182b] px-6 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425]"
+              >
+                Ver colección
+              </a>
+              <a
+                routerLink="/equipos"
+                class="flex min-h-11 w-fit items-center whitespace-nowrap text-sm font-semibold text-[#f4f4f0] underline decoration-[#d9182b] decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#d9182b]"
+              >
+                Remeras para tu equipo →
+              </a>
+            </div>
+          </div>
+
+          <p class="hidden max-w-52 text-sm leading-relaxed text-[#b8b8b2] md:block md:text-right">
+            {{ designCountLabel() }}. Algodón. Compra coordinada por WhatsApp.
           </p>
-          <a
-            routerLink="/products"
-            class="mt-6 inline-flex min-h-12 items-center bg-[#d9182b] px-6 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425]"
-          >
-            Ver colección
-          </a>
-          <a
-            routerLink="/equipos"
-            class="mt-2 flex min-h-11 w-fit items-center whitespace-nowrap text-sm font-semibold text-[#f4f4f0] underline decoration-[#d9182b] decoration-2 underline-offset-4 transition-colors duration-200 hover:text-[#d9182b]"
-          >
-            Remeras para tu equipo →
-          </a>
         </div>
-
-        <p
-          class="absolute bottom-6 left-4 z-30 hidden max-w-52 text-sm leading-relaxed text-[#b8b8b2] md:left-8 md:block"
-        >
-          {{ designCountLabel() }}. Algodón. Compra coordinada por WhatsApp.
-        </p>
       </section>
-
-      <app-clothes-rack />
 
       <section class="section-rise px-4 py-24 md:px-8 md:py-36" aria-labelledby="drop-title">
         <div class="mb-12 grid gap-8 md:grid-cols-12 md:items-end">

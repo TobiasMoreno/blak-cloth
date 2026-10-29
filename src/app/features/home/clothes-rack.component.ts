@@ -17,48 +17,40 @@ import { ProductService } from '../../core/services/product.service';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 
 const DRAG_THRESHOLD = 6;
+const PRIORITY_IMAGES = 6;
 
 @Component({
   selector: 'app-clothes-rack',
   imports: [RouterLink, NgOptimizedImage, CurrencyArsPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section
-      class="bg-[#0b0b0b] pt-16 pb-20 text-[#f4f4f0] md:pt-24 md:pb-28"
-      aria-labelledby="rack-title"
+    <div
+      class="relative text-[#f4f4f0]"
+      role="region"
       aria-roledescription="carrusel"
+      aria-label="Perchero de remeras"
     >
-      <div class="mb-10 flex flex-wrap items-end justify-between gap-6 px-4 md:px-8">
-        <div>
-          <h2 id="rack-title" class="text-5xl font-black uppercase leading-[0.88] md:text-7xl">
-            El perchero
-          </h2>
-          <p class="mt-4 max-w-xs text-[#b8b8b2]">Pasá por las remeras y elegí la que te llame.</p>
-        </div>
-
-        <div class="flex gap-2">
-          <button
-            type="button"
-            class="rack-arrow"
-            aria-label="Remeras anteriores"
-            aria-controls="rack-track"
-            [disabled]="!canGoPrev()"
-            (click)="prev()"
-          >
-            <span aria-hidden="true">←</span>
-          </button>
-          <button
-            type="button"
-            class="rack-arrow"
-            aria-label="Remeras siguientes"
-            aria-controls="rack-track"
-            [disabled]="!canGoNext()"
-            (click)="next()"
-          >
-            <span aria-hidden="true">→</span>
-          </button>
-        </div>
-      </div>
+      <!-- Flechas a los costados para no sumar alto: el perchero vive dentro del hero -->
+      <button
+        type="button"
+        class="rack-arrow left-2 md:left-4"
+        aria-label="Remeras anteriores"
+        aria-controls="rack-track"
+        [disabled]="!canGoPrev()"
+        (click)="prev()"
+      >
+        <span aria-hidden="true">←</span>
+      </button>
+      <button
+        type="button"
+        class="rack-arrow right-2 md:right-4"
+        aria-label="Remeras siguientes"
+        aria-controls="rack-track"
+        [disabled]="!canGoNext()"
+        (click)="next()"
+      >
+        <span aria-hidden="true">→</span>
+      </button>
 
       <div
         #viewport
@@ -93,7 +85,7 @@ const DRAG_THRESHOLD = 6;
             >
               <a
                 [routerLink]="['/product', product.id]"
-                class="rack-link group block w-44 rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[#d9182b] md:w-56"
+                class="rack-link group block w-36 rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[#d9182b] md:w-52"
                 draggable="false"
                 [attr.tabindex]="slide.isClone ? -1 : null"
                 (click)="onLinkClick($event)"
@@ -102,6 +94,7 @@ const DRAG_THRESHOLD = 6;
                   <svg
                     class="mx-auto block h-16 w-full text-[#9a9a94]"
                     viewBox="0 0 200 64"
+                    preserveAspectRatio="xMidYMin meet"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="5"
@@ -120,7 +113,8 @@ const DRAG_THRESHOLD = 6;
                       alt=""
                       fill
                       draggable="false"
-                      sizes="(max-width: 767px) 11rem, 14rem"
+                      sizes="(max-width: 767px) 9rem, 13rem"
+                      [priority]="slide.priority"
                       class="object-cover object-[22%_center]"
                     />
                   </div>
@@ -138,7 +132,7 @@ const DRAG_THRESHOLD = 6;
               </a>
             </li>
           } @empty {
-            <li class="h-96 w-full" role="status" aria-label="Cargando remeras"></li>
+            <li class="h-80 w-full md:h-96" role="status" aria-label="Cargando remeras"></li>
           }
         </ul>
       </div>
@@ -146,7 +140,7 @@ const DRAG_THRESHOLD = 6;
       @if (products().length > 0) {
         <p class="sr-only" aria-live="polite">{{ positionLabel() }}</p>
       }
-    </section>
+    </div>
   `,
   styles: `
     .rack-viewport {
@@ -168,14 +162,28 @@ const DRAG_THRESHOLD = 6;
       transition: transform 600ms var(--ease-expo);
     }
 
+    /* A la altura del pecho de las remeras */
     .rack-arrow {
+      position: absolute;
+      top: 8.5rem;
+      z-index: 10;
       display: grid;
       place-items: center;
-      width: 3rem;
-      height: 3rem;
+      width: 2.75rem;
+      height: 2.75rem;
       border: 2px solid #f4f4f0;
+      background-color: rgb(11 11 11 / 0.75);
       font-size: 1.25rem;
+      transform: translateY(-50%);
       transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+    }
+
+    @media (min-width: 768px) {
+      .rack-arrow {
+        top: 11rem;
+        width: 3rem;
+        height: 3rem;
+      }
     }
 
     .rack-arrow:not(:disabled):hover {
@@ -279,18 +287,27 @@ export class ClothesRackComponent {
   private swiped = false;
 
   private count = computed(() => this.products().length);
-  // Si entran todas en pantalla no tiene sentido girar
-  private loops = computed(() => this.count() > this.visibleCount());
+  // Con una sola remera no hay nada que girar
+  private loops = computed(() => this.count() > 1);
 
   /**
-   * Con loop se renderizan tres copias seguidas y la posición vive en la del medio;
-   * así siempre hay remeras a ambos lados y el salto de vuelta no se nota.
+   * Con loop se renderizan varias copias seguidas y la posición vive en la segunda (la "real");
+   * así siempre hay remeras a ambos lados y el salto de vuelta no se nota. En pantallas donde
+   * entran todas, se suman copias para que la barra nunca quede vacía a la derecha.
    */
   slides = computed(() => {
     const products = this.products();
-    const copies = this.loops() ? [0, 1, 2] : [1];
+    const count = Math.max(1, this.count());
+    const copyCount = 2 + Math.ceil(this.visibleCount() / count);
+    const copies = this.loops() ? Array.from({ length: copyCount }, (_, copy) => copy) : [1];
     return copies.flatMap(copy =>
-      products.map(product => ({ product, key: `${copy}-${product.id}`, isClone: copy !== 1 }))
+      products.map((product, index) => ({
+        product,
+        key: `${copy}-${product.id}`,
+        isClone: copy !== 1,
+        // Están en la primera pantalla: las que se ven al abrir cargan primero
+        priority: copy === 1 && index < PRIORITY_IMAGES,
+      }))
     );
   });
 
