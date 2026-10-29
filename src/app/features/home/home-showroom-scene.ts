@@ -74,20 +74,23 @@ interface GroupLabel {
  * Medidas del perchero (mundo). La coreografía está verificada por SAT sobre la caja de cada
  * remera (SHIRT_HALF_WIDTH × SHIRT_HALF_THICKNESS):
  * - colgadas de canto a RACK_YAW, paralelas, separadas `spacing`: nunca se tocan;
- * - una remera sale deslizándose por su propio plano (`pull`) y recién gira cuando quedó
- *   delante de todas; varias pueden deslizarse a la vez, pero solo una gira;
+ * - una remera sale hacia adelante con un desplazamiento lateral corto (`pullXRatio`) y recién
+ *   gira cuando quedó delante de todas; varias pueden deslizarse a la vez, pero solo una gira;
  * - las vecinas se abren `spread` en bloque (sin caída), así ningún hueco se achica;
  * - el escenario está por delante de todo y la remera solo gira ahí cuando ya llegó.
  * Si cambiás estos valores, hay que volver a verificar.
  */
 const RAIL_Y = 1;
 const RACK = {
-  spacing: 0.2,
+  // Mantiene la lectura de perchero, pero deja una franja clara para apuntar cada prenda.
+  spacing: 0.3,
   groupGap: 0.55,
   yaw: 1.2,
   pull: 1.3,
+  pullXRatio: -0.15,
   spread: 0.5,
   turnStart: 0.5,
+  pickRadius: 0.38,
 } as const;
 const STAGE_Z = 1.8;
 const DIM_Z = 0.95;
@@ -680,6 +683,9 @@ export class HomeShowroomScene {
     this.raycaster.setFromCamera(this.ndc, this.camera);
     const { origin, direction } = this.raycaster.ray;
     if (Math.abs(direction.z) < 1e-5) return null;
+
+    // Las zonas de selección permanecen en las perchas. Si acompañaran a la prenda que sale
+    // hacia adelante, un puntero quieto terminaría apuntando a la vecina durante la animación.
     const distance = -origin.z / direction.z;
     const x = origin.x + direction.x * distance;
     const y = origin.y + direction.y * distance;
@@ -687,7 +693,7 @@ export class HomeShowroomScene {
 
     const local = x - this.rail.position.x;
     let best: RackItem | null = null;
-    let bestDistance = 0.32;
+    let bestDistance: number = RACK.pickRadius;
     for (const item of this.items) {
       if (!item.active || item.presence < 0.99) continue;
       const gap = Math.abs(item.baseX - local);
@@ -986,8 +992,10 @@ export class HomeShowroomScene {
     const stage = this.stagePose();
     const order = new Map(this.activeItems().map((item, index) => [item, index]));
     const out = this.items.filter((item) => item.pull > 0);
-    const directionX = -Math.cos(RACK.yaw);
-    const directionZ = Math.sin(RACK.yaw);
+    // Casi recto hacia la cámara: el cursor permanece sobre la remera mientras esta sale.
+    // El pequeño sesgo lateral conserva margen con la vecina durante el desplazamiento.
+    const directionX = RACK.pullXRatio;
+    const directionZ = 1;
     const spinSide = this.selected ? this.userYaw : 0;
 
     for (const item of this.items) {
