@@ -1,0 +1,491 @@
+<header class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold">Proveedores</h1>
+    <p class="mt-2 max-w-2xl text-sm leading-6 text-muted">
+      Guardá catálogos, condiciones y precios por cantidad para decidir con el costo completo.
+    </p>
+  </div>
+  <button
+    type="button"
+    class="min-h-11 bg-ink px-4 text-sm font-semibold text-white md:min-h-9"
+    (click)="addSupplier()"
+  >
+    Agregar proveedor
+  </button>
+</header>
+
+<div class="mt-6 flex gap-6 border-b border-rule">
+  <button
+    type="button"
+    class="min-h-11 border-b-2 px-1 text-sm font-semibold md:min-h-10"
+    [class.border-ink]="view() === 'directory'"
+    [class.border-transparent]="view() !== 'directory'"
+    [class.text-muted]="view() !== 'directory'"
+    [attr.aria-pressed]="view() === 'directory'"
+    (click)="setView('directory')"
+  >
+    Directorio
+  </button>
+  <button
+    type="button"
+    class="min-h-11 border-b-2 px-1 text-sm font-semibold md:min-h-10"
+    [class.border-ink]="view() === 'comparison'"
+    [class.border-transparent]="view() !== 'comparison'"
+    [class.text-muted]="view() !== 'comparison'"
+    [attr.aria-pressed]="view() === 'comparison'"
+    (click)="setView('comparison')"
+  >
+    Comparar ofertas
+  </button>
+</div>
+
+@if (view() === 'directory') {
+  @if (store.suppliers().length === 0) {
+    <section class="mt-6 border border-dashed border-field bg-white px-5 py-10 text-center">
+      <h2 class="text-base font-semibold">Todavía no hay proveedores</h2>
+      <p class="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted">
+        Cargá el primero y después agregá sus productos, mínimos y descuentos por cantidad.
+      </p>
+      <button
+        type="button"
+        class="mt-6 min-h-11 bg-ink px-4 text-sm font-semibold text-white"
+        (click)="addSupplier()"
+      >
+        Crear primer proveedor
+      </button>
+    </section>
+  } @else {
+    <div class="mt-6 grid items-start gap-5 xl:grid-cols-[minmax(260px,0.72fr)_minmax(0,1.58fr)]">
+      <section class="bg-white xl:sticky xl:top-8" aria-labelledby="supplier-list-title">
+        <div class="flex items-center justify-between px-4 py-4">
+          <h2 id="supplier-list-title" class="text-base font-semibold">Todos</h2>
+          <span class="text-sm tabular-nums text-muted">{{ store.suppliers().length }}</span>
+        </div>
+        <div>
+          @for (supplier of store.suppliers(); track supplier.id) {
+            <button
+              type="button"
+              class="grid min-h-16 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-paper px-4 py-3 text-left hover:bg-paper"
+              [class.bg-surface]="store.selectedSupplierId() === supplier.id"
+              [attr.aria-pressed]="store.selectedSupplierId() === supplier.id"
+              (click)="selectSupplier(supplier.id)"
+            >
+              <span class="min-w-0">
+                <span class="block truncate text-sm font-semibold">{{ supplier.name }}</span>
+                <span class="mt-1 block truncate text-xs text-muted">
+                  {{ supplier.location || 'Sin ubicación' }}
+                </span>
+              </span>
+              <span class="text-right">
+                <span class="block text-sm font-medium tabular-nums">{{ supplier.offers.length }}</span>
+                <span class="mt-1 block text-xs text-muted">
+                  {{ supplier.offers.length === 1 ? 'oferta' : 'ofertas' }}
+                </span>
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+
+      @if (store.selectedSupplier(); as supplier) {
+        <div class="space-y-5">
+          <section class="bg-white p-4 md:p-5" aria-labelledby="supplier-detail-title">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 id="supplier-detail-title" class="text-base font-semibold">Datos del proveedor</h2>
+                <p class="mt-1 text-xs text-muted">Los cambios quedan listos para guardar en Drive.</p>
+              </div>
+              @if (supplier.catalogUrl) {
+                <a
+                  [href]="supplier.catalogUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex min-h-11 items-center text-sm font-semibold hover:underline md:min-h-9"
+                >
+                  Abrir catálogo
+                </a>
+              }
+            </div>
+
+            <form [formGroup]="supplierForm" class="mt-5 space-y-5">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label for="supplier-name" class="mb-2 block text-sm font-medium">Nombre</label>
+                  <input id="supplier-name" type="text" formControlName="name" autocomplete="organization" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-location" class="mb-2 block text-sm font-medium">Ubicación</label>
+                  <input id="supplier-location" type="text" formControlName="location" autocomplete="address-level1" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-contact" class="mb-2 block text-sm font-medium">Contacto</label>
+                  <input id="supplier-contact" type="text" formControlName="contactName" autocomplete="name" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-phone" class="mb-2 block text-sm font-medium">Teléfono</label>
+                  <input id="supplier-phone" type="tel" formControlName="phone" autocomplete="tel" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-email" class="mb-2 block text-sm font-medium">Email</label>
+                  <input id="supplier-email" type="email" formControlName="email" autocomplete="email" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-instagram" class="mb-2 block text-sm font-medium">Instagram</label>
+                  <input id="supplier-instagram" type="text" formControlName="instagram" autocomplete="off" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-website" class="mb-2 block text-sm font-medium">Sitio web</label>
+                  <input id="supplier-website" type="url" formControlName="website" autocomplete="url" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-catalog" class="mb-2 block text-sm font-medium">Enlace al catálogo</label>
+                  <input id="supplier-catalog" type="url" formControlName="catalogUrl" autocomplete="url" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-lead-time" class="mb-2 block text-sm font-medium">Entrega estimada (días)</label>
+                  <input id="supplier-lead-time" type="number" min="0" step="1" inputmode="numeric" formControlName="leadTimeDays" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                </div>
+                <div>
+                  <label for="supplier-minimum" class="mb-2 block text-sm font-medium">Mínimo general</label>
+                  <input id="supplier-minimum" type="number" min="1" step="1" inputmode="numeric" formControlName="minimumQuantity" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                </div>
+              </div>
+
+              <div>
+                <label for="supplier-payment" class="mb-2 block text-sm font-medium">Condiciones de pago</label>
+                <input id="supplier-payment" type="text" formControlName="paymentTerms" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" placeholder="Ej. transferencia, 50% de seña" />
+              </div>
+
+              <fieldset>
+                <legend class="text-sm font-semibold">Descuentos generales por cantidad</legend>
+                <button type="button" class="mt-2 min-h-11 text-sm font-semibold hover:underline md:min-h-9" (click)="addSupplierPricingRule()">Agregar regla</button>
+                <p class="mt-1 text-xs leading-5 text-muted">Se aplican a las ofertas que usan las condiciones generales del proveedor.</p>
+                <div formArrayName="pricingRules" class="mt-3 space-y-3">
+                  @for (rule of supplierPricingRules.controls; track $index; let i = $index) {
+                    <div [formGroupName]="i" class="grid gap-3 bg-paper p-3 sm:grid-cols-[minmax(90px,0.7fr)_minmax(130px,1fr)_minmax(110px,1fr)_auto] sm:items-end">
+                      <div>
+                        <label [for]="'supplier-rule-quantity-' + i" class="mb-2 block text-xs font-medium text-muted">Desde</label>
+                        <input [id]="'supplier-rule-quantity-' + i" type="number" min="1" step="1" formControlName="minQuantity" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                      </div>
+                      <div>
+                        <label [for]="'supplier-rule-mode-' + i" class="mb-2 block text-xs font-medium text-muted">Tipo</label>
+                        <select [id]="'supplier-rule-mode-' + i" formControlName="mode" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm">
+                          <option value="discount-rate">Descuento %</option>
+                          <option value="unit-price">Precio unitario</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label [for]="'supplier-rule-value-' + i" class="mb-2 block text-xs font-medium text-muted">Valor</label>
+                        <input [id]="'supplier-rule-value-' + i" type="number" min="0" step="0.01" formControlName="value" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                      </div>
+                      <button type="button" class="min-h-11 px-2 text-sm font-semibold text-wine hover:underline md:min-h-10" [attr.aria-label]="'Eliminar regla ' + (i + 1)" (click)="removeSupplierPricingRule(i)">Quitar</button>
+                    </div>
+                  }
+                </div>
+              </fieldset>
+
+              <div>
+                <label for="supplier-notes" class="mb-2 block text-sm font-medium">Observaciones</label>
+                <textarea id="supplier-notes" rows="3" formControlName="notes" class="w-full resize-y border border-field bg-white px-3 py-2 text-base leading-6 md:text-sm"></textarea>
+              </div>
+            </form>
+          </section>
+
+          <section class="bg-white" aria-labelledby="supplier-offers-title">
+            <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-5">
+              <div>
+                <h2 id="supplier-offers-title" class="text-base font-semibold">Productos y cotizaciones</h2>
+                <p class="mt-1 text-xs text-muted">{{ supplier.offers.length }} {{ supplier.offers.length === 1 ? 'oferta' : 'ofertas' }}</p>
+              </div>
+              <button type="button" class="min-h-11 border border-field bg-white px-4 text-sm font-semibold md:min-h-9" (click)="createOffer()">Agregar oferta</button>
+            </div>
+
+            @if (supplier.offers.length === 0) {
+              <p class="border-t border-paper px-5 py-8 text-sm text-muted">Todavía no cargaste productos de este proveedor.</p>
+            } @else {
+              <div class="hidden overflow-x-auto md:block">
+                <table class="w-full table-fixed border-collapse text-sm">
+                  <caption class="sr-only">Ofertas de {{ supplier.name }}</caption>
+                  <thead class="text-xs font-normal text-muted">
+                    <tr>
+                      <th scope="col" class="w-[34%] px-5 py-3 text-left font-normal">Producto</th>
+                      <th scope="col" class="w-[20%] px-3 py-3 text-left font-normal">Variante</th>
+                      <th scope="col" class="w-[18%] px-3 py-3 text-right font-normal">Base</th>
+                      <th scope="col" class="w-[13%] px-3 py-3 text-right font-normal">Mínimo</th>
+                      <th scope="col" class="w-[15%] px-4 py-3 text-right font-normal">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (offer of supplier.offers; track offer.id) {
+                      <tr class="border-t border-paper">
+                        <td class="px-5 py-3 font-medium">{{ offer.productName }}</td>
+                        <td class="truncate px-3 py-3 text-muted">{{ offer.variant || '—' }}</td>
+                        <td class="px-3 py-3 text-right tabular-nums">{{ offer.baseUnitPrice | currencyArs }}</td>
+                        <td class="px-3 py-3 text-right tabular-nums">{{ offer.minimumQuantity }}</td>
+                        <td class="px-4 py-2 text-right">
+                          <button type="button" class="min-h-9 text-sm font-semibold hover:underline" (click)="editOffer(offer)">Editar</button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <div class="md:hidden">
+                @for (offer of supplier.offers; track offer.id) {
+                  <button type="button" class="grid min-h-16 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-paper px-4 py-3 text-left" (click)="editOffer(offer)">
+                    <span class="min-w-0">
+                      <span class="block truncate text-sm font-semibold">{{ offer.productName }}</span>
+                      <span class="mt-1 block truncate text-xs text-muted">{{ offer.variant || offer.category || 'Sin variante' }}</span>
+                    </span>
+                    <span class="text-right">
+                      <span class="block text-sm font-semibold tabular-nums">{{ offer.baseUnitPrice | currencyArs }}</span>
+                      <span class="mt-1 block text-xs text-muted">Mín. {{ offer.minimumQuantity }}</span>
+                    </span>
+                  </button>
+                }
+              </div>
+            }
+
+            @if (offerEditorOpen()) {
+              <form [formGroup]="offerForm" (ngSubmit)="saveOffer()" class="border-t border-rule bg-paper p-4 md:p-5" aria-labelledby="offer-editor-title">
+                <div class="flex items-center justify-between gap-4">
+                  <h3 id="offer-editor-title" class="text-base font-semibold">Detalle de la oferta</h3>
+                  <button type="button" class="min-h-11 text-sm font-semibold hover:underline md:min-h-9" (click)="cancelOffer()">Cerrar</button>
+                </div>
+
+                <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label for="offer-name" class="mb-2 block text-sm font-medium">Producto</label>
+                    <input id="offer-name" type="text" formControlName="productName" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                  </div>
+                  <div>
+                    <label for="offer-category" class="mb-2 block text-sm font-medium">Categoría</label>
+                    <input id="offer-category" type="text" formControlName="category" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" placeholder="Ej. Chombas" />
+                  </div>
+                  <div>
+                    <label for="offer-variant" class="mb-2 block text-sm font-medium">Variante o especificación</label>
+                    <input id="offer-variant" type="text" formControlName="variant" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" placeholder="Ej. piqué 24/1, unisex" />
+                  </div>
+                  <div>
+                    <label for="offer-base-price" class="mb-2 block text-sm font-medium">Precio unitario base</label>
+                    <input id="offer-base-price" type="number" min="0" step="1" inputmode="decimal" formControlName="baseUnitPrice" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                  </div>
+                  <div>
+                    <label for="offer-minimum" class="mb-2 block text-sm font-medium">Pedido mínimo</label>
+                    <input id="offer-minimum" type="number" min="1" step="1" inputmode="numeric" formControlName="minimumQuantity" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                  </div>
+                  <div>
+                    <label for="offer-shipping" class="mb-2 block text-sm font-medium">Envío total estimado</label>
+                    <input id="offer-shipping" type="number" min="0" step="1" inputmode="decimal" formControlName="shippingCost" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                  </div>
+                  <div>
+                    <label for="offer-quoted-at" class="mb-2 block text-sm font-medium">Fecha de cotización</label>
+                    <input id="offer-quoted-at" type="date" formControlName="quotedAt" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                  </div>
+                  <div>
+                    <label for="offer-valid-until" class="mb-2 block text-sm font-medium">Válida hasta</label>
+                    <input id="offer-valid-until" type="date" formControlName="validUntil" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" />
+                  </div>
+                </div>
+
+                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label class="flex min-h-11 items-center gap-3 text-sm font-medium">
+                    <input type="checkbox" formControlName="taxIncluded" class="size-5" />
+                    Impuestos incluidos
+                  </label>
+                  <label class="flex min-h-11 items-center gap-3 text-sm font-medium">
+                    <input type="checkbox" formControlName="useSupplierPricing" class="size-5" />
+                    Usar descuentos generales
+                  </label>
+                </div>
+
+                @if (!offerForm.controls.useSupplierPricing.value) {
+                  <fieldset class="mt-5">
+                    <legend class="text-sm font-semibold">Reglas específicas de esta oferta</legend>
+                    <button type="button" class="mt-2 min-h-11 text-sm font-semibold hover:underline md:min-h-9" (click)="addOfferPricingRule()">Agregar regla</button>
+                    <div formArrayName="pricingRules" class="mt-3 space-y-3">
+                      @for (rule of offerPricingRules.controls; track $index; let i = $index) {
+                        <div [formGroupName]="i" class="grid gap-3 bg-white p-3 sm:grid-cols-[minmax(90px,0.7fr)_minmax(130px,1fr)_minmax(110px,1fr)_auto] sm:items-end">
+                          <div>
+                            <label [for]="'offer-rule-quantity-' + i" class="mb-2 block text-xs font-medium text-muted">Desde</label>
+                            <input [id]="'offer-rule-quantity-' + i" type="number" min="1" step="1" formControlName="minQuantity" class="min-h-11 w-full border border-field px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                          </div>
+                          <div>
+                            <label [for]="'offer-rule-mode-' + i" class="mb-2 block text-xs font-medium text-muted">Tipo</label>
+                            <select [id]="'offer-rule-mode-' + i" formControlName="mode" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm">
+                              <option value="discount-rate">Descuento %</option>
+                              <option value="unit-price">Precio unitario</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label [for]="'offer-rule-value-' + i" class="mb-2 block text-xs font-medium text-muted">Valor</label>
+                            <input [id]="'offer-rule-value-' + i" type="number" min="0" step="0.01" formControlName="value" class="min-h-11 w-full border border-field px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+                          </div>
+                          <button type="button" class="min-h-11 px-2 text-sm font-semibold text-wine hover:underline md:min-h-10" [attr.aria-label]="'Eliminar regla específica ' + (i + 1)" (click)="removeOfferPricingRule(i)">Quitar</button>
+                        </div>
+                      }
+                    </div>
+                  </fieldset>
+                }
+
+                <div class="mt-4">
+                  <label for="offer-notes" class="mb-2 block text-sm font-medium">Observaciones</label>
+                  <textarea id="offer-notes" rows="3" formControlName="notes" class="w-full resize-y border border-field bg-white px-3 py-2 text-base leading-6 md:text-sm"></textarea>
+                </div>
+
+                <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-rule pt-4">
+                  <div>
+                    @if (editingOfferId(); as offerId) {
+                      @if (offerExists(offerId)) {
+                        @if (offerDeleteConfirmationId() === offerId) {
+                          <div class="flex flex-wrap items-center gap-3">
+                            <span class="text-sm font-medium">¿Eliminar esta oferta?</span>
+                            <button type="button" class="min-h-11 bg-wine px-3 text-sm font-semibold text-white" (click)="confirmOfferDelete(offerId)">Eliminar</button>
+                            <button type="button" class="min-h-11 px-3 text-sm font-semibold hover:underline" (click)="cancelOfferDelete()">Cancelar</button>
+                          </div>
+                        } @else {
+                          <button type="button" class="min-h-11 text-sm font-semibold text-wine hover:underline" (click)="requestOfferDelete(offerId)">Eliminar oferta</button>
+                        }
+                      }
+                    }
+                  </div>
+                  <div class="flex gap-3">
+                    <button type="button" class="min-h-11 border border-field bg-white px-4 text-sm font-semibold" (click)="cancelOffer()">Cancelar</button>
+                    <button type="submit" class="min-h-11 bg-ink px-4 text-sm font-semibold text-white">Guardar oferta</button>
+                  </div>
+                </div>
+              </form>
+            }
+          </section>
+
+          <section class="bg-white p-4 md:p-5" aria-labelledby="supplier-delete-title">
+            <h2 id="supplier-delete-title" class="text-base font-semibold">Eliminar proveedor</h2>
+            <p class="mt-2 text-sm leading-6 text-muted">También elimina todas sus ofertas guardadas.</p>
+            @if (supplierDeleteConfirmationOpen()) {
+              <div class="mt-4 flex flex-wrap items-center gap-3">
+                <span class="text-sm font-medium">¿Eliminar {{ supplier.name }}?</span>
+                <button type="button" class="min-h-11 bg-wine px-4 text-sm font-semibold text-white" (click)="confirmSupplierDelete()">Eliminar</button>
+                <button type="button" class="min-h-11 border border-field px-4 text-sm font-semibold" (click)="cancelSupplierDelete()">Cancelar</button>
+              </div>
+            } @else {
+              <button type="button" class="mt-3 min-h-11 text-sm font-semibold text-wine hover:underline" (click)="requestSupplierDelete()">Eliminar proveedor</button>
+            }
+          </section>
+        </div>
+      }
+    </div>
+  }
+} @else {
+  <section class="mt-6" aria-labelledby="comparison-title">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id="comparison-title" class="text-base font-semibold">Comparación por cantidad</h2>
+        <p class="mt-1 max-w-2xl text-sm leading-6 text-muted">Buscá un producto para destacar el mejor costo. La especificación sigue visible para no elegir por precio una prenda distinta.</p>
+      </div>
+      <span class="text-sm tabular-nums text-muted">{{ comparisonRows().length }} {{ comparisonRows().length === 1 ? 'resultado' : 'resultados' }}</span>
+    </div>
+
+    <div class="mt-5 grid gap-4 bg-white p-4 sm:grid-cols-[minmax(0,1fr)_180px] md:p-5">
+      <div>
+        <label for="comparison-query" class="mb-2 block text-sm font-medium">Producto o categoría</label>
+        <input id="comparison-query" type="search" [value]="comparisonQuery()" (input)="updateComparisonQuery($event)" class="min-h-11 w-full border border-field bg-white px-3 text-base md:min-h-10 md:text-sm" placeholder="Ej. chomba" />
+      </div>
+      <div>
+        <label for="comparison-quantity" class="mb-2 block text-sm font-medium">Cantidad</label>
+        <input id="comparison-quantity" type="number" min="1" step="1" inputmode="numeric" [value]="comparisonQuantity()" (input)="updateComparisonQuantity($event)" class="min-h-11 w-full border border-field bg-white px-3 text-right text-base tabular-nums md:min-h-10 md:text-sm" />
+      </div>
+    </div>
+
+    @if (comparisonRows().length === 0) {
+      <div class="mt-5 border border-dashed border-field bg-white px-5 py-10 text-center">
+        <p class="text-sm font-medium">No hay ofertas que coincidan con la búsqueda.</p>
+        <button type="button" class="mt-5 min-h-11 text-sm font-semibold hover:underline" (click)="setView('directory')">Volver al directorio</button>
+      </div>
+    } @else {
+      <div class="mt-5 hidden overflow-x-auto bg-white md:block">
+        <table class="w-full min-w-[920px] border-collapse text-sm">
+          <caption class="sr-only">Comparación de ofertas para {{ comparisonQuantity() }} unidades</caption>
+          <thead class="text-xs font-normal text-muted">
+            <tr>
+              <th scope="col" class="px-5 py-3 text-left font-normal">Oferta</th>
+              <th scope="col" class="px-3 py-3 text-left font-normal">Proveedor</th>
+              <th scope="col" class="px-3 py-3 text-left font-normal">Especificación</th>
+              <th scope="col" class="px-3 py-3 text-right font-normal">Descuento</th>
+              <th scope="col" class="px-3 py-3 text-right font-normal">Unitario</th>
+              <th scope="col" class="px-3 py-3 text-right font-normal">Con envío</th>
+              <th scope="col" class="px-3 py-3 text-right font-normal">Total</th>
+              <th scope="col" class="px-5 py-3 text-right font-normal">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of comparisonRows(); track row.supplier.id + row.offer.id) {
+              <tr class="border-t border-paper" [class.bg-[#dcfae5]]="isBestRow(row)">
+                <td class="px-5 py-4">
+                  <span class="font-semibold">{{ row.offer.productName }}</span>
+                  @if (isBestRow(row)) {
+                    <span class="ml-2 inline-flex bg-[#dcfae5] px-2 py-1 text-xs font-semibold text-[#04250e]">Mejor costo</span>
+                  }
+                </td>
+                <td class="px-3 py-4">{{ row.supplier.name }}</td>
+                <td class="max-w-52 truncate px-3 py-4 text-muted">{{ row.offer.variant || 'Sin especificar' }}</td>
+                <td class="px-3 py-4 text-right tabular-nums">{{ discountLabel(row.pricing.discountRate) }}</td>
+                <td class="px-3 py-4 text-right tabular-nums">{{ row.pricing.unitPrice | currencyArs }}</td>
+                <td class="px-3 py-4 text-right">
+                  <span class="block font-semibold tabular-nums">{{ row.pricing.effectiveUnitPrice | currencyArs }}</span>
+                  <span class="mt-1 block text-xs text-muted">{{ row.offer.taxIncluded ? 'Impuestos incluidos' : 'Impuestos sin confirmar' }}</span>
+                </td>
+                <td class="px-3 py-4 text-right tabular-nums">{{ row.pricing.totalCost | currencyArs }}</td>
+                <td class="px-5 py-3 text-right">
+                  @if (row.pricing.eligible) {
+                    <button type="button" class="min-h-9 whitespace-nowrap text-sm font-semibold hover:underline" (click)="useOfferInCosts(row)">Usar en Costos</button>
+                  } @else {
+                    <span class="whitespace-nowrap text-xs text-muted">Mín. {{ row.pricing.minimumQuantity }}</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-5 space-y-3 md:hidden">
+        @for (row of comparisonRows(); track row.supplier.id + row.offer.id) {
+          <article class="bg-white p-4" [class.bg-[#dcfae5]]="isBestRow(row)">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h3 class="truncate text-sm font-semibold">{{ row.offer.productName }}</h3>
+                <p class="mt-1 truncate text-xs text-muted">{{ row.supplier.name }} · {{ row.offer.variant || 'Sin especificar' }}</p>
+              </div>
+              @if (isBestRow(row)) {
+                <span class="shrink-0 bg-[#dcfae5] px-2 py-1 text-xs font-semibold text-[#04250e]">Mejor costo</span>
+              }
+            </div>
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt class="text-xs text-muted">Unitario con envío</dt>
+                <dd class="mt-1 font-semibold tabular-nums">{{ row.pricing.effectiveUnitPrice | currencyArs }}</dd>
+              </div>
+              <div class="text-right">
+                <dt class="text-xs text-muted">Total</dt>
+                <dd class="mt-1 font-semibold tabular-nums">{{ row.pricing.totalCost | currencyArs }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs text-muted">Descuento</dt>
+                <dd class="mt-1 tabular-nums">{{ discountLabel(row.pricing.discountRate) }}</dd>
+              </div>
+              <div class="text-right">
+                <dt class="text-xs text-muted">Impuestos</dt>
+                <dd class="mt-1">{{ row.offer.taxIncluded ? 'Incluidos' : 'Sin confirmar' }}</dd>
+              </div>
+            </dl>
+            @if (row.pricing.eligible) {
+              <button type="button" class="mt-4 min-h-11 w-full border border-field bg-white px-3 text-sm font-semibold" (click)="useOfferInCosts(row)">Usar en Costos</button>
+            } @else {
+              <p class="mt-4 text-sm font-medium text-muted">Pedido mínimo: {{ row.pricing.minimumQuantity }}</p>
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
+}

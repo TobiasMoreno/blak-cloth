@@ -36,9 +36,9 @@
         class="h-8 w-auto"
         priority
       />
-      <h1 id="drive-connect-title" class="mt-10 text-2xl font-bold">Costos y cotizador</h1>
+      <h1 id="drive-connect-title" class="mt-10 text-2xl font-bold">Gestión BLAK</h1>
       <p class="mt-3 max-w-md text-sm leading-6 text-muted">
-        Ingresá con tu cuenta de Google para abrir el archivo compartido de BLAK.
+        Ingresá con tu cuenta de Google para abrir costos, proveedores y cotizaciones compartidas.
       </p>
       @if (errorMessage()) {
         <p role="alert" class="mt-5 bg-[#ffedea] px-4 py-3 text-sm font-medium text-wine">
@@ -170,6 +170,15 @@
           class="flex min-h-11 items-center px-3 text-sm text-muted hover:bg-surface hover:text-ink md:min-h-9"
         >
           Cotizador
+        </a>
+        <a
+          routerLink="/gestion/proveedores"
+          routerLinkActive="bg-surface text-ink"
+          ariaCurrentWhenActive="page"
+          (click)="closeMenu()"
+          class="flex min-h-11 items-center px-3 text-sm text-muted hover:bg-surface hover:text-ink md:min-h-9"
+        >
+          Proveedores
         </a>
       </nav>
 

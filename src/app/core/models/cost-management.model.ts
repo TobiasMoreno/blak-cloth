@@ -21,11 +21,57 @@ export interface QuoteDefaults {
   depositRate: number;
 }
 
+export type SupplierPricingRuleMode = 'discount-rate' | 'unit-price';
+
+export interface SupplierPricingRule {
+  minQuantity: number;
+  mode: SupplierPricingRuleMode;
+  /** Tasa entre 0 y 1 para descuentos; importe ARS para precio unitario. */
+  value: number;
+}
+
+export interface SupplierOffer {
+  id: string;
+  productName: string;
+  category: string;
+  variant: string;
+  baseUnitPrice: number;
+  minimumQuantity: number;
+  shippingCost: number;
+  taxIncluded: boolean;
+  useSupplierPricing: boolean;
+  pricingRules: SupplierPricingRule[];
+  quotedAt: string;
+  validUntil: string;
+  notes: string;
+  updatedAt: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contactName: string;
+  phone: string;
+  email: string;
+  instagram: string;
+  website: string;
+  location: string;
+  catalogUrl: string;
+  paymentTerms: string;
+  leadTimeDays: number;
+  minimumQuantity: number;
+  pricingRules: SupplierPricingRule[];
+  offers: SupplierOffer[];
+  notes: string;
+  updatedAt: string;
+}
+
 export interface CostWorkspace {
-  schemaVersion: 1;
+  schemaVersion: 2;
   revision: number;
   updatedAt: string;
   costs: CostItem[];
+  suppliers: Supplier[];
   quoteDefaults: QuoteDefaults;
 }
 
@@ -67,10 +113,11 @@ export const DEFAULT_QUOTE_DEFAULTS: QuoteDefaults = {
 
 export function createEmptyWorkspace(now: string): CostWorkspace {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     revision: 0,
     updatedAt: now,
     costs: [],
+    suppliers: [],
     quoteDefaults: { ...DEFAULT_QUOTE_DEFAULTS },
   };
 }

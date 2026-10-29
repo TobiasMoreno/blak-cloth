@@ -6,9 +6,13 @@ import {
   DEFAULT_QUOTE_DEFAULTS,
   QuoteDefaults,
   QuoteInput,
+  Supplier,
+  SupplierOffer,
+  SupplierPricingRule,
   createEmptyWorkspace,
   createQuoteInput,
 } from '../models/cost-management.model';
+import { calculateSupplierOfferPrice } from '../pricing/supplier-pricing';
 import {
   DriveConflictError,
   GoogleDriveService,
@@ -25,6 +29,7 @@ export class CostManagementStore {
   readonly drive = inject(GoogleDriveService);
   readonly workspace = signal<CostWorkspace | null>(null);
   readonly selectedCostId = signal<string | null>(null);
+  readonly selectedSupplierId = signal<string | null>(null);
   readonly quoteDraft = signal<QuoteInput>(createQuoteInput(DEFAULT_QUOTE_DEFAULTS));
   readonly saveState = signal<WorkspaceSaveState>('idle');
   readonly errorMessage = signal<string | null>(null);
@@ -33,6 +38,11 @@ export class CostManagementStore {
   readonly selectedCost = computed(() => {
     const selectedId = this.selectedCostId();
     return this.costs().find((cost) => cost.id === selectedId) ?? null;
+  });
+  readonly suppliers = computed(() => this.workspace()?.suppliers ?? []);
+  readonly selectedSupplier = computed(() => {
+    const selectedId = this.selectedSupplierId();
+    return this.suppliers().find((supplier) => supplier.id === selectedId) ?? null;
   });
   readonly hasWorkspace = computed(() => this.workspace() !== null);
   readonly isDirty = computed(() => this.saveState() === 'dirty');
@@ -87,6 +97,7 @@ export class CostManagementStore {
     this.errorMessage.set(null);
     const next: CostWorkspace = {
       ...current,
+      schemaVersion: 2,
       revision: current.revision + 1,
       updatedAt: new Date().toISOString(),
     };
@@ -170,6 +181,166 @@ export class CostManagementStore {
     this.markDirty();
   }
 
+  addSupplier(): void {
+    const id = this.createId();
+    const supplier: Supplier = {
+      id,
+      name: 'Nuevo proveedor',
+      contactName: '',
+      phone: '',
+      email: '',
+      instagram: '',
+      website: '',
+      location: '',
+      catalogUrl: '',
+      paymentTerms: '',
+      leadTimeDays: 0,
+      minimumQuantity: 1,
+      pricingRules: [],
+      offers: [],
+      notes: '',
+      updatedAt: new Date().toISOString(),
+    };
+    this.workspace.update((workspace) =>
+      workspace ? { ...workspace, suppliers: [...workspace.suppliers, supplier] } : workspace,
+    );
+    this.selectedSupplierId.set(id);
+    this.markDirty();
+  }
+
+  selectSupplier(id: string): void {
+    if (this.suppliers().some((supplier) => supplier.id === id)) this.selectedSupplierId.set(id);
+  }
+
+  updateSupplier(updated: Supplier): void {
+    this.workspace.update((workspace) => {
+      if (!workspace) return workspace;
+      return {
+        ...workspace,
+        suppliers: workspace.suppliers.map((supplier) =>
+          supplier.id === updated.id
+            ? { ...updated, updatedAt: new Date().toISOString() }
+            : supplier,
+        ),
+      };
+    });
+    this.markDirty();
+  }
+
+  deleteSelectedSupplier(): void {
+    const selectedId = this.selectedSupplierId();
+    if (!selectedId) return;
+    this.workspace.update((workspace) =>
+      workspace
+        ? {
+            ...workspace,
+            suppliers: workspace.suppliers.filter((supplier) => supplier.id !== selectedId),
+          }
+        : workspace,
+    );
+    this.selectedSupplierId.set(this.suppliers()[0]?.id ?? null);
+    this.markDirty();
+  }
+
+  createSupplierOffer(): SupplierOffer {
+    return {
+      id: this.createId(),
+      productName: '',
+      category: '',
+      variant: '',
+      baseUnitPrice: 0,
+      minimumQuantity: this.selectedSupplier()?.minimumQuantity ?? 1,
+      shippingCost: 0,
+      taxIncluded: false,
+      useSupplierPricing: true,
+      pricingRules: [],
+      quotedAt: new Date().toISOString().slice(0, 10),
+      validUntil: '',
+      notes: '',
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  upsertSupplierOffer(supplierId: string, offer: SupplierOffer): void {
+    this.workspace.update((workspace) => {
+      if (!workspace) return workspace;
+      return {
+        ...workspace,
+        suppliers: workspace.suppliers.map((supplier) => {
+          if (supplier.id !== supplierId) return supplier;
+          const exists = supplier.offers.some((item) => item.id === offer.id);
+          return {
+            ...supplier,
+            offers: exists
+              ? supplier.offers.map((item) =>
+                  item.id === offer.id
+                    ? { ...offer, updatedAt: new Date().toISOString() }
+                    : item,
+                )
+              : [...supplier.offers, { ...offer, updatedAt: new Date().toISOString() }],
+            updatedAt: new Date().toISOString(),
+          };
+        }),
+      };
+    });
+    this.markDirty();
+  }
+
+  deleteSupplierOffer(supplierId: string, offerId: string): void {
+    this.workspace.update((workspace) => {
+      if (!workspace) return workspace;
+      return {
+        ...workspace,
+        suppliers: workspace.suppliers.map((supplier) =>
+          supplier.id === supplierId
+            ? {
+                ...supplier,
+                offers: supplier.offers.filter((offer) => offer.id !== offerId),
+                updatedAt: new Date().toISOString(),
+              }
+            : supplier,
+        ),
+      };
+    });
+    this.markDirty();
+  }
+
+  addCostFromSupplierOffer(supplierId: string, offerId: string, quantity: number): void {
+    const supplier = this.suppliers().find((item) => item.id === supplierId);
+    const offer = supplier?.offers.find((item) => item.id === offerId);
+    if (!supplier || !offer) return;
+    const pricing = calculateSupplierOfferPrice(supplier, offer, quantity);
+    if (!pricing.eligible) return;
+
+    const now = new Date().toISOString();
+    const cost: CostItem = {
+      id: this.createId(),
+      productName: offer.productName,
+      category: offer.category,
+      garmentCost: pricing.effectiveUnitPrice,
+      printingCost: 0,
+      designCostPerUnit: 0,
+      labelsCost: 0,
+      packagingCost: 0,
+      otherUnitCost: 0,
+      regularPrice: 0,
+      notes: [
+        `Proveedor: ${supplier.name}`,
+        `Referencia: ${Math.max(1, Math.floor(quantity))} unidades`,
+        `Cotización: ${offer.quotedAt || now.slice(0, 10)}`,
+        supplier.catalogUrl ? `Fuente: ${supplier.catalogUrl}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      updatedAt: now,
+    };
+    this.workspace.update((workspace) =>
+      workspace ? { ...workspace, costs: [...workspace.costs, cost] } : workspace,
+    );
+    this.selectedCostId.set(cost.id);
+    this.markDirty();
+  }
+
   updateQuoteDraft(draft: QuoteInput): void {
     this.quoteDraft.set(draft);
   }
@@ -189,6 +360,10 @@ export class CostManagementStore {
     const selected =
       workspace.costs.find((cost) => cost.id === this.selectedCostId()) ?? workspace.costs[0];
     this.selectedCostId.set(selected?.id ?? null);
+    const selectedSupplier =
+      workspace.suppliers.find((supplier) => supplier.id === this.selectedSupplierId()) ??
+      workspace.suppliers[0];
+    this.selectedSupplierId.set(selectedSupplier?.id ?? null);
     this.quoteDraft.set(createQuoteInput(workspace.quoteDefaults, selected));
     this.saveState.set('saved');
     this.errorMessage.set(null);
@@ -208,21 +383,90 @@ export class CostManagementStore {
   }
 }
 
-function parseWorkspace(value: unknown): CostWorkspace {
+export function parseWorkspace(value: unknown): CostWorkspace {
   const record = asRecord(value);
-  if (!record || record['schemaVersion'] !== 1 || !Array.isArray(record['costs'])) {
+  if (
+    !record ||
+    (record['schemaVersion'] !== 1 && record['schemaVersion'] !== 2) ||
+    !Array.isArray(record['costs'])
+  ) {
     throw new Error('El archivo elegido no tiene el formato de Costos BLAK.');
   }
 
   const quoteDefaults = parseQuoteDefaults(record['quoteDefaults']);
   const costs = record['costs'].map(parseCostItem);
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     revision: toNonNegativeNumber(record['revision']),
     updatedAt: toStringValue(record['updatedAt']) || new Date().toISOString(),
     costs,
+    suppliers: Array.isArray(record['suppliers']) ? record['suppliers'].map(parseSupplier) : [],
     quoteDefaults,
   };
+}
+
+function parseSupplier(value: unknown): Supplier {
+  const record = asRecord(value);
+  if (!record || !toStringValue(record['id']) || !toStringValue(record['name'])) {
+    throw new Error('Hay un proveedor incompleto en el archivo de costos.');
+  }
+  return {
+    id: toStringValue(record['id']),
+    name: toStringValue(record['name']),
+    contactName: toStringValue(record['contactName']),
+    phone: toStringValue(record['phone']),
+    email: toStringValue(record['email']),
+    instagram: toStringValue(record['instagram']),
+    website: toStringValue(record['website']),
+    location: toStringValue(record['location']),
+    catalogUrl: toStringValue(record['catalogUrl']),
+    paymentTerms: toStringValue(record['paymentTerms']),
+    leadTimeDays: toNonNegativeInteger(record['leadTimeDays']),
+    minimumQuantity: Math.max(1, toNonNegativeInteger(record['minimumQuantity'])),
+    pricingRules: parsePricingRules(record['pricingRules']),
+    offers: Array.isArray(record['offers']) ? record['offers'].map(parseSupplierOffer) : [],
+    notes: toStringValue(record['notes']),
+    updatedAt: toStringValue(record['updatedAt']) || new Date().toISOString(),
+  };
+}
+
+function parseSupplierOffer(value: unknown): SupplierOffer {
+  const record = asRecord(value);
+  if (!record || !toStringValue(record['id']) || !toStringValue(record['productName'])) {
+    throw new Error('Hay una oferta incompleta en el archivo de costos.');
+  }
+  return {
+    id: toStringValue(record['id']),
+    productName: toStringValue(record['productName']),
+    category: toStringValue(record['category']),
+    variant: toStringValue(record['variant']),
+    baseUnitPrice: toNonNegativeNumber(record['baseUnitPrice']),
+    minimumQuantity: Math.max(1, toNonNegativeInteger(record['minimumQuantity'])),
+    shippingCost: toNonNegativeNumber(record['shippingCost']),
+    taxIncluded: record['taxIncluded'] === true,
+    useSupplierPricing: record['useSupplierPricing'] !== false,
+    pricingRules: parsePricingRules(record['pricingRules']),
+    quotedAt: toStringValue(record['quotedAt']),
+    validUntil: toStringValue(record['validUntil']),
+    notes: toStringValue(record['notes']),
+    updatedAt: toStringValue(record['updatedAt']) || new Date().toISOString(),
+  };
+}
+
+function parsePricingRules(value: unknown): SupplierPricingRule[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    const record = asRecord(item);
+    const mode = record?.['mode'] === 'unit-price' ? 'unit-price' : 'discount-rate';
+    return {
+      minQuantity: Math.max(1, toNonNegativeInteger(record?.['minQuantity'])),
+      mode,
+      value:
+        mode === 'discount-rate'
+          ? toRate(record?.['value'], 0)
+          : toNonNegativeNumber(record?.['value']),
+    };
+  });
 }
 
 function parseCostItem(value: unknown): CostItem {
@@ -271,6 +515,10 @@ function toStringValue(value: unknown): string {
 
 function toNonNegativeNumber(value: unknown): number {
   return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+function toNonNegativeInteger(value: unknown): number {
+  return Math.floor(toNonNegativeNumber(value));
 }
 
 function toRate(value: unknown, fallback: number): number {

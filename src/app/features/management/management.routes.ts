@@ -21,6 +21,11 @@ export const managementRoutes: Route[] = [
         title: 'Cotizador · Gestión BLAK',
         loadComponent: () => import('./quote.component').then((m) => m.QuoteComponent),
       },
+      {
+        path: 'proveedores',
+        title: 'Proveedores · Gestión BLAK',
+        loadComponent: () => import('./suppliers.component').then((m) => m.SuppliersComponent),
+      },
     ],
   },
 ];

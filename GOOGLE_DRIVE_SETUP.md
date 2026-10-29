@@ -1,8 +1,13 @@
-# Google Drive para Costos y Cotizador
+# Google Drive para la gestión interna
 
-La sección `/gestion` guarda un único archivo `blak-costos.json` dentro de una carpeta visible
+La sección `/gestion` guarda costos, proveedores, ofertas y cotizaciones en un único archivo
+`blak-costos.json` dentro de una carpeta visible
 `BLAK` en Google Drive. El archivo no contiene credenciales y solo resulta accesible para las
 cuentas con las que se comparta.
+
+El directorio y comparador de proveedores está en `/gestion/proveedores`. Las ofertas pueden usar
+descuentos generales del proveedor o escalas específicas por producto, expresadas como porcentaje
+o como precio unitario final.
 
 ## Configuración de Google Cloud
 
