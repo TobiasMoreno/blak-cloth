@@ -1,0 +1,450 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
+import { NgOptimizedImage } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { ProductService } from '../../core/services/product.service';
+import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
+
+const DRAG_THRESHOLD = 6;
+
+@Component({
+  selector: 'app-clothes-rack',
+  imports: [RouterLink, NgOptimizedImage, CurrencyArsPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <section
+      class="bg-[#0b0b0b] pt-16 pb-20 text-[#f4f4f0] md:pt-24 md:pb-28"
+      aria-labelledby="rack-title"
+      aria-roledescription="carrusel"
+    >
+      <div class="mb-10 flex flex-wrap items-end justify-between gap-6 px-4 md:px-8">
+        <div>
+          <h2 id="rack-title" class="text-5xl font-black uppercase leading-[0.88] md:text-7xl">
+            El perchero
+          </h2>
+          <p class="mt-4 max-w-xs text-[#b8b8b2]">Pasá por las remeras y elegí la que te llame.</p>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="rack-arrow"
+            aria-label="Remeras anteriores"
+            aria-controls="rack-track"
+            [disabled]="!canGoPrev()"
+            (click)="prev()"
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+          <button
+            type="button"
+            class="rack-arrow"
+            aria-label="Remeras siguientes"
+            aria-controls="rack-track"
+            [disabled]="!canGoNext()"
+            (click)="next()"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        #viewport
+        class="rack-viewport relative overflow-hidden px-4 md:px-8"
+        [class.rack-dragging]="dragging()"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp()"
+        (pointercancel)="onPointerUp()"
+      >
+        <div
+          class="rack-bar pointer-events-none absolute inset-x-0 top-3 h-2.5 rounded-full"
+          aria-hidden="true"
+        ></div>
+
+        <ul
+          #track
+          id="rack-track"
+          class="rack relative flex gap-2 md:gap-4"
+          [class.rack-animate]="animate() && !dragging()"
+          role="list"
+          [style.transform]="'translateX(' + -offset() + 'px)'"
+          (transitionend)="onTransitionEnd($event)"
+        >
+          @for (slide of slides(); track slide.key; let index = $index) {
+            @let product = slide.product;
+            <!-- Las copias del loop se pueden clickear, pero no se anuncian ni reciben Tab -->
+            <li
+              class="rack-item shrink-0"
+              [attr.aria-hidden]="slide.isClone || null"
+              (focusin)="reveal(index)"
+            >
+              <a
+                [routerLink]="['/product', product.id]"
+                class="rack-link group block w-44 rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[#d9182b] md:w-56"
+                draggable="false"
+                [attr.tabindex]="slide.isClone ? -1 : null"
+                (click)="onLinkClick($event)"
+              >
+                <div class="rack-swing">
+                  <svg
+                    class="mx-auto block h-16 w-full text-[#9a9a94]"
+                    viewBox="0 0 200 64"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <!-- Gancho que abraza la barra y percha -->
+                    <path d="M100 40 V24 a10 10 0 1 0 -10 -10" />
+                    <path d="M100 40 L22 60 H178 Z" />
+                  </svg>
+
+                  <div class="shirt relative -mt-3 aspect-[4/5] bg-[#252525]">
+                    <img
+                      [ngSrc]="product.images[0]"
+                      alt=""
+                      fill
+                      draggable="false"
+                      sizes="(max-width: 767px) 11rem, 14rem"
+                      class="object-cover object-[22%_center]"
+                    />
+                  </div>
+                </div>
+
+                <span class="rack-label mt-4 block px-1">
+                  <span class="block font-display text-2xl font-black uppercase leading-none">
+                    {{ product.name }}
+                  </span>
+                  <span class="mt-1 flex items-center justify-between text-sm text-[#b8b8b2]">
+                    <span class="tabular-nums">{{ product.price | currencyArs }}</span>
+                    <span aria-hidden="true" class="text-[#d9182b]">Ver ↗</span>
+                  </span>
+                </span>
+              </a>
+            </li>
+          } @empty {
+            <li class="h-96 w-full" role="status" aria-label="Cargando remeras"></li>
+          }
+        </ul>
+      </div>
+
+      @if (products().length > 0) {
+        <p class="sr-only" aria-live="polite">{{ positionLabel() }}</p>
+      }
+    </section>
+  `,
+  styles: `
+    .rack-viewport {
+      touch-action: pan-y;
+      cursor: grab;
+    }
+
+    .rack-dragging {
+      cursor: grabbing;
+      user-select: none;
+    }
+
+    /* Mientras se arrastra no se abre ni se resalta ninguna remera */
+    .rack-dragging .rack-link {
+      pointer-events: none;
+    }
+
+    .rack-animate {
+      transition: transform 600ms var(--ease-expo);
+    }
+
+    .rack-arrow {
+      display: grid;
+      place-items: center;
+      width: 3rem;
+      height: 3rem;
+      border: 2px solid #f4f4f0;
+      font-size: 1.25rem;
+      transition: background-color 200ms ease, color 200ms ease, opacity 200ms ease;
+    }
+
+    .rack-arrow:not(:disabled):hover {
+      background-color: #f4f4f0;
+      color: #0b0b0b;
+    }
+
+    .rack-arrow:focus-visible {
+      outline: 3px solid #d9182b;
+      outline-offset: 3px;
+    }
+
+    .rack-arrow:disabled {
+      opacity: 0.3;
+    }
+
+    .rack-bar {
+      background: linear-gradient(180deg, #d0d0ca 0%, #7a7a74 55%, #3a3a36 100%);
+      box-shadow: 0 6px 14px rgb(0 0 0 / 0.6);
+    }
+
+    /* Recorta la foto con forma de remera para que parezca colgada */
+    .shirt {
+      clip-path: polygon(
+        33% 0%, 41% 5%, 50% 8%, 59% 5%, 67% 0%,
+        100% 13%, 92% 33%, 80% 28%, 80% 100%,
+        20% 100%, 20% 28%, 8% 33%, 0% 13%
+      );
+      filter: drop-shadow(0 18px 18px rgb(0 0 0 / 0.5));
+    }
+
+    .rack-swing {
+      transform-origin: 50% 0.75rem;
+      transition: transform 400ms var(--ease-out);
+    }
+
+    .rack-item {
+      transition: opacity 300ms ease;
+    }
+
+    .rack-label {
+      transition: opacity 250ms ease, transform 300ms var(--ease-out);
+    }
+
+    /* Con mouse: el nombre aparece al pasar por encima; en táctil queda siempre visible */
+    @media (hover: hover) {
+      .rack-label {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+      }
+
+      .rack-link:hover .rack-label,
+      .rack-link:focus-visible .rack-label {
+        opacity: 1;
+        transform: none;
+      }
+
+      .rack:has(.rack-link:hover) .rack-item:not(:has(.rack-link:hover)) {
+        opacity: 0.4;
+      }
+    }
+
+    .rack-link:hover .rack-swing,
+    .rack-link:focus-visible .rack-swing {
+      transform: scale(1.04);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .rack-link:hover .rack-swing,
+      .rack-link:focus-visible .rack-swing,
+      .rack-link:active .rack-swing {
+        animation: rack-swing 900ms var(--ease-out);
+      }
+    }
+
+    @keyframes rack-swing {
+      0% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(5deg) scale(1.04); }
+      50% { transform: rotate(-3deg) scale(1.04); }
+      75% { transform: rotate(1.5deg) scale(1.04); }
+      100% { transform: rotate(0deg) scale(1.04); }
+    }
+  `,
+})
+export class ClothesRackComponent {
+  products = inject(ProductService).products;
+
+  private viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
+  private track = viewChild.required<ElementRef<HTMLElement>>('track');
+
+  /** Índice (dentro de slides) de la primera remera visible. */
+  private position = signal(0);
+  // Se miden en pantalla porque el ancho de cada remera cambia con el breakpoint
+  private step = signal(0);
+  private visibleCount = signal(1);
+  animate = signal(true);
+  dragging = signal(false);
+  private dragDelta = signal(0);
+
+  private pointerStartX: number | null = null;
+  private swiped = false;
+
+  private count = computed(() => this.products().length);
+  // Si entran todas en pantalla no tiene sentido girar
+  private loops = computed(() => this.count() > this.visibleCount());
+
+  /**
+   * Con loop se renderizan tres copias seguidas y la posición vive en la del medio;
+   * así siempre hay remeras a ambos lados y el salto de vuelta no se nota.
+   */
+  slides = computed(() => {
+    const products = this.products();
+    const copies = this.loops() ? [0, 1, 2] : [1];
+    return copies.flatMap(copy =>
+      products.map(product => ({ product, key: `${copy}-${product.id}`, isClone: copy !== 1 }))
+    );
+  });
+
+  private current = computed(() =>
+    this.loops()
+      ? this.position()
+      : Math.min(this.position(), Math.max(0, this.count() - this.visibleCount()))
+  );
+
+  private lastPosition = computed(() => Math.max(0, this.slides().length - this.visibleCount()));
+
+  offset = computed(() => this.current() * this.step() - this.dragDelta());
+  canGoPrev = computed(() => this.loops() || this.current() > 0);
+  canGoNext = computed(() => this.loops() || this.current() < this.count() - this.visibleCount());
+
+  positionLabel = computed(() => {
+    const total = this.count();
+    const first = (this.current() % total) + 1;
+    return `Mostrando desde la remera ${first} de ${total}`;
+  });
+
+  constructor() {
+    // Al activarse el loop, arranca en la copia del medio
+    effect(() => {
+      if (this.loops()) {
+        const middle = this.count();
+        untracked(() => this.jumpTo(middle));
+      }
+    });
+
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const observer = new ResizeObserver(() => this.measure());
+      observer.observe(this.viewport().nativeElement);
+      observer.observe(this.track().nativeElement);
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
+
+  // De a una remera por vez, como empujando perchas
+  prev(): void {
+    // Con clicks muy rápidos, frena antes de quedarse sin copias a la izquierda
+    if (this.current() > 0) {
+      this.position.set(this.current() - 1);
+    }
+  }
+
+  next(): void {
+    if (this.current() < this.lastPosition()) {
+      this.position.set(this.current() + 1);
+    }
+  }
+
+  /** Al llegar con Tab a una remera oculta, el carrusel se mueve para mostrarla. */
+  reveal(itemIndex: number): void {
+    const current = this.current();
+    if (itemIndex < current) {
+      this.position.set(itemIndex);
+    } else if (itemIndex >= current + this.visibleCount()) {
+      this.position.set(itemIndex - this.visibleCount() + 1);
+    }
+  }
+
+  /** Terminado el deslizamiento, vuelve sin animación a la copia del medio. */
+  onTransitionEnd(event: TransitionEvent): void {
+    // Las remeras también animan transform y el evento burbujea hasta la lista
+    if (event.target !== event.currentTarget || event.propertyName !== 'transform') return;
+    if (!this.loops()) return;
+
+    const total = this.count();
+    const position = this.position();
+    if (position < total) {
+      this.jumpTo(position + total);
+    } else if (position >= total * 2) {
+      this.jumpTo(position - total);
+    }
+  }
+
+  private jumpTo(position: number): void {
+    this.animate.set(false);
+    this.position.set(position);
+    // Dos frames: uno para pintar la nueva posición y otro para devolver la transición
+    requestAnimationFrame(() => requestAnimationFrame(() => this.animate.set(true)));
+  }
+
+  onPointerDown(event: PointerEvent): void {
+    if (event.button !== 0) return;
+    this.pointerStartX = event.clientX;
+    this.swiped = false;
+  }
+
+  /** El perchero sigue al puntero mientras se arrastra. */
+  onPointerMove(event: PointerEvent): void {
+    if (this.pointerStartX === null) return;
+    const delta = event.clientX - this.pointerStartX;
+
+    if (!this.dragging()) {
+      // Hasta superar el umbral es un click común sobre la remera
+      if (Math.abs(delta) < DRAG_THRESHOLD) return;
+      this.dragging.set(true);
+      this.swiped = true;
+      this.recenter();
+      // Se captura recién acá: capturar en pointerdown rompería el click de los links
+      this.viewport().nativeElement.setPointerCapture(event.pointerId);
+    }
+    this.dragDelta.set(delta);
+  }
+
+  /** Al soltar, se acomoda en la remera más cercana. */
+  onPointerUp(): void {
+    this.pointerStartX = null;
+    if (!this.dragging()) return;
+
+    const moved = this.step() > 0 ? Math.round(-this.dragDelta() / this.step()) : 0;
+    const target = Math.min(this.lastPosition(), Math.max(0, this.current() + moved));
+    this.dragging.set(false);
+    this.dragDelta.set(0);
+    this.position.set(target);
+  }
+
+  /** Lleva la posición a la copia del medio para tener margen de arrastre a ambos lados. */
+  private recenter(): void {
+    if (!this.loops()) return;
+    const total = this.count();
+    const position = this.position();
+    if (position < total) {
+      this.position.set(position + total);
+    } else if (position >= total * 2) {
+      this.position.set(position - total);
+    }
+  }
+
+  /** Un arrastre no debe abrir la remera sobre la que terminó el gesto. */
+  onLinkClick(event: MouseEvent): void {
+    if (this.swiped) {
+      event.preventDefault();
+      this.swiped = false;
+    }
+  }
+
+  private measure(): void {
+    const items = this.track().nativeElement.children;
+    if (items.length === 0) return;
+
+    const first = items[0] as HTMLElement;
+    const second = items[1] as HTMLElement | undefined;
+    const step = second ? second.offsetLeft - first.offsetLeft : first.offsetWidth;
+    const viewport = this.viewport().nativeElement;
+    const style = getComputedStyle(viewport);
+    const available =
+      viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+
+    this.step.set(step);
+    // El último ítem no lleva gap a la derecha, por eso se suma uno al ancho disponible
+    this.visibleCount.set(Math.max(1, Math.floor((available + step - first.offsetWidth) / step)));
+  }
+}

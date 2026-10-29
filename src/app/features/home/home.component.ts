@@ -3,10 +3,11 @@ import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../../core/services/product.service';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
+import { ClothesRackComponent } from './clothes-rack.component';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, NgOptimizedImage, CurrencyArsPipe],
+  imports: [RouterLink, NgOptimizedImage, CurrencyArsPipe, ClothesRackComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="overflow-clip bg-[#f4f4f0]">
@@ -69,6 +70,8 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
           {{ designCountLabel() }}. Algodón. Compra coordinada por WhatsApp.
         </p>
       </section>
+
+      <app-clothes-rack />
 
       <section class="section-rise px-4 py-24 md:px-8 md:py-36" aria-labelledby="drop-title">
         <div class="mb-12 grid gap-8 md:grid-cols-12 md:items-end">
