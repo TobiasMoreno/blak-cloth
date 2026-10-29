@@ -46,7 +46,11 @@ export class CostManagementStore {
   });
   readonly hasWorkspace = computed(() => this.workspace() !== null);
   readonly isDirty = computed(() => this.saveState() === 'dirty');
-  readonly canSave = computed(() => this.hasWorkspace() && this.saveState() === 'dirty');
+  readonly canSave = computed(
+    () =>
+      this.hasWorkspace() &&
+      (this.saveState() === 'dirty' || this.saveState() === 'conflict'),
+  );
 
   async connect(): Promise<void> {
     this.errorMessage.set(null);
@@ -103,7 +107,7 @@ export class CostManagementStore {
     };
 
     try {
-      const file = await this.drive.saveWorkspace(next, expectedVersion);
+      const file = await this.drive.saveWorkspace(next, expectedVersion, current.revision);
       this.workspace.set(next);
       this.remoteVersion.set(file.version);
       this.saveState.set('saved');
@@ -111,7 +115,7 @@ export class CostManagementStore {
       if (error instanceof DriveConflictError) {
         this.saveState.set('conflict');
         this.errorMessage.set(
-          'La otra persona guardó cambios antes. Recargá Drive para revisar la última versión.',
+          'Drive encontró una revisión distinta. Volvé a intentar; si el conflicto continúa, recargá la versión de Drive.',
         );
       } else {
         this.handleError(error);

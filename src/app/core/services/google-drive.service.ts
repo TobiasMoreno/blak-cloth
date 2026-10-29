@@ -121,9 +121,7 @@ export class GoogleDriveService {
       parents: [folder.id],
       appProperties: { [WORKSPACE_PROPERTY_KEY]: WORKSPACE_PROPERTY_VALUE },
     });
-    await this.uploadJson(file.id, initialContent);
-
-    const savedFile = await this.getFileMetadata(file.id);
+    const savedFile = await this.uploadJson(file.id, initialContent);
     const savedFolder = await this.getFileMetadata(folder.id);
     this.workspaceFile.set(savedFile);
     this.workspaceFolder.set(savedFolder);
@@ -157,17 +155,23 @@ export class GoogleDriveService {
     return { content, file: latestFile };
   }
 
-  async saveWorkspace(content: unknown, expectedVersion: string): Promise<DriveFileMetadata> {
+  async saveWorkspace(
+    content: unknown,
+    expectedVersion: string,
+    expectedRevision: number,
+  ): Promise<DriveFileMetadata> {
     const file = this.workspaceFile();
     if (!file) throw new Error('No hay un archivo de costos vinculado.');
 
     const latestFile = await this.getFileMetadata(file.id);
     if (latestFile.version !== expectedVersion) {
-      throw new DriveConflictError();
+      const latestContent = await this.downloadJson(file.id);
+      if (!hasWorkspaceRevision(latestContent, expectedRevision)) {
+        throw new DriveConflictError();
+      }
     }
 
-    await this.uploadJson(file.id, content);
-    const savedFile = await this.getFileMetadata(file.id);
+    const savedFile = await this.uploadJson(file.id, content);
     this.workspaceFile.set(savedFile);
     return savedFile;
   }
@@ -250,15 +254,20 @@ export class GoogleDriveService {
     return response.json() as Promise<unknown>;
   }
 
-  private async uploadJson(fileId: string, content: unknown): Promise<void> {
-    await this.driveFetch(
-      `https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=media`,
+  private async uploadJson(fileId: string, content: unknown): Promise<DriveFileMetadata> {
+    const params = new URLSearchParams({
+      uploadType: 'media',
+      fields: DRIVE_FIELDS,
+    });
+    const response = await this.driveFetch(
+      `https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(fileId)}?${params}`,
       {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(content, null, 2),
       },
     );
+    return (await response.json()) as DriveFileMetadata;
   }
 
   private async driveFetch(url: string, init: RequestInit = {}): Promise<Response> {
@@ -424,4 +433,10 @@ async function safeResponseText(response: Response): Promise<string> {
 
 function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Ocurrió un error inesperado con Google Drive.';
+}
+
+export function hasWorkspaceRevision(value: unknown, expectedRevision: number): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const revision = (value as Record<string, unknown>)['revision'];
+  return typeof revision === 'number' && revision === expectedRevision;
 }

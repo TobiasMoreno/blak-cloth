@@ -185,14 +185,24 @@
       <div class="mt-8 border-t border-rule pt-5 md:absolute md:inset-x-3 md:bottom-5">
         <p class="px-3 text-xs text-muted" aria-live="polite">{{ saveLabel() }}</p>
         @if (store.saveState() === 'conflict') {
-          <button
-            type="button"
-            class="mt-3 min-h-11 w-full border border-field bg-white px-3 text-sm font-semibold md:min-h-9"
-            [disabled]="busy()"
-            (click)="reload()"
-          >
-            Recargar Drive
-          </button>
+          <div class="mt-3 space-y-2">
+            <button
+              type="button"
+              class="min-h-11 w-full bg-ink px-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 md:min-h-9"
+              [disabled]="busy() || !store.canSave()"
+              (click)="save()"
+            >
+              Volver a intentar
+            </button>
+            <button
+              type="button"
+              class="min-h-11 w-full border border-field bg-white px-3 text-sm font-semibold md:min-h-9"
+              [disabled]="busy()"
+              (click)="reload()"
+            >
+              Descartar y recargar Drive
+            </button>
+          </div>
         } @else {
           <button
             type="button"

@@ -5,6 +5,8 @@ import { CostManagementStore } from '../../core/services/cost-management.store';
 
 export const UNSAVED_CHANGES_MESSAGE =
   'Hay cambios que todavía no guardaste en Drive. Si salís ahora, se pierden. ¿Salir igual?';
+export const RELOAD_CONFLICT_MESSAGE =
+  'Recargar Drive descarta los cambios que tenés abiertos. ¿Querés continuar?';
 
 @Component({
   selector: 'app-management-shell',
@@ -57,6 +59,7 @@ export class ManagementShellComponent {
   }
 
   async reload(): Promise<void> {
+    if (this.store.saveState() === 'conflict' && !confirm(RELOAD_CONFLICT_MESSAGE)) return;
     await this.run(() => this.store.reload());
   }
 
