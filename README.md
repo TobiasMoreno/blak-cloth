@@ -244,23 +244,90 @@ Total: ${{total}}
 
 ---
 
-## 🖼️ Imágenes de productos
+## 🖼️ Imágenes de productos: cómo agregar una remera nueva
 
-### Ubicación
-- **Ruta**: `public/images/products/`
-- **Formato**: JPG, PNG o WebP
-- **Nomenclatura**: `product-{id}-{index}.jpg` (ej: `product-001-1.jpg`, `product-001-2.jpg`)
-- **Nota**: Las imágenes en `public/` se sirven directamente desde la raíz, sin necesidad de modificar `angular.json`
+Cada remera vive en su propia carpeta, junto con sus fotos:
 
-### Tamaños recomendados
-- **Imagen principal del producto**: 1200x1200px (cuadrada, 1:1)
-- **Imágenes secundarias**: 1200x1200px (cuadrada, 1:1)
-- **Thumbnails en grid**: Se generan automáticamente con `NgOptimizedImage`
-- **Peso máximo**: 200-300KB por imagen (optimizar antes de agregar)
+```
+public/products/
+ └─ <slug>/            ← ej: medusa, stitch-art (minúsculas, sin espacios ni tildes)
+     ├─ index.json     ← datos de la remera
+     ├─ mockup.jpeg    ← foto con la espalda y el frente juntos
+     ├─ frente.png     ← (opcional) foto sola del frente
+     └─ espalda.png    ← (opcional) foto sola de la espalda
+```
 
-### Uso en componentes
-- Usar `NgOptimizedImage` de Angular para optimización automática
-- Lazy loading para imágenes que no están en viewport
+El `slug` (el nombre de la carpeta) es el identificador de la remera: aparece en la URL (`/product/<slug>`), en el carrito y en favoritos. **No lo cambies una vez publicada.**
+
+### Opción A: desde el panel (recomendado)
+
+1. Corré el panel en local: `npx decap-server` en una terminal y `npm start` en otra.
+2. Abrí `http://localhost:4200/admin/` → **Remeras** → **Nueva remera**.
+3. Completá los datos y subí las fotos en **Fotos**: *Frente*, *Espalda* y/o *Mockup*.
+4. Guardá. El panel crea la carpeta, el `index.json` y copia las fotos dentro.
+
+### Opción B: a mano
+
+1. Creá la carpeta `public/products/<slug>/` y copiá ahí las fotos.
+2. Creá `index.json` en esa carpeta. Las rutas de `images` son **solo el nombre del archivo** (relativas a la carpeta):
+
+```json
+{
+  "name": "Medusa",
+  "collection": "",
+  "price": 30000,
+  "createdAt": "2026-10-22",
+  "featured": false,
+  "description": "Descripción de la remera.",
+  "images": {
+    "mockup": "mockup.jpeg",
+    "front": "frente.png",
+    "back": "espalda.png"
+  },
+  "variants": [
+    { "size": "M", "color": "Negro", "available": true },
+    { "size": "L", "color": "Negro", "available": true }
+  ]
+}
+```
+
+`front`, `back` y `mockup` son opcionales, pero tiene que haber **al menos una** foto. Si no usás alguna, borrá la línea; no la dejes vacía.
+
+3. Regenerá el catálogo: `npm run catalog`. También corre solo con `npm start` y `npm run build`. El script junta todos los `index.json` en `public/data/products.json`, que es lo que lee la web.
+
+### Qué foto se usa en cada lugar
+
+| Lugar | Qué muestra |
+|---|---|
+| Tarjeta del catálogo y detalle | La primera que exista, en este orden: `front` → `back` → `mockup` |
+| Hover de la tarjeta | La `back`, solo si hay `front` **y** `back` |
+| Perchero 3D del inicio | Ver la sección siguiente |
+| Vista previa al compartir el link | `front` → `mockup` → `back` |
+
+### Fotos para el perchero 3D (inicio)
+
+El perchero arma cada remera en 3D y le "pega" encima la zona del torso de tus fotos. Para que la estampa quede bien ubicada, las fotos tienen que respetar una de estas dos plantillas:
+
+**1. Mockup (`mockup`): dos remeras colgadas en una misma foto**
+- **Izquierda: la espalda**, que es la estampa principal. **Derecha: el frente.**
+- Las dos remeras centradas en su mitad, ocupando casi todo el alto de la foto, con un margen arriba para las perchas. Es la misma plantilla de los mockups actuales (`public/products/medusa/mockup.jpeg` es una buena referencia).
+- Fondo liso o pared clara, sin objetos encima de las remeras.
+- Formato horizontal 3:2, por ejemplo 2560×1706 o 1600×1066.
+
+**2. Fotos sueltas (`front` + `back`): una remera por foto**
+- Una sola remera centrada, que ocupe casi todo el alto, en vertical (por ejemplo 800×1110).
+- Si hay `front` y `back`, el perchero usa estas fotos en vez del mockup: `back` como estampa principal y `front` como frente.
+
+**Recomendaciones generales**
+- Que la parte de abajo del torso sea tela lisa, sin estampa: de ahí se toma el color real de la remera.
+- El primer color de `variants` define en qué grupo cuelga la remera: **Negras**, **Blancas** o **Color**.
+- Si la estampa queda corrida o cortada en el 3D, casi siempre es porque la foto no sigue la plantilla. Las zonas que se recortan están en `src/app/features/home/rack/shirt-texture.ts` (`MOCKUP_LEFT`, `MOCKUP_RIGHT` y `SINGLE_PHOTO`, en fracciones de la imagen).
+- Excepción conocida: en `naruto-y-kurama` el mockup tiene la estampa principal a la derecha, y eso está resuelto con un caso especial en ese mismo archivo. Para remeras nuevas, mejor respetá la plantilla que agregar otra excepción.
+
+### Peso y formato
+- JPG o WebP para mockups (fotos), PNG solo si hace falta transparencia.
+- Lado más largo de hasta ~2560 px y, si se puede, menos de 500 KB por foto. Optimizalas antes de subirlas (por ejemplo con [Squoosh](https://squoosh.app)).
+- En los componentes se usan con `NgOptimizedImage` (`ngSrc`), que se encarga de la carga diferida.
 
 ---
 

@@ -20,6 +20,15 @@
         ],
         "createdAt": "2026-10-29T02:08:29.023Z",
         "reason": "audit 2026-10-28: all <img> use Angular ngSrc (NgOptimizedImage), detector does not read ngSrc"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/home/home-showroom.component.html"
+        ],
+        "createdAt": "2026-10-29T16:36:41.575Z",
+        "reason": "Claude: images use Angular ngSrc (NgOptimizedImage) with real assets, not src; detector false positive"
       }
     ]
   }

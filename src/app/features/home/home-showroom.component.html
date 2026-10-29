@@ -1,0 +1,210 @@
+<section class="locker" aria-labelledby="locker-title">
+  <div #rackStage class="locker-stage" [class.is-staged]="selectedProduct()">
+    @if (!sceneFailed()) {
+      <canvas #rackCanvas class="locker-canvas" aria-hidden="true"></canvas>
+      <div #labelLayer class="rack-labels" aria-hidden="true">
+        @for (group of groups(); track group) {
+          <span class="rack-label" [attr.data-group]="group">{{ group }}</span>
+        }
+      </div>
+      <div #caption class="rack-caption" aria-hidden="true">
+        @if (hoveredProduct(); as product) {
+          <strong>{{ product.name }}</strong>
+          <span>{{ product.price | currencyArs }}</span>
+        }
+      </div>
+
+      <div
+        class="rack-focus"
+        tabindex="0"
+        role="group"
+        aria-roledescription="perchero 3D"
+        aria-label="Perchero de remeras BLAK"
+        aria-describedby="rack-help"
+        (keydown)="onRackKeydown($event)"
+      ></div>
+      <p id="rack-help" class="sr-only">
+        Flechas izquierda y derecha para recorrer las remeras. Enter para verla en el escenario y
+        para darla vuelta. Escape para devolverla al perchero.
+      </p>
+
+      @if (!sceneReady()) {
+        <div class="locker-loading" role="status">
+          <img
+            ngSrc="images/brand/blak-logo-white.svg"
+            alt=""
+            width="590"
+            height="144"
+            priority
+          />
+          <p>Abriendo el vestuario</p>
+        </div>
+      }
+
+      <header class="locker-header">
+        <a routerLink="/" class="locker-mark" aria-label="BLAK Vestuario Córdoba, inicio">
+          <img
+            ngSrc="images/brand/blak-logo-white.svg"
+            alt="BLAK"
+            width="590"
+            height="144"
+            priority
+          />
+          <span>Vestuario Córdoba</span>
+        </a>
+
+        <div class="locker-title">
+          <h1 id="locker-title">BLAK</h1>
+          <p>Drop actual · Remeras de autor</p>
+        </div>
+
+        <div class="locker-filters" role="group" aria-label="Filtrar el vestuario">
+          @for (filter of filters; track filter.value) {
+            <button
+              type="button"
+              [attr.aria-pressed]="activeFilter() === filter.value"
+              (click)="setFilter(filter.value)"
+            >
+              {{ filter.label }} <span>{{ filterCount(filter.value) }}</span>
+            </button>
+          }
+        </div>
+      </header>
+
+      @if (selectedProduct(); as product) {
+        <aside class="stage-panel" aria-labelledby="stage-title">
+          <p class="stage-kicker">Ficha · {{ positionLabel() }}</p>
+          <h2 id="stage-title">{{ product.name }}</h2>
+          <p class="stage-description">{{ product.description }}</p>
+
+          <dl>
+            <div>
+              <dt>Precio</dt>
+              <dd>{{ product.price | currencyArs }}</dd>
+            </div>
+            <div>
+              <dt>Colores</dt>
+              <dd>{{ product.colors.join(', ') }}</dd>
+            </div>
+            <div>
+              <dt>Talles</dt>
+              <dd>{{ product.sizes.join(' · ') }}</dd>
+            </div>
+            <div>
+              <dt>Material</dt>
+              <dd>Algodón</dd>
+            </div>
+          </dl>
+
+          <div class="side-controls" role="group" aria-label="Lado de la remera">
+            <button
+              type="button"
+              [attr.aria-pressed]="selectedSide() === 'design'"
+              (click)="showSide('design')"
+            >
+              Estampa
+            </button>
+            <button
+              type="button"
+              [attr.aria-pressed]="selectedSide() === 'front'"
+              (click)="showSide('front')"
+            >
+              Frente
+            </button>
+          </div>
+
+          <a [routerLink]="['/product', product.id]" class="stage-action">
+            Elegir esta remera
+            <span aria-hidden="true">↗</span>
+          </a>
+
+          <div class="stage-navigation">
+            <button type="button" class="stage-back" (click)="deselect()">
+              <span aria-hidden="true">←</span> Volver al perchero
+            </button>
+            <div class="arrow-controls">
+              <button
+                type="button"
+                [disabled]="!canPrevious()"
+                (click)="previous()"
+                aria-label="Ver la remera anterior"
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                [disabled]="!canNext()"
+                (click)="next()"
+                aria-label="Ver la remera siguiente"
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </aside>
+      }
+
+      <div class="locker-footer">
+        <p>
+          @if (selectedProduct()) {
+            Arrastrá para girarla · Clic en la remera para darla vuelta · Clic afuera para soltarla
+          } @else {
+            Arrastrá el perchero · Clic para sacar una remera
+          }
+        </p>
+        <button
+          type="button"
+          class="sound-toggle"
+          [attr.aria-pressed]="soundOn()"
+          (click)="toggleSound()"
+        >
+          Sonido {{ soundOn() ? 'sí' : 'no' }}
+        </button>
+      </div>
+
+      <p class="sr-only" aria-live="polite">{{ announcement() }}</p>
+    } @else {
+      @if (visibleProducts()[0]; as product) {
+        <div class="locker-fallback">
+          <img
+            [ngSrc]="product.images[0]"
+            [alt]="product.name + ', frente y espalda'"
+            fill
+            sizes="100vw"
+            priority
+          />
+          <div>
+            <h1 id="locker-title">BLAK</h1>
+            <p>Remeras de autor creadas en Córdoba.</p>
+            <a routerLink="/products">Ver colección</a>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  @if (visibleProducts().length > 0) {
+    <ul class="product-rail" aria-label="Elegir una remera del vestuario">
+      @for (product of visibleProducts(); track product.id) {
+        <li>
+          <button
+            type="button"
+            [attr.aria-pressed]="selectedId() === product.id"
+            (click)="select(product.id)"
+          >
+            {{ product.name }}
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <div class="locker-ticker" aria-hidden="true">
+    <span>Hecho en Córdoba</span>
+    <span>Algodón</span>
+    <span>Drop actual</span>
+    <span>Streetwear de autor</span>
+    <span>BLAK</span>
+    <span>Hecho en Córdoba</span>
+  </div>
+</section>

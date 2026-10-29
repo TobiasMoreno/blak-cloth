@@ -48,7 +48,7 @@ import { WishlistService } from '../../core/services/wishlist.service';
           />
         </a>
 
-        <div class="hidden items-center gap-8 md:flex md:justify-self-center">
+        <div class="hidden items-center gap-6 md:flex md:justify-self-center">
           <a
             routerLink="/"
             routerLinkActive="text-accent"

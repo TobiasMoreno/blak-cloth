@@ -3,61 +3,19 @@ import { NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ProductService } from '../../core/services/product.service';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
-import { ClothesRackComponent } from './clothes-rack.component';
+import { HomeShowroomComponent } from './home-showroom.component';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, NgOptimizedImage, CurrencyArsPipe, ClothesRackComponent],
+  imports: [RouterLink, NgOptimizedImage, CurrencyArsPipe, HomeShowroomComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="overflow-clip bg-bone">
       <section
-        class="flex min-h-[calc(100svh-4rem)] flex-col overflow-hidden bg-ink text-bone"
-        aria-labelledby="home-title"
+        class="min-h-[calc(100svh-4rem)] overflow-hidden bg-ink text-bone"
+        aria-label="Colección BLAK"
       >
-        <h1 id="home-title" class="px-4 pt-5 md:px-8 md:pt-8">
-          <span class="monument-enter-left block">
-            <img
-              ngSrc="images/brand/blak-logo-white.svg"
-              alt="BLAK"
-              width="590"
-              height="144"
-              priority
-              class="h-auto w-[calc(100vw-2rem)] max-w-[52rem] md:w-[38vw]"
-            />
-          </span>
-        </h1>
-
-        <!-- El perchero ocupa el espacio libre del hero y queda centrado en él -->
-        <app-clothes-rack class="flex flex-1 flex-col justify-center py-6 md:py-8" />
-
-        <div
-          class="flex flex-col gap-6 px-4 pb-6 md:flex-row md:items-end md:justify-between md:px-8 md:pb-8"
-        >
-          <div class="max-w-sm">
-            <p class="text-lg leading-snug text-bone md:text-xl">
-              Streetwear de autor creado en Córdoba para vestir una idea propia.
-            </p>
-            <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
-              <a
-                routerLink="/products"
-                class="inline-flex min-h-12 items-center bg-accent px-6 font-semibold text-white transition-colors duration-200 hover:bg-accent-hover"
-              >
-                Ver colección
-              </a>
-              <a
-                routerLink="/equipos"
-                class="flex min-h-11 w-fit items-center whitespace-nowrap text-sm font-semibold text-bone underline decoration-accent decoration-2 underline-offset-4 transition-colors duration-200 hover:text-accent-bright"
-              >
-                Remeras para tu equipo →
-              </a>
-            </div>
-          </div>
-
-          <p class="hidden max-w-52 text-sm leading-relaxed text-ash md:block md:text-right">
-            {{ designCountLabel() }}. Algodón. Compra coordinada por WhatsApp.
-          </p>
-        </div>
+        <app-home-showroom />
       </section>
 
       <section class="section-rise px-4 py-24 md:px-8 md:py-36" aria-labelledby="drop-title">
@@ -191,7 +149,7 @@ import { ClothesRackComponent } from './clothes-rack.component';
         >
           <h2
             id="teams-home-title"
-            class="max-w-[8ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl"
+            class="max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl"
           >
             Tu equipo. Su remera.
           </h2>
@@ -216,7 +174,7 @@ import { ClothesRackComponent } from './clothes-rack.component';
             <div class="lg:sticky lg:top-28">
               <h2
                 id="buy-title"
-                class="max-w-[8ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl"
+                class="max-w-[12ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl"
               >
                 De la obra a vos
               </h2>
