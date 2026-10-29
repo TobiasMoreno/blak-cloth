@@ -15,7 +15,7 @@ const COPIED_FEEDBACK_MS = 2500;
         target="_blank"
         rel="noopener"
         [attr.aria-label]="'Compartir ' + title() + ' por WhatsApp (se abre en otra pestaña)'"
-        class="flex min-h-11 items-center gap-2 bg-[#e7e7e1] px-4 font-semibold transition-colors duration-200 hover:bg-[#0b0b0b] hover:text-[#f4f4f0]"
+        class="flex min-h-11 items-center gap-2 bg-surface px-4 font-semibold transition-colors duration-200 hover:bg-ink hover:text-bone"
       >
         <i class="pi pi-whatsapp" aria-hidden="true"></i>
         WhatsApp
@@ -24,7 +24,7 @@ const COPIED_FEEDBACK_MS = 2500;
       <button
         type="button"
         (click)="copyLink()"
-        class="flex min-h-11 items-center gap-2 bg-[#e7e7e1] px-4 font-semibold transition-colors duration-200 hover:bg-[#0b0b0b] hover:text-[#f4f4f0]"
+        class="flex min-h-11 items-center gap-2 bg-surface px-4 font-semibold transition-colors duration-200 hover:bg-ink hover:text-bone"
       >
         <i [class]="copied() ? 'pi pi-check' : 'pi pi-link'" aria-hidden="true"></i>
         {{ copied() ? '¡Link copiado!' : 'Copiar link' }}
@@ -35,7 +35,7 @@ const COPIED_FEEDBACK_MS = 2500;
           type="button"
           (click)="nativeShare()"
           aria-label="Más opciones para compartir"
-          class="flex min-h-11 min-w-11 items-center justify-center bg-[#e7e7e1] px-3 transition-colors duration-200 hover:bg-[#0b0b0b] hover:text-[#f4f4f0]"
+          class="flex min-h-11 min-w-11 items-center justify-center bg-surface px-3 transition-colors duration-200 hover:bg-ink hover:text-bone"
         >
           <i class="pi pi-share-alt" aria-hidden="true"></i>
         </button>

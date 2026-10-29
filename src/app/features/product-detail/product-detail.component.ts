@@ -11,7 +11,6 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgOptimizedImage } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Meta, Title } from '@angular/platform-browser';
 import { map } from 'rxjs';
 import { ProductService } from '../../core/services/product.service';
@@ -23,8 +22,9 @@ import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
 import { getColorHex } from '../../core/constants/colors.constants';
 import { LEGACY_PRODUCT_IDS } from '../../core/constants/legacy-products.constants';
-import { InputNumberModule } from 'primeng/inputnumber';
+import { STORE_INFO } from '../../core/constants/store-info.constants';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
+import { QuantityStepperComponent } from '../../shared/components/quantity-stepper/quantity-stepper.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { ShareButtonsComponent } from '../../shared/components/share-buttons/share-buttons.component';
 
@@ -35,25 +35,24 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
   imports: [
     RouterLink,
     NgOptimizedImage,
-    FormsModule,
     CurrencyArsPipe,
-    InputNumberModule,
+    QuantityStepperComponent,
     ProductCardComponent,
     ShareButtonsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (product(); as productData) {
-      <div class="min-h-[100svh] bg-[#f4f4f0] px-4 py-10 md:px-8 md:py-16">
+      <div class="min-h-[100svh] bg-bone px-4 py-10 md:px-8 md:py-16">
         <div>
           <!-- Breadcrumbs -->
           <nav aria-label="Breadcrumb" class="mb-10">
-            <ol class="flex items-center gap-3 text-sm text-[#555550]">
-              <li><a routerLink="/" class="hover:text-[#d9182b]">Inicio</a></li>
+            <ol class="flex items-center gap-3 text-sm text-muted">
+              <li><a routerLink="/" class="hover:text-accent">Inicio</a></li>
               <li aria-hidden="true">→</li>
-              <li><a routerLink="/products" class="hover:text-[#d9182b]">Colección</a></li>
+              <li><a routerLink="/products" class="hover:text-accent">Colección</a></li>
               <li aria-hidden="true">→</li>
-              <li class="truncate font-semibold text-[#0b0b0b]" aria-current="page">{{ productData.name }}</li>
+              <li class="truncate font-semibold text-ink" aria-current="page">{{ productData.name }}</li>
             </ol>
           </nav>
 
@@ -69,15 +68,15 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                       [attr.aria-label]="'Ver foto ' + (i + 1) + ' de ' + productData.images.length"
                       (click)="activeImage.set(i)"
                       [class]="activeImage() === i
-                        ? 'aspect-square w-16 overflow-hidden bg-[#e7e7e1] ring-4 ring-[#0b0b0b] md:w-full'
-                        : 'aspect-square w-16 overflow-hidden bg-[#e7e7e1] opacity-60 hover:opacity-100 md:w-full'">
+                        ? 'aspect-square w-16 overflow-hidden bg-surface ring-4 ring-ink md:w-full'
+                        : 'aspect-square w-16 overflow-hidden bg-surface opacity-60 hover:opacity-100 md:w-full'">
                       <img [ngSrc]="img" alt="" width="200" height="200" class="h-full w-full object-cover">
                     </button>
                   }
                 </div>
               }
               <div class="flex-1">
-                <div class="aspect-[4/3] overflow-hidden bg-[#e7e7e1] lg:sticky lg:top-24">
+                <div class="aspect-[4/3] overflow-hidden bg-surface lg:sticky lg:top-24">
                   <img [ngSrc]="productData.images[activeImage()] || productData.images[0]"
                        [alt]="productData.name"
                        width="1200"
@@ -103,29 +102,28 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                 <button
                   type="button"
                   (click)="toggleFavorite()"
-                  aria-label="Guardar en favoritos"
                   [attr.aria-pressed]="isFavorite()"
-                  class="flex min-h-11 items-center gap-2 bg-[#e7e7e1] px-4 font-semibold transition-colors duration-200 hover:bg-[#d6d6cf]"
+                  class="flex min-h-11 items-center gap-2 bg-surface px-4 font-semibold transition-colors duration-200 hover:bg-rule"
                 >
-                  <i [class]="isFavorite() ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'" aria-hidden="true"></i>
+                  <i [class]="isFavorite() ? 'pi pi-heart-fill text-accent' : 'pi pi-heart'" aria-hidden="true"></i>
                   {{ isFavorite() ? 'En favoritos' : 'Guardar' }}
                 </button>
               </div>
 
               @if (productData.description) {
-                <p class="mt-8 max-w-[40ch] text-lg leading-relaxed text-[#555550]">
+                <p class="mt-8 max-w-[40ch] text-lg leading-relaxed text-muted">
                   {{ productData.description }}
                 </p>
               }
 
               @if (isSoldOut()) {
-                <div class="mt-10 bg-[#e7e7e1] p-5">
+                <div class="mt-10 bg-surface p-5">
                   <p class="font-semibold">Por ahora no hay talles disponibles.</p>
                   <a
                     [href]="soldOutWhatsAppUrl()"
                     target="_blank"
                     rel="noopener"
-                    class="mt-4 flex min-h-14 items-center justify-center bg-[#0b0b0b] px-5 font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#d9182b]"
+                    class="mt-4 flex min-h-14 items-center justify-center bg-ink px-5 font-semibold text-bone transition-colors duration-200 hover:bg-accent"
                   >
                     Consultar por WhatsApp
                   </a>
@@ -137,90 +135,129 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                     <p class="flex items-center gap-2 text-sm">
                       <span class="font-semibold uppercase tracking-wide">Color</span>
                       <span
-                        class="inline-block h-4 w-4 rounded-full border border-[#888880]"
+                        class="inline-block h-4 w-4 rounded-full border border-field"
                         [style.background-color]="getColorHex(productData.colors[0])"
                         aria-hidden="true"
                       ></span>
                       {{ productData.colors[0] }}
                     </p>
                   } @else {
-                    <div>
-                      <p id="color-label" class="mb-3 text-sm font-semibold uppercase tracking-wide">
+                    <fieldset>
+                      <legend class="mb-3 text-sm font-semibold uppercase tracking-wide">
                         Color
                         @if (selectedColor()) {
-                          <span class="font-normal normal-case tracking-normal text-[#555550]"> · {{ selectedColor() }}</span>
+                          <span class="font-normal normal-case tracking-normal text-muted"> · {{ selectedColor() }}</span>
                         }
-                      </p>
-                      <div class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="color-label">
+                      </legend>
+                      <div class="flex flex-wrap gap-2 [--choice-bg:var(--color-surface)]">
                         @for (color of productData.colors; track color) {
-                          <button
-                            type="button"
-                            role="radio"
-                            [attr.aria-checked]="selectedColor() === color"
-                            (click)="selectedColor.set(color)"
-                            [class]="selectedColor() === color
-                              ? 'flex min-h-12 items-center gap-2 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
-                              : 'flex min-h-12 items-center gap-2 bg-[#e7e7e1] px-4 font-semibold transition-colors duration-200 hover:bg-[#d6d6cf]'">
+                          <label class="choice flex min-h-12 items-center gap-2 px-4 font-semibold">
+                            <input
+                              type="radio"
+                              name="product-color"
+                              class="sr-only"
+                              [value]="color"
+                              [checked]="selectedColor() === color"
+                              (change)="selectedColor.set(color)"
+                            />
                             <span
-                              class="inline-block h-5 w-5 rounded-full border border-[#888880]"
+                              class="inline-block h-5 w-5 rounded-full border border-field"
                               [style.background-color]="getColorHex(color)"
                               aria-hidden="true"
                             ></span>
                             {{ color }}
-                          </button>
+                          </label>
                         }
                       </div>
-                    </div>
+                    </fieldset>
                   }
 
-                  <div>
-                    <p id="size-label" class="mb-3 text-sm font-semibold uppercase tracking-wide">Talle</p>
-                    <div class="flex flex-wrap gap-2" role="radiogroup" aria-labelledby="size-label">
+                  <fieldset>
+                    <legend class="mb-3 text-sm font-semibold uppercase tracking-wide">Talle</legend>
+                    <div class="flex flex-wrap gap-2 [--choice-bg:var(--color-surface)]">
                       @for (option of sizeOptions(); track option.size) {
-                        <button
-                          type="button"
-                          role="radio"
-                          [attr.aria-checked]="selectedSize() === option.size"
-                          [attr.aria-label]="option.available ? option.size : option.size + ', sin stock'"
-                          [disabled]="!option.available"
-                          (click)="selectedSize.set(option.size)"
-                          [class]="!option.available
-                            ? 'min-h-12 min-w-12 cursor-not-allowed bg-[#e7e7e1] px-4 font-semibold text-[#6b6b66] line-through'
-                            : selectedSize() === option.size
-                              ? 'min-h-12 min-w-12 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
-                              : 'min-h-12 min-w-12 bg-[#e7e7e1] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'">
+                        <label class="choice flex min-h-12 min-w-12 items-center justify-center px-4 font-semibold">
+                          <input
+                            type="radio"
+                            name="product-size"
+                            class="sr-only"
+                            [value]="option.size"
+                            [checked]="selectedSize() === option.size"
+                            [disabled]="!option.available"
+                            (change)="selectedSize.set(option.size)"
+                          />
                           {{ option.size }}
-                        </button>
+                          @if (!option.available) {
+                            <span class="sr-only">, sin stock</span>
+                          }
+                        </label>
                       }
                     </div>
-                  </div>
+
+                    <details class="group mt-4">
+                      <summary class="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-semibold underline decoration-2 underline-offset-4 hover:text-accent-deep [&::-webkit-details-marker]:hidden">
+                        Guía de talles
+                        <span class="transition-transform duration-200 group-open:rotate-45" aria-hidden="true">+</span>
+                      </summary>
+                      @if (sizeChart.length > 0) {
+                        <table class="mt-3 w-full max-w-sm text-left text-sm tabular-nums">
+                          <caption class="sr-only">Medidas de la remera en centímetros</caption>
+                          <thead class="border-b-2 border-ink">
+                            <tr>
+                              <th scope="col" class="py-2 font-semibold">Talle</th>
+                              <th scope="col" class="py-2 font-semibold">Ancho de pecho</th>
+                              <th scope="col" class="py-2 font-semibold">Largo</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (row of sizeChart; track row.size) {
+                              <tr class="border-b border-rule">
+                                <th scope="row" class="py-2 font-semibold">{{ row.size }}</th>
+                                <td class="py-2">{{ row.chest }} cm</td>
+                                <td class="py-2">{{ row.length }} cm</td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                        <p class="mt-2 text-sm text-muted">Medí una remera que te quede bien, apoyada y estirada.</p>
+                      } @else {
+                        <p class="mt-3 max-w-[40ch] text-sm leading-relaxed text-muted">
+                          Pasanos tu altura y cómo te gusta que te quede, y te recomendamos el talle.
+                          <a
+                            [href]="sizeHelpWhatsAppUrl()"
+                            target="_blank"
+                            rel="noopener"
+                            class="font-semibold text-ink underline decoration-2 underline-offset-4 hover:text-accent-deep"
+                          >Preguntar por WhatsApp<span class="sr-only"> (se abre en otra pestaña)</span></a>
+                        </p>
+                      }
+                    </details>
+                  </fieldset>
 
                   <div>
                     <label for="product-quantity" class="mb-3 block text-sm font-semibold uppercase tracking-wide">
                       Cantidad
                     </label>
-                    <p-inputNumber
+                    <app-quantity-stepper
                       inputId="product-quantity"
-                      [ngModel]="quantity()"
-                      (ngModelChange)="quantity.set($event)"
-                      [min]="1"
+                      [value]="quantity()"
+                      (valueChange)="quantity.set($event)"
                       [max]="availableQuantity() > 0 ? availableQuantity() : 1"
-                      [showButtons]="true"
                       [disabled]="availableQuantity() === 0"
-                      styleClass="w-full">
-                    </p-inputNumber>
+                      describedBy="quantity-hint"
+                    />
                     @if (currentCartQuantity() > 0) {
                       @if (availableQuantity() === 0) {
-                        <p class="mt-2 bg-[#fde8ea] px-3 py-2 text-sm font-semibold text-[#8a1020]">
-                          Ya tenés 5 unidades en el carrito (máximo permitido).
+                        <p id="quantity-hint" class="mt-2 bg-[#fde8ea] px-3 py-2 text-sm font-semibold text-[#8a1020]">
+                          Ya tenés {{ MAX_QUANTITY }} en el carrito, el máximo por pedido. Para más, escribinos por WhatsApp.
                         </p>
                       } @else {
-                        <p class="mt-2 bg-[#fdf3d0] px-3 py-2 text-sm font-semibold text-[#5c4300]">
+                        <p id="quantity-hint" class="mt-2 bg-[#fdf3d0] px-3 py-2 text-sm font-semibold text-[#5c4300]">
                           Ya tenés {{ currentCartQuantity() }} en el carrito. Podés agregar {{ availableQuantity() }} más.
                         </p>
                       }
                     } @else {
-                      <p class="mt-2 text-sm text-[#555550]">Hasta 5 por pedido. Para más, consultanos por WhatsApp.</p>
+                      <p id="quantity-hint" class="mt-2 text-sm text-muted">Hasta {{ MAX_QUANTITY }} por pedido. Para más, consultanos por WhatsApp.</p>
                     }
                   </div>
 
@@ -238,12 +275,12 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                 </div>
 
                 <!-- Botones de acción -->
-                <div class="mt-8 grid gap-3 sm:grid-cols-2">
+                <div class="mt-8 grid gap-3">
                   <button
                     type="button"
                     [disabled]="availableQuantity() === 0"
                     (click)="addToCart()"
-                    class="min-h-14 bg-[#0b0b0b] px-5 font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#333330] disabled:cursor-not-allowed disabled:bg-[#6b6b66]"
+                    class="on-accent min-h-14 bg-accent px-5 font-semibold text-white transition-colors duration-200 hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-muted"
                   >
                     Agregar al carrito
                   </button>
@@ -251,17 +288,24 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                     type="button"
                     [disabled]="availableQuantity() === 0"
                     (click)="buyNow()"
-                    class="min-h-14 bg-[#d9182b] px-5 font-semibold text-white transition-colors duration-200 hover:bg-[#c91425] disabled:cursor-not-allowed disabled:bg-[#6b6b66]"
+                    class="min-h-12 border-2 border-ink px-5 font-semibold text-ink transition-colors duration-200 hover:bg-ink hover:text-bone disabled:cursor-not-allowed disabled:border-muted disabled:text-muted disabled:hover:bg-transparent"
                   >
-                    Comprar ahora
+                    Agregar e ir al carrito
                   </button>
                 </div>
-                <p class="mt-4 text-sm leading-relaxed text-[#555550]">
-                  El pedido se confirma por WhatsApp después de revisar el carrito.
-                </p>
+                <dl class="mt-6 grid gap-2 border-t border-rule pt-5 text-sm">
+                  <div class="flex gap-2">
+                    <dt class="w-20 shrink-0 font-semibold">Pago</dt>
+                    <dd class="text-muted">{{ storeInfo.payment }}, al confirmar por WhatsApp.</dd>
+                  </div>
+                  <div class="flex gap-2">
+                    <dt class="w-20 shrink-0 font-semibold">Entrega</dt>
+                    <dd class="text-muted">{{ deliveryFact }}</dd>
+                  </div>
+                </dl>
               }
 
-              <div class="mt-10 border-t border-[#d6d6cf] pt-6">
+              <div class="mt-10 border-t border-rule pt-6">
                 <app-share-buttons
                   [path]="'/product/' + productData.id"
                   [title]="productData.name + ' · BLAK Streetwear'"
@@ -275,7 +319,7 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
             <section class="mt-32 md:mt-44">
               <div class="mb-10 flex items-end justify-between gap-5">
                 <h2 class="max-w-[10ch] text-5xl font-black uppercase leading-[0.9] md:text-7xl">También te puede gustar</h2>
-                <a routerLink="/products" class="min-h-11 content-center font-semibold underline decoration-2 underline-offset-4 hover:text-[#d9182b]">
+                <a routerLink="/products" class="min-h-11 content-center font-semibold underline decoration-2 underline-offset-4 hover:text-accent">
                   Ver todo
                 </a>
               </div>
@@ -289,12 +333,12 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
         </div>
       </div>
     } @else if (isLoading()) {
-      <div class="min-h-[100svh] bg-[#f4f4f0]" role="status" aria-label="Cargando remera"></div>
+      <div class="min-h-[100svh] bg-bone" role="status" aria-label="Cargando remera"></div>
     } @else {
-      <div class="flex min-h-[70svh] items-center bg-[#0b0b0b] px-4 text-[#f4f4f0] md:px-8">
+      <div class="flex min-h-[70svh] items-center bg-ink px-4 text-bone md:px-8">
         <div>
           <h1 class="max-w-[10ch] text-7xl font-black uppercase leading-[0.86] md:text-9xl">Producto no encontrado</h1>
-          <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-[#d9182b] px-6 font-semibold text-white">
+          <a routerLink="/products" class="mt-8 inline-flex min-h-12 items-center bg-accent px-6 font-semibold text-white">
             Volver a la colección
           </a>
         </div>
@@ -318,6 +362,11 @@ export class ProductDetailComponent {
   });
 
   readonly getColorHex = getColorHex;
+  readonly storeInfo = STORE_INFO;
+  readonly sizeChart = STORE_INFO.sizeChart;
+  readonly deliveryFact = STORE_INFO.shippingArea
+    ? `Retiro o envío en ${STORE_INFO.shippingArea}, se coordina por WhatsApp.`
+    : `Retiro o envío en ${STORE_INFO.city}, se coordina por WhatsApp.`;
 
   isLoading = this.productService.isLoading;
   product = computed<Product | null>(() => {
@@ -387,6 +436,10 @@ export class ProductDetailComponent {
     return Math.max(0, this.MAX_QUANTITY - this.currentCartQuantity());
   });
 
+  sizeHelpWhatsAppUrl = computed(() =>
+    getWhatsAppUrl(`Hola! Quiero la remera "${this.product()?.name}" y necesito ayuda con el talle. Mido: `)
+  );
+
   soldOutWhatsAppUrl = computed(() =>
     getWhatsAppUrl(`Hola! Quería saber si va a volver a haber stock de la remera "${this.product()?.name}".`)
   );
@@ -422,7 +475,10 @@ export class ProductDetailComponent {
     const added = this.addSelectionToCart();
     if (!added) return;
 
-    this.toastService.show('Agregado al carrito', `${added.productName} · Talle ${added.size} · ${added.color}`);
+    this.toastService.show('Agregado al carrito', `${added.productName} · Talle ${added.size} · ${added.color}`, {
+      label: 'Ver carrito',
+      link: '/cart'
+    });
   }
 
   buyNow(): void {

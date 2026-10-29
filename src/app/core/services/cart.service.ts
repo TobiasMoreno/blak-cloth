@@ -1,8 +1,10 @@
 import { inject, Injectable, signal, computed } from '@angular/core';
 import { CartItem } from '../models/cart-item.model';
 import { LEGACY_PRODUCT_IDS } from '../constants/legacy-products.constants';
+import { readStorage, writeStorage } from '../storage/local-storage';
 
-const CART_STORAGE_KEY = 'lm-studio-cart';
+const CART_STORAGE_KEY = 'blak-cart';
+const LEGACY_CART_STORAGE_KEY = 'lm-studio-cart';
 const MAX_QUANTITY = 5;
 
 @Injectable({
@@ -112,6 +114,14 @@ export class CartService {
     this.saveCartToStorage();
   }
 
+  /** Vuelve a poner una prenda quitada en su lugar ("Deshacer"). */
+  restoreItem(item: CartItem, index: number): void {
+    const updatedItems = [...this.cartItems()];
+    updatedItems.splice(Math.min(index, updatedItems.length), 0, item);
+    this.cartItems.set(updatedItems);
+    this.saveCartToStorage();
+  }
+
   clearCart(): void {
     this.cartItems.set([]);
     this.saveCartToStorage();
@@ -119,7 +129,7 @@ export class CartService {
 
   private loadCartFromStorage(): CartItem[] {
     try {
-      const stored = localStorage.getItem(CART_STORAGE_KEY);
+      const stored = readStorage(CART_STORAGE_KEY, LEGACY_CART_STORAGE_KEY);
       const items: CartItem[] = stored ? JSON.parse(stored) : [];
       // Carritos guardados antes del catálogo con slugs: actualizar ID y foto
       return items.map(item => {
@@ -132,10 +142,6 @@ export class CartService {
   }
 
   private saveCartToStorage(): void {
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(this.cartItems()));
-    } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
-    }
+    writeStorage(CART_STORAGE_KEY, JSON.stringify(this.cartItems()));
   }
 }

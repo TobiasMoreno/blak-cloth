@@ -19,19 +19,19 @@ const NEW_PRODUCT_DAYS = 30;
         (click)="toggleWishlist($event)"
         [attr.aria-label]="isFavorite() ? 'Quitar ' + product().name + ' de favoritos' : 'Agregar ' + product().name + ' a favoritos'"
         [attr.aria-pressed]="isFavorite()"
-        class="absolute right-3 top-3 z-10 flex min-h-11 min-w-11 items-center justify-center bg-[#f4f4f0] text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d9182b] hover:text-white"
+        class="absolute right-3 top-3 z-10 flex min-h-11 min-w-11 items-center justify-center bg-bone text-ink transition-colors duration-200 hover:bg-accent hover:text-white"
       >
-        <i [class]="isFavorite() ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'" aria-hidden="true"></i>
+        <i [class]="isFavorite() ? 'pi pi-heart-fill text-accent' : 'pi pi-heart'" aria-hidden="true"></i>
       </button>
 
       @if (isNew()) {
-        <span class="absolute left-3 top-3 z-10 bg-[#d9182b] px-3 py-1 text-sm font-semibold uppercase tracking-wide text-white">
+        <span class="absolute left-3 top-3 z-10 bg-accent px-3 py-1 text-sm font-semibold uppercase tracking-wide text-white">
           Nuevo
         </span>
       }
 
       <a [routerLink]="['/product', product().id]" class="block">
-        <div class="relative aspect-[4/3] overflow-hidden bg-[#e7e7e1]">
+        <div class="relative aspect-[4/3] overflow-hidden bg-surface">
           <img
             [ngSrc]="product().images[0]"
             [alt]="product().name"
@@ -56,7 +56,7 @@ const NEW_PRODUCT_DAYS = 30;
 
         <div class="pt-5">
           <div class="flex items-start justify-between gap-4">
-            <h3 class="max-w-[13ch] text-3xl font-black uppercase leading-[0.92] transition-colors duration-200 group-hover:text-[#d9182b]">
+            <h3 class="max-w-[13ch] text-3xl font-black uppercase leading-[0.92] transition-colors duration-200 group-hover:text-accent">
               {{ product().name }}
             </h3>
             <p class="shrink-0 text-lg font-semibold tabular-nums">
@@ -64,16 +64,16 @@ const NEW_PRODUCT_DAYS = 30;
             </p>
           </div>
 
-          <div class="mt-5 flex items-center justify-between gap-4 text-sm text-[#555550]">
+          <div class="mt-5 flex items-center justify-between gap-4 text-sm text-muted">
             @if (product().sizes.length > 0) {
               <span>Talles {{ product().sizes.join(' · ') }}</span>
             } @else {
-              <span class="font-semibold text-[#0b0b0b]">Sin stock</span>
+              <span class="font-semibold text-ink">Sin stock</span>
             }
             <span role="img" [attr.aria-label]="'Colores disponibles: ' + product().colors.join(', ')" class="flex gap-2">
               @for (color of product().colors; track color) {
                 <span
-                  class="inline-block h-4 w-4 rounded-full border border-[#888880]"
+                  class="inline-block h-4 w-4 rounded-full border border-field"
                   [style.background-color]="getColorHex(color)"
                   [title]="color"
                 ></span>

@@ -12,16 +12,16 @@ const CONNECTORS = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'y', 'e']);
   },
   template: `
     <div
-      class="frame relative flex h-full items-center justify-center overflow-hidden bg-[#d9182b] p-3 md:p-4"
+      class="frame relative flex h-full items-center justify-center overflow-hidden bg-accent p-3 md:p-4"
     >
       <p
-        class="absolute left-3 top-3 z-10 bg-[#0b0b0b] px-3 py-1 text-xs font-semibold text-white md:left-6 md:top-6 md:text-sm"
+        class="absolute left-3 top-3 z-10 bg-ink px-3 py-1 text-xs font-semibold text-white md:left-6 md:top-6 md:text-sm"
       >
         {{ placementLabel() }}
       </p>
       @if (hasCrest() !== null) {
         <p
-          class="absolute bottom-3 right-3 z-10 max-w-40 bg-[#0b0b0b] px-3 py-2 text-right text-xs leading-snug text-white md:bottom-6 md:right-6 md:text-sm"
+          class="absolute bottom-3 right-3 z-10 max-w-40 bg-ink px-3 py-2 text-right text-xs leading-snug text-white md:bottom-6 md:right-6 md:text-sm"
         >
           {{ hasCrest() ? 'Escudo: ubicación a definir' : 'Escudo: hay que crearlo' }}
         </p>

@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/management/management-shell.component.html"
+        ],
+        "createdAt": "2026-10-29T02:08:28.971Z",
+        "reason": "audit 2026-10-28: all <img> use Angular ngSrc (NgOptimizedImage), detector does not read ngSrc"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/app/features/teams/teams.component.html"
+        ],
+        "createdAt": "2026-10-29T02:08:29.023Z",
+        "reason": "audit 2026-10-28: all <img> use Angular ngSrc (NgOptimizedImage), detector does not read ngSrc"
+      }
+    ]
+  }
+}

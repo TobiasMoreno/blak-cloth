@@ -25,7 +25,7 @@ import { WishlistService } from '../../core/services/wishlist.service';
   },
   template: `
     <header
-      class="sticky top-0 z-50 bg-[#f4f4f0] text-[#0b0b0b]"
+      class="sticky top-0 z-50 bg-bone text-ink"
       (keydown.tab)="trapFocus($event)"
       (keydown.shift.tab)="trapFocus($event)"
     >
@@ -51,36 +51,36 @@ import { WishlistService } from '../../core/services/wishlist.service';
         <div class="hidden items-center gap-8 md:flex md:justify-self-center">
           <a
             routerLink="/"
-            routerLinkActive="text-[#d9182b]"
+            routerLinkActive="text-accent"
             ariaCurrentWhenActive="page"
             [routerLinkActiveOptions]="{ exact: true }"
-            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
+            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-accent"
           >
             Inicio
           </a>
           <a
             routerLink="/products"
-            routerLinkActive="text-[#d9182b]"
+            routerLinkActive="text-accent"
             ariaCurrentWhenActive="page"
-            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
+            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-accent"
           >
             Colección
           </a>
           <a
             routerLink="/equipos"
-            routerLinkActive="text-[#d9182b]"
+            routerLinkActive="text-accent"
             ariaCurrentWhenActive="page"
-            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
+            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-accent"
           >
-            Para Equipos
+            Para equipos
           </a>
           <a
             routerLink="/about"
-            routerLinkActive="text-[#d9182b]"
+            routerLinkActive="text-accent"
             ariaCurrentWhenActive="page"
-            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
+            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-accent"
           >
-            El Estudio
+            El estudio
           </a>
         </div>
 
@@ -89,28 +89,30 @@ import { WishlistService } from '../../core/services/wishlist.service';
             routerLink="/products"
             [queryParams]="{ favoritas: 1 }"
             [attr.aria-label]="favoritesLabel()"
-            class="flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-semibold transition-colors duration-200 hover:text-[#d9182b]"
+            class="flex min-h-11 items-center justify-center gap-2 px-2 text-sm font-semibold transition-colors duration-200 hover:text-accent"
           >
             <i
-              [class]="wishlistService.totalItems() > 0 ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'"
+              [class]="wishlistService.totalItems() > 0 ? 'pi pi-heart-fill text-accent' : 'pi pi-heart'"
               aria-hidden="true"
             ></i>
+            Favoritas
             @if (wishlistService.totalItems() > 0) {
               <span class="tabular-nums" aria-hidden="true">{{ wishlistService.totalItems() }}</span>
             }
           </a>
           <a
             routerLink="/cart"
-            routerLinkActive="bg-[#d9182b]"
+            routerLinkActive="bg-accent"
             ariaCurrentWhenActive="page"
-            class="relative flex min-h-11 items-center gap-2 bg-[#0b0b0b] px-4 text-sm font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#d9182b]"
-            aria-label="Abrir carrito"
+            class="relative flex min-h-11 items-center gap-2 bg-ink px-4 text-sm font-semibold text-bone transition-colors duration-200 hover:bg-accent"
+            [attr.aria-label]="cartLabel()"
           >
             Carrito
             @if (cartService.totalItems() > 0) {
               <span
                 [class.cart-badge-pop]="badgeAnimating()"
-                class="inline-flex min-h-6 min-w-6 items-center justify-center bg-[#d9182b] px-1 text-xs text-white"
+                class="inline-flex min-h-6 min-w-6 items-center justify-center bg-accent px-1 text-xs text-white"
+                aria-hidden="true"
               >
                 {{ cartService.totalItems() }}
               </span>
@@ -118,7 +120,7 @@ import { WishlistService } from '../../core/services/wishlist.service';
           </a>
         </div>
 
-        <div class="flex items-center gap-2 md:hidden">
+        <div class="flex items-center gap-1 md:hidden">
           <a
             routerLink="/products"
             [queryParams]="{ favoritas: 1 }"
@@ -127,11 +129,32 @@ import { WishlistService } from '../../core/services/wishlist.service';
             class="flex min-h-11 min-w-11 items-center justify-center gap-1 font-semibold"
           >
             <i
-              [class]="wishlistService.totalItems() > 0 ? 'pi pi-heart-fill text-[#d9182b]' : 'pi pi-heart'"
+              [class]="wishlistService.totalItems() > 0 ? 'pi pi-heart-fill text-accent' : 'pi pi-heart'"
               aria-hidden="true"
             ></i>
             @if (wishlistService.totalItems() > 0) {
               <span class="text-sm tabular-nums" aria-hidden="true">{{ wishlistService.totalItems() }}</span>
+            }
+          </a>
+          <!-- Siempre a mano en el teléfono: después de agregar una remera, el carrito está a un toque -->
+          <a
+            routerLink="/cart"
+            ariaCurrentWhenActive="page"
+            (click)="closeMenu()"
+            [attr.aria-label]="cartLabel()"
+            class="flex min-h-11 min-w-11 items-center justify-center gap-1.5 bg-ink px-3 text-sm font-semibold text-bone"
+          >
+            <!-- En 320px no entra la palabra junto al logo: queda el ícono -->
+            <i class="pi pi-shopping-bag min-[380px]:hidden" aria-hidden="true"></i>
+            <span class="max-[379px]:hidden">Carrito</span>
+            @if (cartService.totalItems() > 0) {
+              <span
+                [class.cart-badge-pop]="badgeAnimating()"
+                class="inline-flex min-h-6 min-w-6 items-center justify-center bg-accent px-1 text-xs tabular-nums text-white"
+                aria-hidden="true"
+              >
+                {{ cartService.totalItems() }}
+              </span>
             }
           </a>
           <button
@@ -151,55 +174,55 @@ import { WishlistService } from '../../core/services/wishlist.service';
         <div
           #mobileNavigation
           id="mobile-navigation"
-          class="fixed inset-x-0 bottom-0 top-16 overflow-y-auto bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:hidden"
+          class="fixed inset-x-0 bottom-0 top-16 overflow-y-auto bg-ink px-4 py-10 text-bone md:hidden"
         >
           <div class="flex flex-col">
             <a
               routerLink="/"
-              routerLinkActive="text-[#d9182b]"
+              routerLinkActive="text-accent"
               [routerLinkActiveOptions]="{ exact: true }"
               ariaCurrentWhenActive="page"
               (click)="closeMenu()"
-              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-[#d9182b]"
+              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-accent"
             >
               Inicio
             </a>
             <a
               routerLink="/products"
-              routerLinkActive="text-[#d9182b]"
+              routerLinkActive="text-accent"
               ariaCurrentWhenActive="page"
               (click)="closeMenu()"
-              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-[#d9182b]"
+              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-accent"
             >
               Colección
             </a>
             <a
               routerLink="/equipos"
-              routerLinkActive="text-[#d9182b]"
+              routerLinkActive="text-accent"
               ariaCurrentWhenActive="page"
               (click)="closeMenu()"
-              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-[#d9182b]"
+              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-accent"
             >
-              Para Equipos
+              Para equipos
             </a>
             <a
               routerLink="/about"
-              routerLinkActive="text-[#d9182b]"
+              routerLinkActive="text-accent"
               ariaCurrentWhenActive="page"
               (click)="closeMenu()"
-              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-[#d9182b]"
+              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-accent"
             >
-              El Estudio
+              El estudio
             </a>
             <a
               routerLink="/cart"
               routerLinkActive="outline outline-2 outline-white"
               ariaCurrentWhenActive="page"
               (click)="closeMenu()"
-              class="mt-12 flex min-h-14 items-center justify-between bg-[#d9182b] px-5 font-semibold text-white"
+              class="mt-12 flex min-h-14 items-center justify-between bg-accent px-5 font-semibold text-white"
             >
               Ver carrito
-              <span>{{ cartService.totalItems() }} prendas</span>
+              <span>{{ itemsLabel() }}</span>
             </a>
           </div>
         </div>
@@ -216,6 +239,12 @@ export class HeaderComponent {
     const count = this.wishlistService.totalItems();
     return count === 0 ? 'Favoritas' : `Favoritas, ${count} ${count === 1 ? 'guardada' : 'guardadas'}`;
   });
+  itemsLabel = computed(() => {
+    const count = this.cartService.totalItems();
+    return `${count} ${count === 1 ? 'prenda' : 'prendas'}`;
+  });
+  // Empieza con el texto visible ("Carrito") para que el control por voz lo encuentre
+  cartLabel = computed(() => (this.cartService.totalItems() === 0 ? 'Carrito, vacío' : `Carrito, ${this.itemsLabel()}`));
   badgeAnimating = signal(false);
 
   private document = inject(DOCUMENT);

@@ -1,17 +1,17 @@
-<div class="min-h-[100svh] bg-[#f4f4f0] px-4 pb-28 pt-10 md:px-8 md:pb-40 md:pt-14">
+<div class="min-h-[100svh] bg-bone px-4 pb-28 pt-10 md:px-8 md:pb-40 md:pt-14">
   <header class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
     <h1 class="text-6xl font-black uppercase leading-[0.85] md:text-8xl">
       {{ onlyFavorites() ? 'Favoritas' : 'Colección' }}
     </h1>
-    <p class="text-lg text-[#555550]">
+    <p class="text-lg text-muted">
       {{ onlyFavorites() ? 'Las remeras que guardaste con el corazón' : 'Diseños de autor · pedidos por WhatsApp' }}
     </p>
   </header>
 
   <!-- Barra fija: búsqueda, orden y colecciones -->
-  <div class="sticky top-16 z-30 -mx-4 mt-8 border-b border-[#d6d6cf] bg-[#f4f4f0] px-4 py-3 md:-mx-8 md:px-8">
+  <div class="sticky top-16 z-30 -mx-4 mt-8 border-b border-rule bg-bone px-4 py-3 md:-mx-8 md:px-8">
     <div class="flex gap-2">
-      <div class="flex min-w-0 flex-1 bg-[#e7e7e1]">
+      <div class="flex min-w-0 flex-1 bg-surface">
         <label for="product-search" class="sr-only">Buscar por nombre</label>
         <input
           id="product-search"
@@ -19,7 +19,7 @@
           placeholder="Buscar"
           [ngModel]="searchTerm()"
           (ngModelChange)="searchTerm.set($event)"
-          class="min-h-12 min-w-0 flex-1 bg-transparent px-4 text-[#0b0b0b] placeholder:text-[#666660] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b0b0b]"
+          class="min-h-12 min-w-0 flex-1 bg-transparent px-4 text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink"
         />
       </div>
 
@@ -28,7 +28,7 @@
         id="product-sort"
         [ngModel]="sort()"
         (ngModelChange)="setSort($event)"
-        class="min-h-12 max-w-[11rem] bg-[#e7e7e1] px-3 font-semibold text-[#0b0b0b] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b0b0b]"
+        class="min-h-12 max-w-[11rem] bg-surface px-3 font-semibold text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink"
       >
         @for (option of sortOptions; track option.value) {
           <option [value]="option.value">{{ option.label }}</option>
@@ -41,7 +41,7 @@
           (click)="filtersOpen.set(!filtersOpen())"
           [attr.aria-expanded]="filtersOpen()"
           aria-controls="filters-panel"
-          class="min-h-12 shrink-0 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0] lg:hidden"
+          class="min-h-12 shrink-0 bg-ink px-4 font-semibold text-bone lg:hidden"
         >
           Filtros
           @if (activeFilterCount() > 0) {
@@ -59,8 +59,8 @@
             (click)="selectCollection(null)"
             [attr.aria-pressed]="selectedCollection() === null && !onlyFavorites()"
             [class]="selectedCollection() === null && !onlyFavorites()
-              ? 'min-h-11 bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
-              : 'min-h-11 bg-[#e7e7e1] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
+              ? 'min-h-11 bg-ink px-4 font-semibold text-bone'
+              : 'min-h-11 bg-surface px-4 font-semibold text-ink transition-colors duration-200 hover:bg-rule'"
           >
             Todas
           </button>
@@ -70,10 +70,10 @@
               (click)="showFavorites()"
               [attr.aria-pressed]="onlyFavorites()"
               [class]="onlyFavorites()
-                ? 'flex min-h-11 items-center gap-2 whitespace-nowrap bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
-                : 'flex min-h-11 items-center gap-2 whitespace-nowrap bg-[#e7e7e1] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
+                ? 'flex min-h-11 items-center gap-2 whitespace-nowrap bg-ink px-4 font-semibold text-bone'
+                : 'flex min-h-11 items-center gap-2 whitespace-nowrap bg-surface px-4 font-semibold text-ink transition-colors duration-200 hover:bg-rule'"
             >
-              <i class="pi pi-heart-fill text-[#d9182b]" aria-hidden="true"></i>
+              <i class="pi pi-heart-fill text-accent" aria-hidden="true"></i>
               Favoritas <span class="tabular-nums">({{ favoritesCount() }})</span>
             </button>
           }
@@ -83,8 +83,8 @@
               (click)="selectCollection(collection.slug)"
               [attr.aria-pressed]="selectedCollection() === collection.slug"
               [class]="selectedCollection() === collection.slug
-                ? 'min-h-11 whitespace-nowrap bg-[#0b0b0b] px-4 font-semibold text-[#f4f4f0]'
-                : 'min-h-11 whitespace-nowrap bg-[#e7e7e1] px-4 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
+                ? 'min-h-11 whitespace-nowrap bg-ink px-4 font-semibold text-bone'
+                : 'min-h-11 whitespace-nowrap bg-surface px-4 font-semibold text-ink transition-colors duration-200 hover:bg-rule'"
             >
               {{ collection.name }}
             </button>
@@ -99,7 +99,7 @@
     <section
       id="filters-panel"
       aria-label="Filtros"
-      [class]="(filtersOpen() ? 'flex' : 'hidden lg:flex') + ' flex-col gap-6 border-b border-[#d6d6cf] py-5 lg:flex-row lg:flex-wrap lg:items-end lg:gap-10'"
+      [class]="(filtersOpen() ? 'flex' : 'hidden lg:flex') + ' flex-col gap-6 border-b border-rule py-5 lg:flex-row lg:flex-wrap lg:items-end lg:gap-10'"
     >
       @if (showSizeFilter()) {
         <fieldset>
@@ -111,8 +111,8 @@
                 (click)="toggleSize(size)"
                 [attr.aria-pressed]="selectedSizes().includes(size)"
                 [class]="selectedSizes().includes(size)
-                  ? 'min-h-11 min-w-11 bg-[#0b0b0b] px-3 font-semibold text-[#f4f4f0]'
-                  : 'min-h-11 min-w-11 bg-[#e7e7e1] px-3 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
+                  ? 'min-h-11 min-w-11 bg-ink px-3 font-semibold text-bone'
+                  : 'min-h-11 min-w-11 bg-surface px-3 font-semibold text-ink transition-colors duration-200 hover:bg-rule'"
               >
                 {{ size }}
               </button>
@@ -131,11 +131,11 @@
                 (click)="toggleColor(color)"
                 [attr.aria-pressed]="selectedColors().includes(color)"
                 [class]="selectedColors().includes(color)
-                  ? 'flex min-h-11 items-center gap-2 bg-[#0b0b0b] px-3 font-semibold text-[#f4f4f0]'
-                  : 'flex min-h-11 items-center gap-2 bg-[#e7e7e1] px-3 font-semibold text-[#0b0b0b] transition-colors duration-200 hover:bg-[#d6d6cf]'"
+                  ? 'flex min-h-11 items-center gap-2 bg-ink px-3 font-semibold text-bone'
+                  : 'flex min-h-11 items-center gap-2 bg-surface px-3 font-semibold text-ink transition-colors duration-200 hover:bg-rule'"
               >
                 <span
-                  class="h-4 w-4 rounded-full border border-[#888880]"
+                  class="h-4 w-4 rounded-full border border-field"
                   [style.background-color]="getColorHex(color)"
                   aria-hidden="true"
                 ></span>
@@ -160,7 +160,7 @@
                 (ngModelChange)="setMinPrice($event)"
                 min="0"
                 placeholder="Mín."
-                class="min-h-11 w-full max-w-[8rem] bg-[#e7e7e1] px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b0b0b]"
+                class="min-h-11 w-full max-w-[8rem] bg-surface px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink"
               />
             </div>
             <div>
@@ -173,7 +173,7 @@
                 (ngModelChange)="setMaxPrice($event)"
                 min="0"
                 placeholder="Máx."
-                class="min-h-11 w-full max-w-[8rem] bg-[#e7e7e1] px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0b0b0b]"
+                class="min-h-11 w-full max-w-[8rem] bg-surface px-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink"
               />
             </div>
           </div>
@@ -186,14 +186,14 @@
   @if (isLoading()) {
     <div class="mt-8 grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Cargando productos">
       @for (placeholder of [1, 2, 3, 4, 5, 6]; track placeholder) {
-        <div class="aspect-[4/3] bg-[#e7e7e1]"></div>
+        <div class="aspect-[4/3] bg-surface"></div>
       }
     </div>
   } @else if (filteredProducts().length > 0) {
     <section class="mt-8" aria-labelledby="results-title">
       <div class="mb-6 flex min-h-11 flex-wrap items-center justify-between gap-3">
         <h2 id="results-title" class="sr-only">Resultados</h2>
-        <p class="text-[#555550]" role="status">
+        <p class="text-muted" role="status">
           Mostrando {{ visibleProducts().length }} de {{ filteredProducts().length }}
           {{ filteredProducts().length === 1 ? 'remera' : 'remeras' }}
         </p>
@@ -201,7 +201,7 @@
           <button
             type="button"
             (click)="clearAllFilters()"
-            class="min-h-11 font-semibold underline decoration-2 underline-offset-4 hover:text-[#d9182b]"
+            class="min-h-11 font-semibold underline decoration-2 underline-offset-4 hover:text-accent"
           >
             Limpiar filtros
           </button>
@@ -219,7 +219,7 @@
           <button
             type="button"
             (click)="showMore()"
-            class="min-h-14 bg-[#0b0b0b] px-8 font-semibold text-[#f4f4f0] transition-colors duration-200 hover:bg-[#d9182b]"
+            class="min-h-14 bg-ink px-8 font-semibold text-bone transition-colors duration-200 hover:bg-accent"
           >
             Ver más <span class="tabular-nums">({{ remainingCount() }})</span>
           </button>
@@ -227,34 +227,34 @@
       }
     </section>
   } @else if (onlyFavorites() && favoritesCount() === 0) {
-    <section class="mt-8 bg-[#e7e7e1] px-5 py-20 md:px-10" aria-labelledby="empty-favorites-title">
+    <section class="mt-8 bg-surface px-5 py-20 md:px-10" aria-labelledby="empty-favorites-title">
       <h2 id="empty-favorites-title" class="max-w-[12ch] text-6xl font-black uppercase leading-[0.9] md:text-8xl">
         Todavía no guardaste remeras
       </h2>
-      <p class="mt-8 max-w-md text-lg leading-relaxed text-[#555550]">
+      <p class="mt-8 max-w-md text-lg leading-relaxed text-muted">
         Tocá el <i class="pi pi-heart" aria-hidden="true"></i><span class="sr-only">corazón</span> en cualquier remera
         para guardarla acá y encontrarla rápido después.
       </p>
       <button
         type="button"
         (click)="clearAllFilters()"
-        class="mt-8 min-h-12 bg-[#0b0b0b] px-6 font-semibold text-[#f4f4f0] hover:bg-[#d9182b]"
+        class="mt-8 min-h-12 bg-ink px-6 font-semibold text-bone hover:bg-accent"
       >
         Ver la colección
       </button>
     </section>
   } @else {
-    <section class="mt-8 bg-[#0b0b0b] px-5 py-20 text-[#f4f4f0] md:px-10" aria-labelledby="empty-title">
+    <section class="mt-8 bg-ink px-5 py-20 text-bone md:px-10" aria-labelledby="empty-title">
       <h2 id="empty-title" class="max-w-[10ch] text-6xl font-black uppercase leading-[0.9] md:text-8xl">
         No apareció esa remera
       </h2>
-      <p class="mt-8 max-w-md text-lg leading-relaxed text-[#b8b8b2]">
+      <p class="mt-8 max-w-md text-lg leading-relaxed text-ash">
         Probá con otro nombre, colección, talle o color.
       </p>
       <button
         type="button"
         (click)="clearAllFilters()"
-        class="mt-8 min-h-12 bg-[#d9182b] px-6 font-semibold text-white hover:bg-[#c91425]"
+        class="mt-8 min-h-12 bg-accent px-6 font-semibold text-white hover:bg-accent-hover"
       >
         Ver toda la colección
       </button>

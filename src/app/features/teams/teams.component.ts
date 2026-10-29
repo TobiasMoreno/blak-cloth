@@ -42,7 +42,7 @@ interface TeamConfiguratorDraft {
 
 export const TEAM_NAME_MAX_LENGTH = 28;
 export const TEAM_NOTES_MAX_LENGTH = 240;
-const STORAGE_KEY = 'lm-studio:teams-configurator';
+const STORAGE_KEY = 'blak:teams-configurator';
 const LONG_NAME_THRESHOLD = 18;
 
 function normalizeText(value: string): string {
@@ -62,31 +62,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './teams.component.html',
   styles: `
-    .choice {
-      background-color: #f4f4f0;
-      color: #0b0b0b;
-      transition:
-        background-color 150ms ease,
-        color 150ms ease;
-    }
-
-    .choice:hover {
-      background-color: #d6d6cf;
-    }
-
-    .choice:has(:checked) {
-      background-color: #0b0b0b;
-      color: #fff;
-    }
-
-    .choice:has(:focus-visible) {
-      outline: 3px solid var(--focus-ring, var(--accent));
-      outline-offset: 4px;
-    }
-
+    /* .choice vive en styles.css: lo comparten el configurador y el detalle de remera */
     .field-invalid .choice,
     select[aria-invalid='true'] {
-      outline: 3px solid #d9182b;
+      outline: 3px solid var(--color-accent);
       outline-offset: 2px;
     }
 

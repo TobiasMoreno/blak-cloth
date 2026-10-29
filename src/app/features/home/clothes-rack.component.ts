@@ -23,9 +23,14 @@ const PRIORITY_IMAGES = 6;
   selector: 'app-clothes-rack',
   imports: [RouterLink, NgOptimizedImage, CurrencyArsPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  // Soltar fuera del perchero (antes de capturar el puntero) o cambiar de ventana también termina el gesto
+  host: {
+    '(document:pointerup)': 'onPointerUp()',
+    '(window:blur)': 'onPointerUp()',
+  },
   template: `
     <div
-      class="relative text-[#f4f4f0]"
+      class="relative text-bone"
       role="region"
       aria-roledescription="carrusel"
       aria-label="Perchero de remeras"
@@ -60,6 +65,7 @@ const PRIORITY_IMAGES = 6;
         (pointermove)="onPointerMove($event)"
         (pointerup)="onPointerUp()"
         (pointercancel)="onPointerUp()"
+        (lostpointercapture)="onPointerUp()"
       >
         <div
           class="rack-bar pointer-events-none absolute inset-x-0 top-3 h-2.5 rounded-full"
@@ -85,14 +91,14 @@ const PRIORITY_IMAGES = 6;
             >
               <a
                 [routerLink]="['/product', product.id]"
-                class="rack-link group block w-36 rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[#d9182b] md:w-52"
+                class="rack-link group block w-36 rounded-sm focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-accent md:w-52"
                 draggable="false"
                 [attr.tabindex]="slide.isClone ? -1 : null"
                 (click)="onLinkClick($event)"
               >
                 <div class="rack-swing">
                   <svg
-                    class="mx-auto block h-16 w-full text-[#9a9a94]"
+                    class="mx-auto block h-16 w-full text-ash"
                     viewBox="0 0 200 64"
                     preserveAspectRatio="xMidYMin meet"
                     fill="none"
@@ -107,7 +113,7 @@ const PRIORITY_IMAGES = 6;
                     <path d="M100 40 L22 60 H178 Z" />
                   </svg>
 
-                  <div class="shirt relative -mt-3 aspect-[4/5] bg-[#252525]">
+                  <div class="shirt relative -mt-3 aspect-[4/5] bg-graphite">
                     <img
                       [ngSrc]="product.images[0]"
                       alt=""
@@ -124,9 +130,9 @@ const PRIORITY_IMAGES = 6;
                   <span class="block font-display text-2xl font-black uppercase leading-none">
                     {{ product.name }}
                   </span>
-                  <span class="mt-1 flex items-center justify-between text-sm text-[#b8b8b2]">
+                  <span class="mt-1 flex items-center justify-between text-sm text-ash">
                     <span class="tabular-nums">{{ product.price | currencyArs }}</span>
-                    <span aria-hidden="true" class="text-[#d9182b]">Ver ↗</span>
+                    <span aria-hidden="true" class="text-accent">Ver ↗</span>
                   </span>
                 </span>
               </a>
@@ -171,7 +177,7 @@ const PRIORITY_IMAGES = 6;
       place-items: center;
       width: 2.75rem;
       height: 2.75rem;
-      border: 2px solid #f4f4f0;
+      border: 2px solid var(--color-bone);
       background-color: rgb(11 11 11 / 0.75);
       font-size: 1.25rem;
       transform: translateY(-50%);
@@ -187,12 +193,12 @@ const PRIORITY_IMAGES = 6;
     }
 
     .rack-arrow:not(:disabled):hover {
-      background-color: #f4f4f0;
-      color: #0b0b0b;
+      background-color: var(--color-bone);
+      color: var(--color-ink);
     }
 
     .rack-arrow:focus-visible {
-      outline: 3px solid #d9182b;
+      outline: 3px solid var(--color-accent);
       outline-offset: 3px;
     }
 
@@ -284,6 +290,10 @@ export class ClothesRackComponent {
   private dragDelta = signal(0);
 
   private pointerStartX: number | null = null;
+  private pointerId: number | null = null;
+  // Cuántas remeras entran en la primera pantalla; se fija al crear porque priority no puede cambiar después
+  private readonly priorityCount =
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches ? PRIORITY_IMAGES : 3;
   private swiped = false;
 
   private count = computed(() => this.products().length);
@@ -306,7 +316,7 @@ export class ClothesRackComponent {
         key: `${copy}-${product.id}`,
         isClone: copy !== 1,
         // Están en la primera pantalla: las que se ven al abrir cargan primero
-        priority: copy === 1 && index < PRIORITY_IMAGES,
+        priority: copy === 1 && index < this.priorityCount,
       }))
     );
   });
@@ -394,14 +404,21 @@ export class ClothesRackComponent {
   }
 
   onPointerDown(event: PointerEvent): void {
-    if (event.button !== 0) return;
+    // Un segundo dedo a mitad del gesto no le roba el arrastre al primero
+    if (event.button !== 0 || this.pointerId !== null) return;
+    this.pointerId = event.pointerId;
     this.pointerStartX = event.clientX;
     this.swiped = false;
   }
 
   /** El perchero sigue al puntero mientras se arrastra. */
   onPointerMove(event: PointerEvent): void {
-    if (this.pointerStartX === null) return;
+    if (this.pointerStartX === null || event.pointerId !== this.pointerId) return;
+    // Mouse soltado fuera del perchero: sin botón apretado ya no hay arrastre
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
+      this.onPointerUp();
+      return;
+    }
     const delta = event.clientX - this.pointerStartX;
 
     if (!this.dragging()) {
@@ -419,6 +436,7 @@ export class ClothesRackComponent {
   /** Al soltar, se acomoda en la remera más cercana. */
   onPointerUp(): void {
     this.pointerStartX = null;
+    this.pointerId = null;
     if (!this.dragging()) return;
 
     const moved = this.step() > 0 ? Math.round(-this.dragDelta() / this.step()) : 0;

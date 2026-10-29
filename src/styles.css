@@ -1,17 +1,38 @@
 @import 'tailwindcss';
 
+/* Paleta BLAK: genera utilidades como bg-ink, text-accent, border-hairline. */
+@theme {
+  --color-ink: #0b0b0b;
+  --color-bone: #f4f4f0;
+  --color-surface: #e7e7e1;
+  --color-paper: #efefeb;
+  --color-muted: #555550;
+  --color-ash: #b8b8b2;
+  --color-smoke: #d0d0ca;
+  --color-hairline: #d1d1cc;
+  --color-rule: #d6d6cf;
+  --color-field: #82827c;
+  --color-graphite: #333330;
+  --color-accent: #d9182b;
+  --color-accent-hover: #c91425;
+  --color-accent-deep: #a3111f;
+  /* Rojo para texto chico sobre tinta: 4.6:1, el accent da 3.86:1. */
+  --color-accent-bright: #ff4d5e;
+  --color-wine: #831c1e;
+}
+
 :root {
-  --bg: #f4f4f0;
-  --surface: #e7e7e1;
-  --ink: #0b0b0b;
-  --muted: #555550;
-  --accent: #d9182b;
+  --bg: var(--color-bone);
+  --surface: var(--color-surface);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --accent: var(--color-accent);
   --accent-ink: #ffffff;
-  --field-dark: #0b0b0b;
-  --field-dark-ink: #f4f4f0;
+  --field-dark: var(--color-ink);
+  --field-dark-ink: var(--color-bone);
   --brand-ink: var(--ink);
   --brand-accent: var(--accent);
-  --brand-accent-hover: #c91425;
+  --brand-accent-hover: var(--color-accent-hover);
   --font-display: 'Big Shoulders', 'Arial Narrow', sans-serif;
   --font-text: 'Public Sans', 'Helvetica Neue', sans-serif;
   --page-margin: clamp(1rem, 2.2vw, 2rem);
@@ -88,9 +109,61 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-:focus-visible {
+/* En base para que un focus-visible:outline-* de Tailwind pueda ajustarlo en un componente. */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--focus-ring, var(--accent));
+    outline-offset: 4px;
+  }
+
+  p,
+  li,
+  dd,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  input,
+  textarea {
+    caret-color: var(--color-accent);
+  }
+}
+
+/* Opción elegible (talle, color, cantidad) armada con un radio nativo: las flechas del teclado funcionan solas.
+   El fondo sin elegir se cambia con --choice-bg según la superficie donde esté. */
+.choice {
+  background-color: var(--choice-bg, var(--color-bone));
+  color: var(--color-ink);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.choice:hover {
+  background-color: var(--color-rule);
+}
+
+.choice:has(:checked) {
+  background-color: var(--color-ink);
+  color: #fff;
+}
+
+.choice:has(:focus-visible) {
   outline: 3px solid var(--focus-ring, var(--accent));
   outline-offset: 4px;
+}
+
+.choice:has(:disabled) {
+  background-color: var(--choice-bg, var(--color-bone));
+  color: var(--color-muted);
+  text-decoration: line-through;
+  cursor: not-allowed;
 }
 
 /* Sobre fondos rojos el anillo rojo desaparece: se usa tinta. */

@@ -5,6 +5,13 @@ import { QuoteDefaults, QuoteInput } from '../../core/models/cost-management.mod
 import { calculateQuote } from '../../core/pricing/pricing-calculations';
 import { CostManagementStore } from '../../core/services/cost-management.store';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
+import { debounceTime } from 'rxjs';
+
+const ARS = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  maximumFractionDigits: 0,
+});
 
 @Component({
   selector: 'app-quote',
@@ -69,18 +76,29 @@ export class QuoteComponent {
       case 'below-target':
         return 'bg-[#fffbeb] text-[#92400e]';
       case 'below-minimum':
-        return 'bg-[#ffedea] text-[#831c1e]';
+        return 'bg-[#ffedea] text-wine';
       default:
-        return 'bg-[#eeeeea] text-[#555550]';
+        return 'bg-paper text-muted';
     }
   });
   readonly savingDefaults = signal(false);
+  /** Resumen corto para lectores de pantalla: se anuncia cuando se deja de tipear, no en cada tecla. */
+  readonly announcement = signal('');
 
   constructor() {
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       const input = this.toQuoteInput();
       this.quoteInput.set(input);
       this.store.updateQuoteDraft(input);
+    });
+
+    this.form.valueChanges.pipe(debounceTime(800), takeUntilDestroyed()).subscribe(() => {
+      const price = this.result().targetUnitPrice;
+      this.announcement.set(
+        price === null
+          ? this.evaluationLabel()
+          : `Precio objetivo ${ARS.format(price)} por remera. ${this.evaluationLabel()}.`,
+      );
     });
 
     this.form.controls.costItemId.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => {

@@ -3,6 +3,9 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CostManagementStore } from '../../core/services/cost-management.store';
 
+export const UNSAVED_CHANGES_MESSAGE =
+  'Hay cambios que todavía no guardaste en Drive. Si salís ahora, se pierden. ¿Salir igual?';
+
 @Component({
   selector: 'app-management-shell',
   imports: [NgOptimizedImage, RouterLink, RouterLinkActive, RouterOutlet],
@@ -10,6 +13,7 @@ import { CostManagementStore } from '../../core/services/cost-management.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(document:keydown.escape)': 'closeMenu()',
+    '(window:beforeunload)': 'warnUnsaved($event)',
   },
 })
 export class ManagementShellComponent {
@@ -54,6 +58,16 @@ export class ManagementShellComponent {
 
   async reload(): Promise<void> {
     await this.run(() => this.store.reload());
+  }
+
+  disconnect(): void {
+    if (this.store.isDirty() && !confirm(UNSAVED_CHANGES_MESSAGE)) return;
+    this.store.drive.disconnect();
+  }
+
+  /** Recargar o cerrar la pestaña con cambios sin guardar pide confirmación al navegador. */
+  warnUnsaved(event: BeforeUnloadEvent): void {
+    if (this.store.isDirty()) event.preventDefault();
   }
 
   toggleMenu(): void {

@@ -9,12 +9,12 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <footer
-      class="flex flex-col lg:min-h-[85svh] justify-between bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:px-8 md:py-12"
+      class="flex flex-col lg:min-h-[85svh] justify-between bg-ink px-4 py-10 text-bone md:px-8 md:py-12"
     >
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p class="font-semibold">BLAK</p>
-          <p class="mt-3 max-w-64 leading-relaxed text-[#b8b8b2]">
+          <p class="mt-3 max-w-64 leading-relaxed text-ash">
             Streetwear de autor y remeras personalizadas para equipos.
           </p>
         </div>
@@ -24,20 +24,20 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
           <nav class="mt-3 flex flex-col items-start gap-2" aria-label="Navegación del pie">
             <a
               routerLink="/products"
-              class="flex min-h-11 items-center text-[#b8b8b2] hover:text-white"
+              class="flex min-h-11 items-center text-ash hover:text-white"
               >Colección</a
             >
             <a
               routerLink="/equipos"
-              class="flex min-h-11 items-center text-[#b8b8b2] hover:text-white"
+              class="flex min-h-11 items-center text-ash hover:text-white"
               >Para equipos</a
             >
             <a
               routerLink="/about"
-              class="flex min-h-11 items-center text-[#b8b8b2] hover:text-white"
+              class="flex min-h-11 items-center text-ash hover:text-white"
               >El estudio</a
             >
-            <a routerLink="/cart" class="flex min-h-11 items-center text-[#b8b8b2] hover:text-white"
+            <a routerLink="/cart" class="flex min-h-11 items-center text-ash hover:text-white"
               >Carrito</a
             >
           </nav>
@@ -45,8 +45,8 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
 
         <div>
           <p class="font-semibold">Comprar</p>
-          <p class="mt-3 leading-relaxed text-[#b8b8b2]">Pago por transferencia</p>
-          <p class="leading-relaxed text-[#b8b8b2]">Entrega coordinada en Córdoba</p>
+          <p class="mt-3 leading-relaxed text-ash">Pago por transferencia</p>
+          <p class="leading-relaxed text-ash">Entrega coordinada en Córdoba</p>
         </div>
 
         <div>
@@ -55,7 +55,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
             [href]="whatsappUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-3 inline-flex min-h-11 items-center text-[#b8b8b2] underline decoration-transparent underline-offset-4 transition-colors duration-200 hover:text-white hover:decoration-current"
+            class="mt-3 inline-flex min-h-11 items-center text-ash underline decoration-transparent underline-offset-4 transition-colors duration-200 hover:text-white hover:decoration-current"
           >
             Abrir WhatsApp ↗
           </a>
@@ -70,7 +70,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
           height="144"
           class="h-auto w-full max-w-[36rem]"
         />
-        <p class="mt-8 text-sm text-[#b8b8b2]">© {{ currentYear }} BLAK</p>
+        <p class="mt-8 text-sm text-ash">© {{ currentYear }} BLAK</p>
       </div>
     </footer>
   `,

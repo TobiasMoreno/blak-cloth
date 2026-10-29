@@ -7,12 +7,13 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
   imports: [NgOptimizedImage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="bg-[#f4f4f0]">
-      <header class="relative min-h-[76svh] overflow-hidden bg-[#0b0b0b] px-4 py-10 text-[#f4f4f0] md:px-8">
-        <h1 class="relative z-10 max-w-[8ch] text-[clamp(7rem,18vw,19rem)] font-black uppercase leading-[0.72] tracking-[-0.03em]">
+    <div class="bg-bone">
+      <!-- En el teléfono la foto va debajo del texto: superpuesta, el párrafo quedaba sobre la pared clara -->
+      <header class="relative flex flex-col overflow-hidden bg-ink px-4 pt-10 text-bone md:block md:min-h-[76svh] md:px-8 md:py-10">
+        <h1 class="relative z-10 max-w-[8ch] text-[clamp(5rem,22vw,19rem)] font-black uppercase leading-[0.72] tracking-[-0.03em]">
           El estudio
         </h1>
-        <p class="absolute bottom-8 left-4 z-10 max-w-sm text-xl leading-relaxed md:left-8">
+        <p class="relative z-10 mt-10 max-w-sm text-xl leading-relaxed md:absolute md:bottom-8 md:left-8 md:mt-0">
           Un proyecto independiente de Córdoba que convierte gráfica, cultura urbana y obsesiones visuales en prendas.
         </p>
         <img
@@ -20,8 +21,9 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
           alt="Remera verde Blak Minimal Series de BLAK"
           width="1920"
           height="1200"
+          sizes="(min-width: 768px) 43vw, 100vw"
           priority
-          class="absolute bottom-0 right-0 h-[54%] w-[48%] object-cover opacity-75 md:h-[70%] md:w-[43%]"
+          class="-mx-4 mt-10 aspect-[16/10] w-[calc(100%+2rem)] max-w-none object-cover opacity-75 md:absolute md:bottom-0 md:right-0 md:mx-0 md:mt-0 md:aspect-auto md:h-[70%] md:w-[43%]"
         />
       </header>
 
@@ -34,17 +36,18 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
             <p class="text-2xl leading-snug md:text-4xl">
               BLAK nace de la pasión por el arte, la gráfica y la cultura urbana. Cada remera empieza con una imagen que merece salir del papel.
             </p>
-            <p class="mt-10 max-w-[52ch] text-lg leading-relaxed text-[#555550]">
+            <p class="mt-10 max-w-[52ch] text-lg leading-relaxed text-muted">
               Trabajamos para personas que buscan algo distinto, auténtico y con identidad propia. No diseñamos una prenda para completar un catálogo: construimos una composición que se sostiene por sí misma y después la llevamos al algodón.
             </p>
           </div>
         </div>
       </section>
 
-      <section class="grid bg-[#e7e7e1] lg:grid-cols-2" aria-labelledby="process-title">
+      <section class="grid bg-surface lg:grid-cols-2" aria-labelledby="process-title">
         <div class="min-h-[55svh] lg:min-h-[88svh]">
           <img
             ngSrc="products/medusa/mockup.jpeg"
+            sizes="(min-width: 1024px) 50vw, 100vw"
             alt="Diseño Medusa impreso sobre remera negra"
             width="1920"
             height="1200"
@@ -56,21 +59,21 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
             <h2 id="process-title" class="max-w-[8ch] text-6xl font-black uppercase leading-[0.88] md:text-8xl">
               Cómo llega a vos
             </h2>
-            <p class="mt-8 max-w-md text-lg leading-relaxed text-[#555550]">
+            <p class="mt-8 max-w-md text-lg leading-relaxed text-muted">
               La compra mantiene el trato directo con quien está detrás de la marca.
             </p>
           </div>
 
           <ol class="mt-16 space-y-9 text-xl">
-            <li class="grid grid-cols-[minmax(0,1fr)_auto] gap-5 bg-[#f4f4f0] p-5">
+            <li class="grid grid-cols-[minmax(0,1fr)_auto] gap-5 bg-bone p-5">
               <span><strong class="block">Elegís</strong> modelo, talle y color.</span>
               <span aria-hidden="true">↘</span>
             </li>
-            <li class="grid grid-cols-[minmax(0,1fr)_auto] gap-5 bg-[#d6d6cf] p-5">
+            <li class="grid grid-cols-[minmax(0,1fr)_auto] gap-5 bg-rule p-5">
               <span><strong class="block">Armás</strong> el carrito con todas las prendas.</span>
               <span aria-hidden="true">↘</span>
             </li>
-            <li class="grid grid-cols-[minmax(0,1fr)_auto] gap-5 bg-[#0b0b0b] p-5 text-[#f4f4f0]">
+            <li class="grid grid-cols-[minmax(0,1fr)_auto] gap-5 bg-ink p-5 text-bone">
               <span><strong class="block">Coordinamos</strong> pago y entrega por WhatsApp.</span>
               <span aria-hidden="true">↗</span>
             </li>
@@ -82,13 +85,12 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
         [href]="whatsappUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="group relative block min-h-[50svh] overflow-hidden bg-[#d9182b] px-4 py-8 text-white transition-colors duration-200 hover:bg-[#0b0b0b] md:px-8"
-        aria-label="Conversar con BLAK por WhatsApp"
+        class="on-accent group relative block min-h-[50svh] overflow-hidden bg-accent px-4 py-8 text-white transition-colors duration-200 hover:bg-ink md:px-8"
       >
-        <p class="max-w-sm text-lg leading-relaxed">¿Querés saber algo antes de elegir?</p>
+        <span class="block max-w-sm text-lg leading-relaxed">¿Querés saber algo antes de elegir?</span>
         <span aria-hidden="true" class="absolute right-4 top-6 text-5xl md:right-8">↗</span>
-        <span class="absolute inset-x-4 bottom-0 font-display text-[clamp(6.5rem,22vw,23rem)] font-black uppercase leading-[0.72] tracking-[-0.04em] md:inset-x-8">
-          Hablemos
+        <span class="absolute inset-x-4 bottom-0 font-display text-[clamp(4.5rem,21vw,23rem)] font-black uppercase leading-[0.72] tracking-[-0.04em] md:inset-x-8">
+          Hablemos<span class="sr-only"> por WhatsApp (se abre en otra pestaña)</span>
         </span>
       </a>
     </div>

@@ -1,7 +1,9 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { resolveLegacyProductId } from '../constants/legacy-products.constants';
+import { readStorage, writeStorage } from '../storage/local-storage';
 
-const WISHLIST_STORAGE_KEY = 'lm-studio-wishlist';
+const WISHLIST_STORAGE_KEY = 'blak-wishlist';
+const LEGACY_WISHLIST_STORAGE_KEY = 'lm-studio-wishlist';
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +29,7 @@ export class WishlistService {
 
   private loadFromStorage(): string[] {
     try {
-      const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
+      const stored = readStorage(WISHLIST_STORAGE_KEY, LEGACY_WISHLIST_STORAGE_KEY);
       const ids: string[] = stored ? JSON.parse(stored) : [];
       return ids.map(resolveLegacyProductId);
     } catch {
@@ -36,10 +38,6 @@ export class WishlistService {
   }
 
   private saveToStorage(): void {
-    try {
-      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(this.items()));
-    } catch (error) {
-      console.error('Error saving wishlist to localStorage:', error);
-    }
+    writeStorage(WISHLIST_STORAGE_KEY, JSON.stringify(this.items()));
   }
 }
