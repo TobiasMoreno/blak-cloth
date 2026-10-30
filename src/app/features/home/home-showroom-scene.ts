@@ -137,7 +137,6 @@ export class HomeShowroomScene {
   private readonly projected = new THREE.Vector3();
   private readonly lookTarget = new THREE.Vector3();
   private readonly mobile = window.innerWidth < 820 || window.matchMedia('(pointer: coarse)').matches;
-  private readonly touchOnly = window.matchMedia('(hover: none)').matches;
   private readonly reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   private geometry: ShirtGeometry | null = null;
@@ -881,7 +880,7 @@ export class HomeShowroomScene {
       this.intro = Math.min(1, this.intro + dt * this.introSpeed);
     }
     this.updateScroll(dt);
-    this.updateHover(dt);
+    this.updateHover();
     this.updateCamera(dt);
     this.updateSelectionSpin(dt);
     this.advanceChoreography(dt);
@@ -922,36 +921,16 @@ export class HomeShowroomScene {
     this.railVelocity = velocity;
   }
 
-  private updateHover(dt: number): void {
+  private updateHover(): void {
     const pointer = this.pointer;
     if (this.intro < 1 || this.selected) {
       if (!this.selected) this.setHover(null);
       return;
     }
     if (this.keyboardHover) return;
+    // En táctil no hay hover: el perchero se recorre libre y un toque lleva la remera al escenario.
     if (!this.dragging && pointer.inside && !pointer.touch) {
       this.setHover(this.pick());
-    } else if (this.touchOnly) {
-      // En táctil se presenta la remera que queda en el centro y el riel se acomoda a ella.
-      const center = -this.rail.position.x;
-      let closest: RackItem | null = null;
-      let distance = Infinity;
-      for (const item of this.activeItems()) {
-        const gap = Math.abs(item.restX - center);
-        if (gap < distance) {
-          distance = gap;
-          closest = item;
-        }
-      }
-      this.setHover(this.dragging ? null : closest);
-      if (closest && !this.dragging && Math.abs(this.scrollVelocity) < 0.25) {
-        this.scrollTarget = damp(
-          this.scrollTarget,
-          THREE.MathUtils.clamp(closest.restX, this.bounds.min, this.bounds.max),
-          5,
-          dt,
-        );
-      }
     } else if (!pointer.inside && this.hover) {
       this.setHover(null);
     }

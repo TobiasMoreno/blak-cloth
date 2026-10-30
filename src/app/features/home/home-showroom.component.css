@@ -488,6 +488,31 @@
   to { opacity: 1; }
 }
 
+/* ── Indicación táctil: reemplaza la leyenda del pie, que en táctil no aplica ── */
+
+.touch-hint {
+  display: none;
+}
+
+@media (hover: none) {
+  .touch-hint {
+    position: absolute;
+    bottom: 4.5rem;
+    left: 50%;
+    z-index: 4;
+    display: block;
+    max-width: calc(100% - 2rem);
+    padding: 0.55rem 0.8rem;
+    transform: translateX(-50%);
+    background: #0b0909;
+    color: #bdb6ab;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+  }
+}
+
 @media (max-width: 1050px) {
   .locker-header {
     grid-template-columns: auto 1fr;
@@ -552,26 +577,43 @@
     padding-bottom: 0.1rem;
   }
 
+  /* Controles táctiles de 44px. */
   .locker-filters button {
     flex: 0 0 auto;
-    min-height: 2.25rem;
+    min-height: 2.75rem;
     padding: 0 0.7rem;
   }
 
-
-  .side-controls button {
-    min-height: 2.5rem;
+  .side-controls button,
+  .sound-toggle,
+  .facing-controls button {
+    min-height: 2.75rem;
     padding: 0 0.7rem;
   }
 
+  /* Por encima de la lista de remeras (3.75rem); con una remera en el escenario se oculta:
+     el panel ya tiene Frente/Dorso y ocupa esa franja. */
   .locker-footer {
     right: 1rem;
-    bottom: 0.65rem;
+    bottom: 4.25rem;
+    gap: 0.5rem;
+  }
+
+  .locker-stage.is-staged .locker-footer {
+    display: none;
+  }
+
+  .touch-hint {
+    bottom: 7.6rem;
+  }
+
+  .touch-hint.is-stage {
+    bottom: calc(38% + 0.5rem);
   }
 
   .arrow-controls button {
-    width: 2.5rem;
-    min-height: 2.5rem;
+    width: 2.75rem;
+    min-height: 2.75rem;
   }
 
   .product-rail {
@@ -594,7 +636,7 @@
   }
 
   .product-rail button {
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     padding: 0 0.8rem;
     color: #aaa39b;
     font-size: 0.75rem;
@@ -614,7 +656,7 @@
   .stage-panel {
     top: 62%;
     right: 1rem;
-    bottom: 3.75rem;
+    bottom: 4.25rem;
     left: 1rem;
     width: auto;
     padding: 1.1rem 1.2rem;
@@ -636,10 +678,6 @@
   }
 
   .stage-navigation .arrow-controls {
-    display: none;
-  }
-
-  .locker-footer p {
     display: none;
   }
 }

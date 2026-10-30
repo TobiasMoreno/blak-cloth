@@ -1,7 +1,12 @@
 <section class="locker" aria-labelledby="locker-title">
   <div #rackStage class="locker-stage" [class.is-staged]="selectedProduct()">
     @if (!sceneFailed()) {
-      <canvas #rackCanvas class="locker-canvas" aria-hidden="true"></canvas>
+      <canvas
+        #rackCanvas
+        class="locker-canvas"
+        aria-hidden="true"
+        (pointerdown)="onCanvasPointerDown()"
+      ></canvas>
       <div #labelLayer class="rack-labels" aria-hidden="true">
         @for (group of groups(); track group) {
           <span class="rack-label" [attr.data-group]="group">{{ group }}</span>
@@ -177,6 +182,11 @@
           Sonido {{ soundOn() ? 'sí' : 'no' }}
         </button>
       </div>
+
+      <!-- Solo en pantallas táctiles (CSS); lectores de pantalla tienen #rack-help. -->
+      @if (touchHint(); as hint) {
+        <p class="touch-hint" [class.is-stage]="selectedProduct()" aria-hidden="true">{{ hint }}</p>
+      }
 
       <p class="sr-only" aria-live="polite">{{ announcement() }}</p>
     } @else {

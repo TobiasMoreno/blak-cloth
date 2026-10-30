@@ -58,6 +58,9 @@ export class HomeShowroomComponent {
   sceneReady = signal(false);
   sceneFailed = signal(false);
   soundOn = signal(false);
+  /** La indicación táctil se va con el primer toque en cada modo (perchero y escenario). */
+  rackHintSeen = signal(false);
+  stageHintSeen = signal(false);
 
   readonly filters: FilterOption[] = [
     { value: 'all', label: 'Todas' },
@@ -91,6 +94,13 @@ export class HomeShowroomComponent {
   canNext = computed(() => {
     const index = this.selectedPosition();
     return index >= 0 && index < this.visibleProducts().length - 1;
+  });
+  touchHint = computed(() => {
+    if (!this.sceneReady()) return null;
+    if (this.selectedId()) {
+      return this.stageHintSeen() ? null : 'Arrastrá para girarla · Tocala para darla vuelta';
+    }
+    return this.rackHintSeen() ? null : 'Deslizá el perchero · Tocá una remera';
   });
   positionLabel = computed(
     () => `${this.selectedPosition() + 1} de ${this.visibleProducts().length}`,
@@ -171,6 +181,10 @@ export class HomeShowroomComponent {
 
   showSide(side: ShowroomSide): void {
     this.scene()?.showSide(side);
+  }
+
+  onCanvasPointerDown(): void {
+    (this.selectedId() ? this.stageHintSeen : this.rackHintSeen).set(true);
   }
 
   setRackSide(side: ShowroomSide): void {
