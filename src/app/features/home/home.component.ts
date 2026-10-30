@@ -127,45 +127,6 @@ import { HomeShowroomComponent } from './home-showroom.component';
       </section>
 
       <section
-        class="grid min-h-[84svh] bg-bone lg:grid-cols-12"
-        aria-labelledby="teams-home-title"
-      >
-        <figure class="relative min-h-[56svh] overflow-hidden lg:col-span-7 lg:min-h-full">
-          <img
-            ngSrc="images/teams/team-hero.jpg"
-            alt="Imagen conceptual de un equipo amateur con remeras negras de algodón personalizadas"
-            fill
-            sizes="(max-width: 1023px) 100vw, 58vw"
-            class="object-cover object-[58%_center]"
-          />
-          <figcaption
-            class="absolute bottom-0 right-0 bg-ink px-4 py-3 text-sm text-smoke"
-          >
-            Referencia visual del servicio
-          </figcaption>
-        </figure>
-        <div
-          class="section-rise flex flex-col justify-center px-4 py-20 md:px-8 lg:col-span-5 lg:px-12"
-        >
-          <h2
-            id="teams-home-title"
-            class="max-w-[12ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl"
-          >
-            Tu equipo. Su remera.
-          </h2>
-          <p class="mt-8 max-w-[34ch] text-xl leading-relaxed text-muted">
-            Diseñamos remeras comunes de algodón para equipos de fútbol amateur, clubes y planteles.
-          </p>
-          <a
-            routerLink="/equipos"
-            class="mt-8 inline-flex min-h-14 w-fit items-center bg-ink px-6 font-semibold text-bone transition-colors duration-200 hover:bg-accent"
-          >
-            Diseñar para mi equipo
-          </a>
-        </div>
-      </section>
-
-      <section
         class="bg-ink px-4 py-24 text-bone md:px-8 md:py-36"
         aria-labelledby="buy-title"
       >

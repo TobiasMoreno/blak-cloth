@@ -15,7 +15,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
         <div>
           <p class="font-semibold">BLAK</p>
           <p class="mt-3 max-w-64 leading-relaxed text-ash">
-            Streetwear de autor y remeras personalizadas para equipos.
+            Streetwear de autor.
           </p>
         </div>
 
@@ -26,11 +26,6 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
               routerLink="/products"
               class="flex min-h-11 items-center text-ash hover:text-white"
               >Colección</a
-            >
-            <a
-              routerLink="/equipos"
-              class="flex min-h-11 items-center text-ash hover:text-white"
-              >Para equipos</a
             >
             <a
               routerLink="/mayoristas"

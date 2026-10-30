@@ -115,12 +115,6 @@ import { STORE_INFO } from '../../core/constants/store-info.constants';
           >
             Escribir por WhatsApp<span class="sr-only"> (se abre en otra pestaña)</span>
           </a>
-          <a
-            routerLink="/equipos"
-            class="inline-flex min-h-12 items-center font-semibold underline decoration-2 underline-offset-4 hover:text-accent-bright"
-          >
-            Remeras para equipos
-          </a>
         </div>
       </section>
     </div>

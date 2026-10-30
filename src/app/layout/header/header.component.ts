@@ -67,14 +67,6 @@ import { WishlistService } from '../../core/services/wishlist.service';
             Colección
           </a>
           <a
-            routerLink="/equipos"
-            routerLinkActive="text-accent"
-            ariaCurrentWhenActive="page"
-            class="min-h-11 content-center text-sm font-semibold transition-colors duration-200 hover:text-accent"
-          >
-            Para equipos
-          </a>
-          <a
             routerLink="/mayoristas"
             routerLinkActive="text-accent"
             ariaCurrentWhenActive="page"
@@ -203,15 +195,6 @@ import { WishlistService } from '../../core/services/wishlist.service';
               class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-accent"
             >
               Colección
-            </a>
-            <a
-              routerLink="/equipos"
-              routerLinkActive="text-accent"
-              ariaCurrentWhenActive="page"
-              (click)="closeMenu()"
-              class="flex min-h-16 items-center font-display text-6xl font-black leading-[1.05] hover:text-accent"
-            >
-              Para equipos
             </a>
             <a
               routerLink="/mayoristas"
