@@ -88,14 +88,6 @@
               <dd>{{ product.price | currencyArs }}</dd>
             </div>
             <div>
-              <dt>Colores</dt>
-              <dd>{{ product.colors.join(', ') }}</dd>
-            </div>
-            <div>
-              <dt>Talles</dt>
-              <dd>{{ product.sizes.join(' · ') }}</dd>
-            </div>
-            <div>
               <dt>Material</dt>
               <dd>Algodón</dd>
             </div>
@@ -118,9 +110,79 @@
             </button>
           </div>
 
-          <a [routerLink]="['/product', product.id]" class="stage-action">
-            Elegir esta remera
-            <span aria-hidden="true">↗</span>
+          @if (isSoldOut()) {
+            <p class="stage-note">Por ahora no hay talles disponibles.</p>
+          } @else {
+            @if (product.colors.length > 1) {
+              <fieldset class="stage-choices">
+                <legend>Color</legend>
+                <div>
+                  @for (color of product.colors; track color) {
+                    <label>
+                      <input
+                        type="radio"
+                        name="stage-color"
+                        class="sr-only"
+                        [value]="color"
+                        [checked]="selectedColor() === color"
+                        (change)="selectColor(color)"
+                      />
+                      {{ color }}
+                    </label>
+                  }
+                </div>
+              </fieldset>
+            }
+
+            <fieldset class="stage-choices">
+              <legend>
+                Talle
+                @if (product.colors.length === 1) {
+                  <span>· {{ product.colors[0] }}</span>
+                }
+              </legend>
+              <div>
+                @for (option of sizeOptions(); track option.size) {
+                  <label>
+                    <input
+                      type="radio"
+                      name="stage-size"
+                      class="sr-only"
+                      [value]="option.size"
+                      [checked]="selectedSize() === option.size"
+                      [disabled]="!option.available"
+                      (change)="selectSize(option.size)"
+                    />
+                    {{ option.size }}
+                    @if (!option.available) {
+                      <span class="sr-only">, sin stock</span>
+                    }
+                  </label>
+                }
+              </div>
+            </fieldset>
+
+            @if (showSelectionError()) {
+              <p class="stage-note" role="alert">
+                {{ selectedColor() ? 'Elegí un talle para agregarla.' : 'Elegí color y talle para agregarla.' }}
+              </p>
+            } @else if (reachedMax()) {
+              <p class="stage-note" role="status">Ya tenés el máximo por pedido de este talle.</p>
+            }
+
+            <button
+              type="button"
+              class="stage-action"
+              [disabled]="reachedMax()"
+              (click)="addToCart()"
+            >
+              Agregar al carrito
+              <span>{{ product.price | currencyArs }}</span>
+            </button>
+          }
+
+          <a [routerLink]="['/product', product.id]" class="stage-back stage-link">
+            Ver ficha completa <span aria-hidden="true">↗</span>
           </a>
 
           <div class="stage-navigation">

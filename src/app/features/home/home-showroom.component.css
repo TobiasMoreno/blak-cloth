@@ -112,7 +112,8 @@
 }
 
 .locker-filters button,
-.side-controls button {
+.side-controls button,
+.stage-choices label {
   min-height: 2.5rem;
   padding: 0 0.85rem;
   border: 2px solid #393433;
@@ -131,7 +132,9 @@
 .locker-filters button:hover,
 .locker-filters button[aria-pressed='true'],
 .side-controls button:hover,
-.side-controls button[aria-pressed='true'] {
+.side-controls button[aria-pressed='true'],
+.stage-choices label:hover,
+.stage-choices label:has(:checked) {
   border-color: #f4f1e9;
   background: #f4f1e9;
   color: #111010;
@@ -314,6 +317,60 @@
   background: #b01d30;
 }
 
+.stage-action:disabled {
+  background: #5a534f;
+  cursor: not-allowed;
+}
+
+.stage-action:focus-visible,
+.stage-choices label:has(:focus-visible) {
+  outline: 3px solid #f4f1e9;
+  outline-offset: 2px;
+}
+
+.stage-choices {
+  margin-top: 1rem;
+}
+
+.stage-choices legend {
+  margin-bottom: 0.5rem;
+  color: #a9a19a;
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.stage-choices div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.stage-choices label {
+  display: inline-grid;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  place-content: center;
+  cursor: pointer;
+}
+
+.stage-choices label:has(:disabled) {
+  border-style: dashed;
+  background: none;
+  color: #8c8580;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.stage-note {
+  margin-top: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  background: #2b2522;
+  color: #f4d48a;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .stage-navigation {
   display: flex;
   align-items: center;
@@ -329,6 +386,11 @@
   font-size: 0.8rem;
   font-weight: 750;
   text-transform: uppercase;
+}
+
+.stage-link {
+  align-content: center;
+  align-self: flex-start;
 }
 
 .stage-back:hover {
@@ -671,6 +733,10 @@
   .stage-description,
   .stage-panel dl {
     display: none;
+  }
+
+  .stage-choices {
+    margin-top: 0.6rem;
   }
 
   .stage-navigation {

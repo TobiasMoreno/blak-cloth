@@ -8,13 +8,17 @@ import {
   computed,
   effect,
   inject,
+  linkedSignal,
   signal,
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Product } from '../../core/models/product.model';
+import { CartItem } from '../../core/models/cart-item.model';
+import { Product, ProductSize } from '../../core/models/product.model';
+import { CartService } from '../../core/services/cart.service';
 import { ProductService } from '../../core/services/product.service';
 import { readStorage, writeStorage } from '../../core/storage/local-storage';
+import { ToastService } from '../../shared/components/toast/toast.service';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 import { HomeShowroomScene, RackEntry, ShowroomSide } from './home-showroom-scene';
 
@@ -27,6 +31,7 @@ interface FilterOption {
 
 const GROUP_ORDER = ['Negras', 'Blancas', 'Color'];
 const RACK_SIDE_STORAGE_KEY = 'blak-rack-side';
+const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
 
 @Component({
   selector: 'app-home-showroom',
@@ -41,6 +46,8 @@ const RACK_SIDE_STORAGE_KEY = 'blak-rack-side';
 })
 export class HomeShowroomComponent {
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
+  private toastService = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   private canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('rackCanvas');
   private stage = viewChild.required<ElementRef<HTMLElement>>('rackStage');
@@ -117,6 +124,49 @@ export class HomeShowroomComponent {
     return `${hovered.name}, ${index + 1} de ${this.visibleProducts().length}. Enter para verla.`;
   });
 
+  /** Compra desde la ficha: si hay un único color o talle disponible, queda elegido. */
+  selectedColor = linkedSignal<string | null>(() => {
+    const colors = this.selectedProduct()?.colors ?? [];
+    return colors.length === 1 ? colors[0] : null;
+  });
+  sizeOptions = computed(() => {
+    const color = this.selectedColor();
+    const variants = (this.selectedProduct()?.variants ?? []).filter(
+      (variant) => !color || variant.color === color,
+    );
+    return SIZE_ORDER.filter((size) => variants.some((variant) => variant.size === size)).map(
+      (size) => ({
+        size,
+        available: variants.some((variant) => variant.size === size && variant.available),
+      }),
+    );
+  });
+  selectedSize = linkedSignal<ProductSize[], ProductSize | null>({
+    source: () =>
+      this.sizeOptions()
+        .filter((option) => option.available)
+        .map((option) => option.size),
+    computation: (available, previous) => {
+      if (previous?.value && available.includes(previous.value)) return previous.value;
+      return available.length === 1 ? available[0] : null;
+    },
+  });
+  isSoldOut = computed(() => (this.selectedProduct()?.colors.length ?? 0) === 0);
+  reachedMax = computed(() => {
+    const product = this.selectedProduct();
+    const size = this.selectedSize();
+    const color = this.selectedColor();
+    if (!product || !size || !color) return false;
+    return (
+      this.cartService.getItemQuantity(product.id, size, color) >=
+      this.cartService.getMaxQuantity()
+    );
+  });
+  showSelectionError = linkedSignal(() => {
+    this.selectedProduct();
+    return false;
+  });
+
   constructor() {
     effect(() => {
       const scene = this.scene();
@@ -177,6 +227,42 @@ export class HomeShowroomComponent {
 
   next(): void {
     this.scene()?.step(1);
+  }
+
+  selectColor(color: string): void {
+    this.selectedColor.set(color);
+    this.showSelectionError.set(false);
+  }
+
+  selectSize(size: ProductSize): void {
+    this.selectedSize.set(size);
+    this.showSelectionError.set(false);
+  }
+
+  addToCart(): void {
+    const product = this.selectedProduct();
+    const size = this.selectedSize();
+    const color = this.selectedColor();
+    if (!product || !size || !color) {
+      this.showSelectionError.set(true);
+      return;
+    }
+    if (this.reachedMax()) return;
+
+    const item: CartItem = {
+      productId: product.id,
+      productName: product.name,
+      price: product.price,
+      size,
+      color,
+      image: product.images[0],
+      quantity: 1,
+    };
+    this.cartService.addItem(item);
+    this.toastService.show('Agregado al carrito', `${product.name} · Talle ${size} · ${color}`, {
+      label: 'Ver carrito',
+      link: '/cart',
+    });
   }
 
   showSide(side: ShowroomSide): void {
