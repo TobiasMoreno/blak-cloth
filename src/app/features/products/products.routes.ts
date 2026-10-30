@@ -4,7 +4,7 @@ import { ProductsComponent } from './products.component';
 export const productsRoutes: Route[] = [
   {
     path: '',
-    title: 'Colección · BLAK',
+    title: 'Remeras estampadas de autor · Colección BLAK',
     component: ProductsComponent
   }
 ];

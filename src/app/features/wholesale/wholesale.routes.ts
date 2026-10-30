@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const wholesaleRoutes: Routes = [
   {
     path: '',
-    title: 'Precios por cantidad para revendedores · BLAK',
+    title: 'Remeras por mayor · Precios por cantidad · BLAK',
     loadComponent: () => import('./wholesale.component').then(m => m.WholesaleComponent)
   }
 ];

@@ -4,7 +4,7 @@ import { AboutComponent } from './about.component';
 export const aboutRoutes: Route[] = [
   {
     path: '',
-    title: 'El estudio · BLAK',
+    title: 'El estudio · Streetwear de autor de Córdoba · BLAK',
     component: AboutComponent
   }
 ];

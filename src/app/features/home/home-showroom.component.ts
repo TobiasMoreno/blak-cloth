@@ -20,7 +20,7 @@ import { ProductService } from '../../core/services/product.service';
 import { readStorage, writeStorage } from '../../core/storage/local-storage';
 import { ToastService } from '../../shared/components/toast/toast.service';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
-import { HomeShowroomScene, RackEntry, ShowroomSide } from './home-showroom-scene';
+import type { HomeShowroomScene, RackEntry, ShowroomSide } from './home-showroom-scene';
 
 type ShowroomFilter = 'all' | 'black' | 'white' | 'color';
 
@@ -54,6 +54,9 @@ export class HomeShowroomComponent {
   private labelLayer = viewChild.required<ElementRef<HTMLElement>>('labelLayer');
   private caption = viewChild.required<ElementRef<HTMLElement>>('caption');
   private scene = signal<HomeShowroomScene | null>(null);
+  // three.js pesa ~600 kB: va en su propio chunk y se pide ya, en paralelo con el primer render,
+  // así la home no espera esa descarga para mostrarse
+  private sceneModule = import('./home-showroom-scene');
 
   products = this.productService.products;
   activeFilter = signal<ShowroomFilter>('all');
@@ -183,7 +186,18 @@ export class HomeShowroomComponent {
       scene.setVisible(ids);
     });
 
-    afterNextRender(() => {
+    let destroyed = false;
+    this.destroyRef.onDestroy(() => (destroyed = true));
+
+    afterNextRender(async () => {
+      let HomeShowroomScene: typeof import('./home-showroom-scene').HomeShowroomScene;
+      try {
+        ({ HomeShowroomScene } = await this.sceneModule);
+      } catch {
+        this.sceneFailed.set(true);
+        return;
+      }
+      if (destroyed) return;
       const scene = new HomeShowroomScene({
         canvas: this.canvas().nativeElement,
         container: this.stage().nativeElement,

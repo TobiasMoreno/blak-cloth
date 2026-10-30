@@ -24,6 +24,7 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
 import { getColorHex } from '../../core/constants/colors.constants';
 import { LEGACY_PRODUCT_IDS } from '../../core/constants/legacy-products.constants';
 import { STORE_INFO } from '../../core/constants/store-info.constants';
+import { productSeoDescription, productSeoTitle } from '../../core/seo/product-seo';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { QuantityStepperComponent } from '../../shared/components/quantity-stepper/quantity-stepper.component';
 import { ToastService } from '../../shared/components/toast/toast.service';
@@ -79,7 +80,7 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
               <div class="flex-1">
                 <div class="aspect-[4/3] overflow-hidden bg-surface lg:sticky lg:top-24">
                   <img [ngSrc]="productData.images[activeImage()] || productData.images[0]"
-                       [alt]="productData.name"
+                       [alt]="'Remera ' + productData.name"
                        width="1200"
                        height="900"
                        sizes="(min-width: 1024px) 58vw, 100vw"
@@ -476,8 +477,9 @@ export class ProductDetailComponent {
     effect(() => {
       const productData = this.product();
       if (!productData) return;
-      this.title.setTitle(`${productData.name} · BLAK`);
-      this.meta.updateTag({ name: 'description', content: productData.description || defaultDescription });
+      // Igual que el HTML estático de la remera (scripts/build-static-pages.mjs)
+      this.title.setTitle(productSeoTitle(productData));
+      this.meta.updateTag({ name: 'description', content: productSeoDescription(productData) });
     });
     inject(DestroyRef).onDestroy(() => this.meta.updateTag({ name: 'description', content: defaultDescription }));
   }

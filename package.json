@@ -8,7 +8,7 @@
     "start": "ng serve",
     "prebuild": "npm run catalog",
     "build": "ng build",
-    "postbuild": "node scripts/build-share-pages.mjs",
+    "postbuild": "node scripts/build-static-pages.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "cms": "npx decap-server@3.11.5"

@@ -2,7 +2,30 @@
   command = "npm run build"
   publish = "dist/lm-studio/browser"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Sin redirección comodín a index.html: cada página pública tiene su HTML (scripts/build-static-pages.mjs)
+# y una URL inexistente recibe 404.html con estado 404. Las rewrites de /gestion/* están en _redirects.
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/cart"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/gestion/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/gestion"
+  [headers.values]
+    X-Robots-Tag = "noindex"
