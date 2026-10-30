@@ -121,7 +121,7 @@ export class QuoteComponent {
     try {
       await this.store.save();
     } catch {
-      // El shell muestra el conflicto o error de Drive.
+      // El shell muestra el conflicto o error de Firebase.
     } finally {
       this.savingDefaults.set(false);
     }

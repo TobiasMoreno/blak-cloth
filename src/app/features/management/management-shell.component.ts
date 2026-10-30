@@ -4,9 +4,9 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CostManagementStore } from '../../core/services/cost-management.store';
 
 export const UNSAVED_CHANGES_MESSAGE =
-  'Hay cambios que todavía no guardaste en Drive. Si salís ahora, se pierden. ¿Salir igual?';
+  'Hay cambios que todavía no guardaste en Firebase. Si salís ahora, se pierden. ¿Salir igual?';
 export const RELOAD_CONFLICT_MESSAGE =
-  'Recargar Drive descarta los cambios que tenés abiertos. ¿Querés continuar?';
+  'Recargar Firebase descarta los cambios que tenés abiertos. ¿Querés continuar?';
 
 @Component({
   selector: 'app-management-shell',
@@ -23,16 +23,16 @@ export class ManagementShellComponent {
   readonly busy = signal(false);
   readonly mobileMenuOpen = signal(false);
   readonly errorMessage = computed(
-    () => this.store.errorMessage() ?? this.store.drive.errorMessage(),
+    () => this.store.errorMessage() ?? this.store.management.errorMessage(),
   );
   readonly saveLabel = computed(() => {
     switch (this.store.saveState()) {
       case 'dirty':
         return 'Cambios sin guardar';
       case 'saving':
-        return 'Guardando en Drive';
+        return 'Guardando en Firebase';
       case 'saved':
-        return 'Guardado en Drive';
+        return 'Guardado en Firebase';
       case 'conflict':
         return 'Hay cambios más recientes';
       case 'error':
@@ -42,6 +42,10 @@ export class ManagementShellComponent {
     }
   });
 
+  constructor() {
+    void this.store.initialize();
+  }
+
   async connect(): Promise<void> {
     await this.run(() => this.store.connect());
   }
@@ -50,8 +54,16 @@ export class ManagementShellComponent {
     await this.run(() => this.store.createWorkspace());
   }
 
-  async chooseWorkspace(): Promise<void> {
-    await this.run(() => this.store.chooseSharedWorkspace());
+  async importWorkspace(event: Event): Promise<void> {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    await this.run(async () => {
+      await this.store.importWorkspaceJson(await file.text());
+    });
   }
 
   async save(): Promise<void> {
@@ -63,9 +75,9 @@ export class ManagementShellComponent {
     await this.run(() => this.store.reload());
   }
 
-  disconnect(): void {
+  async disconnect(): Promise<void> {
     if (this.store.isDirty() && !confirm(UNSAVED_CHANGES_MESSAGE)) return;
-    this.store.drive.disconnect();
+    await this.run(() => this.store.disconnect());
   }
 
   /** Recargar o cerrar la pestaña con cambios sin guardar pide confirmación al navegador. */

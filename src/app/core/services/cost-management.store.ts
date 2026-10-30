@@ -14,25 +14,26 @@ import {
 } from '../models/cost-management.model';
 import { calculateSupplierOfferPrice } from '../pricing/supplier-pricing';
 import {
-  DriveConflictError,
-  GoogleDriveService,
-  LoadedDriveWorkspace,
-} from './google-drive.service';
+  FirebaseManagementService,
+  FirestoreConflictError,
+  LoadedFirestoreWorkspace,
+} from './firebase-management.service';
 
 export type WorkspaceSaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'conflict' | 'error';
 
 @Injectable({ providedIn: 'root' })
 export class CostManagementStore {
   private document = inject(DOCUMENT);
-  private remoteVersion = signal<string | null>(null);
+  private initialization: Promise<void> | null = null;
 
-  readonly drive = inject(GoogleDriveService);
+  readonly management = inject(FirebaseManagementService);
   readonly workspace = signal<CostWorkspace | null>(null);
   readonly selectedCostId = signal<string | null>(null);
   readonly selectedSupplierId = signal<string | null>(null);
   readonly quoteDraft = signal<QuoteInput>(createQuoteInput(DEFAULT_QUOTE_DEFAULTS));
   readonly saveState = signal<WorkspaceSaveState>('idle');
   readonly errorMessage = signal<string | null>(null);
+  readonly initializing = signal(true);
 
   readonly costs = computed(() => this.workspace()?.costs ?? []);
   readonly selectedCost = computed(() => {
@@ -52,32 +53,41 @@ export class CostManagementStore {
       (this.saveState() === 'dirty' || this.saveState() === 'conflict'),
   );
 
+  initialize(): Promise<void> {
+    this.initialization ??= this.restoreSession();
+    return this.initialization;
+  }
+
   async connect(): Promise<void> {
     this.errorMessage.set(null);
-    await this.drive.connect();
-    if (this.drive.workspaceFile()) {
-      await this.loadWorkspace(await this.drive.loadWorkspace());
-    }
+    await this.management.connect();
+    const result = await this.management.loadWorkspace();
+    if (result) await this.loadWorkspace(result);
   }
 
   async createWorkspace(): Promise<void> {
     this.errorMessage.set(null);
     const workspace = createEmptyWorkspace(new Date().toISOString());
     try {
-      await this.loadWorkspace(await this.drive.createWorkspace(workspace));
+      await this.loadWorkspace(await this.management.createWorkspace(workspace));
     } catch (error) {
       this.handleError(error);
       throw error;
     }
   }
 
-  async chooseSharedWorkspace(): Promise<void> {
+  async importWorkspaceJson(json: string): Promise<void> {
     this.errorMessage.set(null);
     try {
-      const result = await this.drive.chooseSharedWorkspace();
-      if (result) await this.loadWorkspace(result);
+      const value: unknown = JSON.parse(json);
+      const workspace = parseWorkspace(value);
+      await this.loadWorkspace(await this.management.replaceWorkspace(workspace));
     } catch (error) {
-      this.handleError(error);
+      this.handleError(
+        error instanceof SyntaxError
+          ? new Error('El archivo elegido no contiene un JSON válido.')
+          : error,
+      );
       throw error;
     }
   }
@@ -85,7 +95,9 @@ export class CostManagementStore {
   async reload(): Promise<void> {
     this.errorMessage.set(null);
     try {
-      await this.loadWorkspace(await this.drive.loadWorkspace());
+      const result = await this.management.loadWorkspace();
+      if (!result) throw new Error('No existe un espacio de gestión en Firebase.');
+      await this.loadWorkspace(result);
     } catch (error) {
       this.handleError(error);
       throw error;
@@ -94,8 +106,7 @@ export class CostManagementStore {
 
   async save(): Promise<void> {
     const current = this.workspace();
-    const expectedVersion = this.remoteVersion();
-    if (!current || !expectedVersion || !this.canSave()) return;
+    if (!current || !this.canSave()) return;
 
     this.saveState.set('saving');
     this.errorMessage.set(null);
@@ -107,21 +118,30 @@ export class CostManagementStore {
     };
 
     try {
-      const file = await this.drive.saveWorkspace(next, expectedVersion, current.revision);
+      await this.management.saveWorkspace(next, current.revision);
       this.workspace.set(next);
-      this.remoteVersion.set(file.version);
       this.saveState.set('saved');
     } catch (error) {
-      if (error instanceof DriveConflictError) {
+      if (error instanceof FirestoreConflictError) {
         this.saveState.set('conflict');
         this.errorMessage.set(
-          'Drive encontró una revisión distinta. Volvé a intentar; si el conflicto continúa, recargá la versión de Drive.',
+          'Firebase encontró una versión más reciente. Recargá los datos antes de volver a guardar.',
         );
       } else {
         this.handleError(error);
       }
       throw error;
     }
+  }
+
+  async disconnect(): Promise<void> {
+    await this.management.disconnect();
+    this.workspace.set(null);
+    this.selectedCostId.set(null);
+    this.selectedSupplierId.set(null);
+    this.quoteDraft.set(createQuoteInput(DEFAULT_QUOTE_DEFAULTS));
+    this.saveState.set('idle');
+    this.errorMessage.set(null);
   }
 
   selectCost(id: string): void {
@@ -357,10 +377,22 @@ export class CostManagementStore {
     this.markDirty();
   }
 
-  private async loadWorkspace(result: LoadedDriveWorkspace): Promise<void> {
+  private async restoreSession(): Promise<void> {
+    try {
+      const user = await this.management.waitForAuthState();
+      if (!user) return;
+      const result = await this.management.loadWorkspace();
+      if (result) await this.loadWorkspace(result);
+    } catch (error) {
+      this.handleError(error);
+    } finally {
+      this.initializing.set(false);
+    }
+  }
+
+  private async loadWorkspace(result: LoadedFirestoreWorkspace): Promise<void> {
     const workspace = parseWorkspace(result.content);
     this.workspace.set(workspace);
-    this.remoteVersion.set(result.file.version);
     const selected =
       workspace.costs.find((cost) => cost.id === this.selectedCostId()) ?? workspace.costs[0];
     this.selectedCostId.set(selected?.id ?? null);

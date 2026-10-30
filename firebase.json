@@ -1,4 +1,24 @@
 {
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "BLAK Streetwear",
+        "supportEmail": "tobiasmoreno.tm.21@gmail.com",
+        "authorizedRedirectUris": [
+          "https://blakstreetwear-7dd9b.firebaseapp.com/__/auth/handler",
+          "https://blakstreetwear.web.app/__/auth/handler",
+          "https://blakstreetwear.netlify.app/__/auth/handler",
+          "http://localhost:4200/__/auth/handler"
+        ]
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "southamerica-west1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
   "hosting": {
     "site": "blakstreetwear",
     "public": "dist/lm-studio/browser",

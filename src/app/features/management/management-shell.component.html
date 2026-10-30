@@ -1,10 +1,10 @@
-@if (store.drive.configLoading()) {
+@if (store.initializing()) {
   <div class="grid min-h-svh place-items-center bg-bone px-5 text-ink">
     <p role="status" class="text-sm font-medium">Preparando la gestión…</p>
   </div>
-} @else if (!store.drive.isConfigured()) {
+} @else if (store.management.connectionState() !== 'connected') {
   <div class="grid min-h-svh place-items-center bg-bone px-5 text-ink">
-    <section class="w-full max-w-xl bg-white p-6 md:p-10" aria-labelledby="drive-setup-title">
+    <section class="w-full max-w-xl bg-white p-6 md:p-10" aria-labelledby="management-connect-title">
       <img
         ngSrc="images/brand/blak-logo-black.svg"
         alt="BLAK"
@@ -13,30 +13,7 @@
         class="h-8 w-auto"
         priority
       />
-      <h1 id="drive-setup-title" class="mt-10 text-2xl font-bold">Falta conectar Google Drive</h1>
-      <p class="mt-3 max-w-md text-sm leading-6 text-muted">
-        Completá los identificadores públicos de Google Cloud para habilitar el acceso compartido.
-      </p>
-      <code class="mt-6 block overflow-x-auto bg-paper p-4 text-sm text-ink">
-        public/config/google-drive.json
-      </code>
-      <p class="mt-4 text-sm text-muted">
-        Las instrucciones están en <strong>GOOGLE_DRIVE_SETUP.md</strong>.
-      </p>
-    </section>
-  </div>
-} @else if (store.drive.connectionState() !== 'connected') {
-  <div class="grid min-h-svh place-items-center bg-bone px-5 text-ink">
-    <section class="w-full max-w-xl bg-white p-6 md:p-10" aria-labelledby="drive-connect-title">
-      <img
-        ngSrc="images/brand/blak-logo-black.svg"
-        alt="BLAK"
-        width="590"
-        height="144"
-        class="h-8 w-auto"
-        priority
-      />
-      <h1 id="drive-connect-title" class="mt-10 text-2xl font-bold">Gestión BLAK</h1>
+      <h1 id="management-connect-title" class="mt-10 text-2xl font-bold">Gestión BLAK</h1>
       <p class="mt-3 max-w-md text-sm leading-6 text-muted">
         Ingresá con tu cuenta de Google para abrir costos, proveedores y cotizaciones compartidas.
       </p>
@@ -73,12 +50,12 @@
           class="h-8 w-auto"
           priority
         />
-        <p class="text-sm text-muted">{{ store.drive.user()?.emailAddress }}</p>
+        <p class="text-sm text-muted">{{ store.management.user()?.emailAddress }}</p>
       </div>
-      <h1 id="workspace-title" class="mt-10 text-2xl font-bold">Elegí el espacio compartido</h1>
+      <h1 id="workspace-title" class="mt-10 text-2xl font-bold">Prepará tu espacio de gestión</h1>
       <p class="mt-3 max-w-xl text-sm leading-6 text-muted">
-        Una sola persona debe crearlo. Después comparte la carpeta de Drive con la otra, que vincula
-        el archivo recibido.
+        Creá un espacio vacío o importá el archivo <strong>blak-costos.json</strong> que ya usabas en
+        Google Drive. A partir de ahí, los cambios se guardarán únicamente en Firebase.
       </p>
       @if (errorMessage()) {
         <p role="alert" class="mt-5 bg-[#ffedea] px-4 py-3 text-sm font-medium text-wine">
@@ -93,20 +70,24 @@
           (click)="createWorkspace()"
         >
           <span class="block font-semibold">Crear espacio nuevo</span>
-          <span class="mt-1 block text-sm text-smoke"
-            >Usalo solamente desde la primera cuenta.</span
-          >
+          <span class="mt-1 block text-sm text-smoke">Empezá con costos y proveedores vacíos.</span>
         </button>
+        <input
+          #workspaceImport
+          type="file"
+          accept="application/json,.json"
+          class="sr-only"
+          aria-label="Importar archivo de gestión"
+          (change)="importWorkspace($event)"
+        />
         <button
           type="button"
           class="min-h-24 border border-hairline bg-white px-5 py-4 text-left disabled:cursor-not-allowed disabled:opacity-60"
           [disabled]="busy()"
-          (click)="chooseWorkspace()"
+          (click)="workspaceImport.click()"
         >
-          <span class="block font-semibold">Vincular archivo compartido</span>
-          <span class="mt-1 block text-sm text-muted"
-            >Elegí blak-costos.json desde Google Drive.</span
-          >
+          <span class="block font-semibold">Importar datos de Drive</span>
+          <span class="mt-1 block text-sm text-muted">Seleccioná tu blak-costos.json existente.</span>
         </button>
       </div>
     </section>
@@ -148,8 +129,8 @@
           height="144"
           class="h-7 w-auto"
         />
-        <p class="mt-5 truncate text-sm font-medium">Costos compartidos</p>
-        <p class="mt-1 truncate text-xs text-muted">{{ store.drive.user()?.emailAddress }}</p>
+        <p class="mt-5 truncate text-sm font-medium">Gestión en Firebase</p>
+        <p class="mt-1 truncate text-xs text-muted">{{ store.management.user()?.emailAddress }}</p>
       </div>
 
       <nav class="mt-8 space-y-1 md:mt-10" aria-label="Secciones de gestión">
@@ -200,7 +181,7 @@
               [disabled]="busy()"
               (click)="reload()"
             >
-              Descartar y recargar Drive
+              Descartar y recargar Firebase
             </button>
           </div>
         } @else {
@@ -210,18 +191,8 @@
             [disabled]="busy() || !store.canSave()"
             (click)="save()"
           >
-            {{ store.saveState() === 'saving' ? 'Guardando…' : 'Guardar en Drive' }}
+            {{ store.saveState() === 'saving' ? 'Guardando…' : 'Guardar en Firebase' }}
           </button>
-        }
-        @if (store.drive.workspaceFolder()?.webViewLink) {
-          <a
-            [href]="store.drive.workspaceFolder()?.webViewLink"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="mt-2 flex min-h-11 items-center justify-center text-sm font-medium hover:underline md:min-h-9"
-          >
-            Abrir carpeta en Drive
-          </a>
         }
         <button
           type="button"
