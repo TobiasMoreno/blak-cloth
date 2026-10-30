@@ -49,3 +49,10 @@ Thumbs.db
 
 # Credenciales de Google Drive (se generan en Netlify con scripts/build-drive-config.mjs)
 /public/config/google-drive.json
+
+# Local Netlify folder
+.netlify
+
+# Local Firebase cache
+.firebase
+firebase-debug.log
