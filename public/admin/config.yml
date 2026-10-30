@@ -5,7 +5,7 @@ backend:
   # El panel se abre desde Firebase Hosting, pero el login con GitHub pasa por el proveedor OAuth
   # configurado en el sitio de Netlify. Sin esto, Decap busca un sitio de Netlify con el dominio actual.
   base_url: https://api.netlify.com
-  site_domain: blakstreetwear.netlify.app
+  site_domain: blakstreetwear.web.app
   commit_messages:
     create: 'Catálogo: agregar {{slug}}'
     update: 'Catálogo: actualizar {{slug}}'
