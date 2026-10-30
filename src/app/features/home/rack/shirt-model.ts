@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { TessellateModifier } from 'three/examples/jsm/modifiers/TessellateModifier.js';
-import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 /**
  * Remera 3D generada por código: dos paneles (frente y espalda) inflados desde la silueta,
@@ -9,21 +9,41 @@ import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
  */
 export const SHIRT_SCALE = 0.42;
 
-/** Punto de la percha que apoya sobre el riel (unidades locales). */
-export const HOOK_CONTACT = new THREE.Vector3(0.18, 2, 0);
+/**
+ * Eje del riel visto desde la remera (unidades locales): el gancho lo abraza desde arriba.
+ * El caño del gancho sube por x = 0, así que la remera queda corrida HOOK_CONTACT.x del riel.
+ */
+export const HOOK_CONTACT = new THREE.Vector3(0.15, 1.81, 0);
+
+/** Radio del riel de locker-room (0.016 en el mundo) pasado a unidades locales. */
+const RAIL_RADIUS = 0.016 / SHIRT_SCALE;
+const HOOK_RADIUS = 0.15;
+const HOOK_TUBE = 0.024;
+const HANGER_DEPTH = 0.07;
+const HANGER_BEVEL = 0.025;
+/**
+ * Escote: puntos del cuello (±x, y), altura del centro del escote y medio fondo del óvalo
+ * abierto. La proporción ancho/fondo del óvalo copia la de una remera real colgada.
+ */
+const NECK = { x: 0.36, y: 1.46, dip: 1.42, depth: 0.1, frontDrop: 0.12, dropFade: 0.6 } as const;
 
 /**
  * Semiancho de manga a manga y semiespesor máximo (panel + pecho + ondas con CLOTH_AMPLITUDE),
  * en unidades locales. Son la caja con la que se verificó que las remeras no se crucen.
  */
 export const SHIRT_HALF_WIDTH = 1.75;
-export const SHIRT_HALF_THICKNESS = 0.15;
-export const CLOTH_AMPLITUDE = 0.012;
+export const SHIRT_HALF_THICKNESS = 0.3;
+export const CLOTH_AMPLITUDE = 0.018;
 export const SHIRT_HEM_Y = -1.78;
 
-const PANEL_DEPTH = 0.11;
+/**
+ * Lado de z donde está el frente real de la prenda (pecho, escote bajo). El panel +z lleva el
+ * estampado de la espalda (`design`), que es el que mira a cámara en el perchero.
+ */
+const GARMENT_FRONT = -1;
+const FRONT_PANEL_DEPTH = 0.25;
+const BACK_PANEL_DEPTH = 0.22;
 const EDGE_ROUNDING = 0.32;
-const FULL_TURN = Math.PI * 2;
 
 export interface ShirtGeometry {
   front: THREE.BufferGeometry;
@@ -50,19 +70,31 @@ export function createShirtShape(): THREE.Shape {
   shape.lineTo(-1.42, 0.36);
   shape.lineTo(-1.72, 0.82);
   shape.lineTo(-1.22, 1.12);
-  shape.quadraticCurveTo(-0.78, 1.43, -0.52, 1.45);
-  shape.quadraticCurveTo(-0.25, 1.22, 0, 1.2);
-  shape.quadraticCurveTo(0.25, 1.22, 0.52, 1.45);
-  shape.quadraticCurveTo(0.78, 1.43, 1.22, 1.12);
+  shape.quadraticCurveTo(-0.8, 1.36, -NECK.x, NECK.y);
+  // Escote: entre los puntos del cuello la tela no se cose; ahí se abre el óvalo del cuello.
+  shape.quadraticCurveTo(0, NECK.dip, NECK.x, NECK.y);
+  shape.quadraticCurveTo(0.8, 1.36, 1.22, 1.12);
   shape.lineTo(1.72, 0.82);
   shape.lineTo(1.42, 0.36);
   shape.lineTo(1.03, 0.66);
   shape.lineTo(0.98, -1.65);
   shape.quadraticCurveTo(0, -1.78, -0.98, -1.65);
-  const neck = new THREE.Path();
-  neck.absellipse(0, 1.35, 0.34, 0.18, 0, FULL_TURN, false, 0);
-  shape.holes.push(neck);
   return shape;
+}
+
+/** Medio ancho de la abertura del cuello (vista desde arriba) a la altura x del escote. */
+function neckOpening(x: number): number {
+  const t = Math.min(1, Math.abs(x) / NECK.x);
+  return NECK.depth * Math.sqrt(1 - t * t);
+}
+
+/**
+ * Cuánto baja el frente: el escote delantero cae por debajo del borde de la percha y se apoya
+ * en ella, mientras la espalda queda alta. Se apaga hacia los hombros y hacia abajo del pecho.
+ */
+function frontNeckDrop(x: number, toNeck: number): number {
+  const fade = 1 - THREE.MathUtils.smoothstep(toNeck, 0, NECK.dropFade);
+  return NECK.frontDrop * (neckOpening(x) / NECK.depth) * fade;
 }
 
 /** Se construye una sola vez y la comparten todas las remeras del perchero. */
@@ -70,14 +102,11 @@ export function createShirtGeometry(): ShirtGeometry {
   // Contorno con puntos parejos (también en los tramos rectos) para que el borde salga liso.
   const source = createShirtShape();
   const outer = source.getSpacedPoints(150);
-  const holes = source.holes.map((hole) => hole.getSpacedPoints(48));
-  const shape = new THREE.Shape(outer);
-  shape.holes = holes.map((points) => new THREE.Path(points));
-  const flat = new THREE.ShapeGeometry(shape, 1);
+  const flat = new THREE.ShapeGeometry(new THREE.Shape(outer), 1);
   const dense = new TessellateModifier(0.17, 8).modify(flat);
   flat.dispose();
 
-  const closedLoops = [outer, ...holes];
+  const { seams, neck } = splitOutline(outer);
 
   dense.computeBoundingBox();
   const box = dense.boundingBox ?? new THREE.Box3();
@@ -86,8 +115,8 @@ export function createShirtGeometry(): ShirtGeometry {
     new THREE.Vector2(box.max.x, box.max.y),
   );
 
-  const front = inflatePanel(dense, closedLoops, bounds, 1);
-  const back = inflatePanel(dense, closedLoops, bounds, -1);
+  const front = inflatePanel(dense, seams, neck, bounds, 1);
+  const back = inflatePanel(dense, seams, neck, bounds, -1);
   dense.dispose();
 
   return {
@@ -100,9 +129,42 @@ export function createShirtGeometry(): ShirtGeometry {
   };
 }
 
+type Segment = readonly [THREE.Vector2, THREE.Vector2];
+
+function loopSegments(loop: THREE.Vector2[]): Segment[] {
+  return loop.map((point, index) => [point, loop[(index + 1) % loop.length]] as const);
+}
+
+/**
+ * Separa el contorno en costuras (frente y espalda se cosen) y escote. El bajo y los puños no
+ * entran en ninguno: ahí los paneles no se juntan y la prenda queda abierta, dejando ver el forro.
+ */
+function splitOutline(outer: THREE.Vector2[]): { seams: Segment[]; neck: Segment[] } {
+  const cuffA = new THREE.Vector2(1.42, 0.36);
+  const cuffB = new THREE.Vector2(1.72, 0.82);
+  const seams: Segment[] = [];
+  const neck: Segment[] = [];
+  for (const segment of loopSegments(outer)) {
+    const [a, b] = segment;
+    const x = Math.abs((a.x + b.x) / 2);
+    const y = (a.y + b.y) / 2;
+    if (y < -1.6 && x < 0.96) continue;
+    if (distanceToSegment(x, y, cuffA, cuffB) < 0.01) continue;
+    (y > NECK.dip - 0.05 && x < NECK.x ? neck : seams).push(segment);
+  }
+  return { seams, neck };
+}
+
+/** Perfil redondeado: la tela llega a la costura a 90° y se aplana hacia el centro. */
+function roundness(distance: number): number {
+  const edge = Math.min(1, distance / EDGE_ROUNDING);
+  return Math.sqrt(1 - (1 - edge) * (1 - edge));
+}
+
 function inflatePanel(
   source: THREE.BufferGeometry,
-  loops: THREE.Vector2[][],
+  seams: Segment[],
+  neck: Segment[],
   bounds: THREE.Box2,
   side: 1 | -1,
 ): THREE.BufferGeometry {
@@ -115,11 +177,21 @@ function inflatePanel(
   for (let index = 0; index < position.count; index += 1) {
     const x = position.getX(index);
     const y = position.getY(index);
-    const edge = Math.min(1, distanceToLoops(x, y, loops) / EDGE_ROUNDING);
-    // Perfil redondeado: la tela llega al borde a 90° y se aplana hacia el centro.
-    const bulge = Math.sqrt(1 - (1 - edge) * (1 - edge));
-    const chest = 1 + 0.1 * Math.exp(-((y - 0.45) ** 2) / 0.6);
-    position.setZ(index, side * PANEL_DEPTH * bulge * chest);
+    const bodyBlend = 1 - THREE.MathUtils.smoothstep(Math.abs(x), 0.82, 1.22);
+    const torsoX = Math.min(1, Math.abs(x) / 1.08);
+    const torsoCurve = Math.sqrt(Math.max(0, 1 - torsoX * torsoX));
+    const torsoVolume = 0.72 + 0.28 * torsoCurve;
+    const chest = side === GARMENT_FRONT ? 1 + 0.12 * Math.exp(-((y - 0.45) ** 2) / 0.5) : 1;
+    const sleeveVolume = 0.56 + 0.08 * Math.exp(-((y - 0.85) ** 2) / 0.35);
+    const volume = THREE.MathUtils.lerp(sleeveVolume, torsoVolume * chest, bodyBlend);
+    const full = (side === GARMENT_FRONT ? FRONT_PANEL_DEPTH : BACK_PANEL_DEPTH) * volume;
+    // Lejos de las costuras (bajo y puños) el panel conserva su volumen: la remera queda como
+    // tubo. En el escote frente y espalda se separan en un óvalo: el cuello abierto hacia arriba.
+    const toNeck = distanceToSeams(x, y, neck);
+    const seamed = full * roundness(distanceToSeams(x, y, seams));
+    const necked = Math.max(neckOpening(x), full * roundness(toNeck));
+    position.setZ(index, side * Math.min(seamed, necked));
+    if (side === GARMENT_FRONT) position.setY(index, y - frontNeckDrop(x, toNeck));
 
     const u = (x - bounds.min.x) / width;
     uv[index * 2] = side === 1 ? u : 1 - u;
@@ -158,15 +230,9 @@ function flipWinding(geometry: THREE.BufferGeometry, uv: Float32Array): void {
   position.needsUpdate = true;
 }
 
-function distanceToLoops(x: number, y: number, loops: THREE.Vector2[][]): number {
+function distanceToSeams(x: number, y: number, seams: Segment[]): number {
   let best = Infinity;
-  for (const loop of loops) {
-    for (let index = 0; index < loop.length; index += 1) {
-      const a = loop[index];
-      const b = loop[(index + 1) % loop.length];
-      best = Math.min(best, distanceToSegment(x, y, a, b));
-    }
-  }
+  for (const [a, b] of seams) best = Math.min(best, distanceToSegment(x, y, a, b));
   return best;
 }
 
@@ -178,35 +244,80 @@ function distanceToSegment(x: number, y: number, a: THREE.Vector2, b: THREE.Vect
   return Math.hypot(x - (a.x + dx * t), y - (a.y + dy * t));
 }
 
+/** Cuello acanalado: un aro que bordea el óvalo del escote; adelante baja con el frente. */
 function createCollarGeometry(): THREE.BufferGeometry {
-  const curve = new THREE.EllipseCurve(0, 1.35, 0.35, 0.19, 0, FULL_TURN, false, 0);
-  const points = curve.getPoints(64).map((point) => new THREE.Vector3(point.x, point.y, 0));
-  return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points, true), 72, 0.03, 8, true);
+  const neckline = new THREE.QuadraticBezierCurve(
+    new THREE.Vector2(-NECK.x, NECK.y),
+    new THREE.Vector2(0, NECK.dip),
+    new THREE.Vector2(NECK.x, NECK.y),
+  );
+  const steps = 32;
+  const points: THREE.Vector3[] = [];
+  for (const side of [1, -1]) {
+    for (let step = 0; step < steps; step += 1) {
+      const t = side === 1 ? step / steps : 1 - step / steps;
+      const { x, y } = neckline.getPoint(t);
+      const drop = side === GARMENT_FRONT ? frontNeckDrop(x, 0) : 0;
+      points.push(new THREE.Vector3(x, y - drop, side * neckOpening(x)));
+    }
+  }
+  // Dos vueltas apiladas: más alto que grueso, como un ribete de punto.
+  const rows = [0, -0.04].map((offset) => {
+    const loop = points.map((point) => point.clone().setY(point.y + offset));
+    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(loop, true), 96, 0.03, 10, true);
+  });
+  const collar = mergeGeometries(rows);
+  rows.forEach((row) => row.dispose());
+  return collar ?? new THREE.BufferGeometry();
 }
 
-/** Brazos de la percha: quedan dentro de la remera y sostienen los hombros. */
+/**
+ * Percha de madera plana: un arco más grueso en el centro que en las puntas, con cantos
+ * redondeados. Queda dentro de la remera, sosteniendo los hombros; se ve por el cuello abierto.
+ */
 function createHangerGeometry(): THREE.BufferGeometry {
-  const arms = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-1.12, 1.02, 0),
-    new THREE.Vector3(-0.6, 1.22, 0),
-    new THREE.Vector3(0, 1.36, 0),
-    new THREE.Vector3(0.6, 1.22, 0),
-    new THREE.Vector3(1.12, 1.02, 0),
-  ]);
-  return new THREE.TubeGeometry(arms, 40, 0.035, 8, false);
+  const shape = new THREE.Shape();
+  shape.moveTo(-1.06, 1.04);
+  shape.quadraticCurveTo(0, 1.64, 1.06, 1.04);
+  shape.quadraticCurveTo(1.14, 1, 1.06, 0.96);
+  shape.quadraticCurveTo(0, 1.44, -1.06, 0.96);
+  shape.quadraticCurveTo(-1.14, 1, -1.06, 1.04);
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: HANGER_DEPTH,
+    bevelThickness: HANGER_BEVEL,
+    bevelSize: HANGER_BEVEL,
+    bevelSegments: 4,
+    curveSegments: 48,
+  });
+  geometry.translate(0, 0, -HANGER_DEPTH / 2);
+  return geometry;
 }
 
+/** Gancho cromado: sube desde el centro de la percha y se curva sobre el riel. */
 function createHookGeometry(): THREE.BufferGeometry {
-  const hook = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0, 1.34, 0),
-    new THREE.Vector3(0, 1.62, 0),
-    new THREE.Vector3(-0.04, 1.86, 0),
-    new THREE.Vector3(0.06, 2.02, 0),
-    new THREE.Vector3(0.2, 2.07, 0),
-    new THREE.Vector3(0.32, 1.99, 0),
-    new THREE.Vector3(0.36, 1.86, 0),
-  ]);
-  return new THREE.TubeGeometry(hook, 40, 0.024, 8, false);
+  const { x: cx } = HOOK_CONTACT;
+  const cy = HOOK_CONTACT.y + HOOK_TUBE + RAIL_RADIUS - HOOK_RADIUS;
+  const points = [new THREE.Vector3(0, 1.28, 0), new THREE.Vector3(0, cy, 0)];
+  // Arco de casi tres cuartos de vuelta: del caño, por arriba del riel, hasta bajar del otro lado.
+  for (let step = 1; step <= 24; step += 1) {
+    const angle = Math.PI - (step / 24) * (Math.PI + 0.55);
+    points.push(new THREE.Vector3(cx + HOOK_RADIUS * Math.cos(angle), cy + HOOK_RADIUS * Math.sin(angle), 0));
+  }
+  const path = new THREE.CurvePath<THREE.Vector3>();
+  path.add(new THREE.LineCurve3(points[0], points[1]));
+  path.add(new THREE.CatmullRomCurve3(points.slice(1)));
+  const wire = new THREE.TubeGeometry(path, 64, HOOK_TUBE, 10, false);
+
+  const tip = new THREE.SphereGeometry(HOOK_TUBE * 1.35, 12, 8);
+  tip.translate(points.at(-1)?.x ?? 0, points.at(-1)?.y ?? 0, 0);
+  // Casquillo donde el gancho entra en la madera.
+  const ferrule = new THREE.CylinderGeometry(0.045, 0.05, 0.1, 16);
+  ferrule.translate(0, 1.38, 0);
+  const merged = mergeGeometries([wire, tip, ferrule]);
+  wire.dispose();
+  tip.dispose();
+  ferrule.dispose();
+  return merged ?? new THREE.BufferGeometry();
 }
 
 /** Normal map de punto de algodón, generado una vez y compartido. */

@@ -337,7 +337,13 @@
   text-underline-offset: 0.25em;
 }
 
-.sound-toggle {
+.facing-controls {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.sound-toggle,
+.facing-controls button {
   min-height: 2.5rem;
   padding: 0 0.85rem;
   border: 2px solid #393433;
@@ -349,7 +355,9 @@
 }
 
 .sound-toggle:hover,
-.sound-toggle[aria-pressed='true'] {
+.sound-toggle[aria-pressed='true'],
+.facing-controls button:hover,
+.facing-controls button[aria-pressed='true'] {
   border-color: #f4f1e9;
   background: #f4f1e9;
   color: #111010;

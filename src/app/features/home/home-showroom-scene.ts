@@ -43,6 +43,7 @@ interface RackItem {
   group: string;
   pivot: THREE.Group;
   turn: THREE.Group;
+  hookTurn: THREE.Group;
   materials: Record<ShirtSide, THREE.MeshPhysicalMaterial>;
   meshes: THREE.Mesh[];
   uniforms: ClothUniforms;
@@ -83,12 +84,12 @@ interface GroupLabel {
 const RAIL_Y = 1;
 const RACK = {
   // Mantiene la lectura de perchero, pero deja una franja clara para apuntar cada prenda.
-  spacing: 0.3,
+  spacing: 0.34,
   groupGap: 0.55,
   yaw: 1.2,
   pull: 1.3,
-  pullXRatio: -0.15,
-  spread: 0.5,
+  pullXRatio: -0.18,
+  spread: 0.65,
   turnStart: 0.5,
   pickRadius: 0.38,
 } as const;
@@ -96,6 +97,8 @@ const STAGE_Z = 1.8;
 const DIM_Z = 0.95;
 const STAGE_MAX_SCALE = 1.2;
 const PULL_SPEED = 2.2;
+/** Velocidad con la que el perchero entero se da vuelta (fracción por segundo). */
+const FACING_SPEED = 1.4;
 const STAGE_SPEED = 1.5;
 const PRESENCE_SPEED = 3;
 const SETTLED = 0.0005;
@@ -113,6 +116,10 @@ const INTRO = {
 };
 
 const SHIRT_HANG = (HOOK_CONTACT.y - SHIRT_HEM_Y) * SHIRT_SCALE;
+/** El gancho cuelga perpendicular al riel (que corre en x). */
+const HOOK_YAW = Math.PI / 2;
+/** Giro con el que la remera mira a cámara con cada lado (el panel +z lleva el estampado). */
+const SIDE_YAW: Record<ShowroomSide, number> = { design: 0, front: Math.PI };
 const SHIRT_WIDTH = SHIRT_HALF_WIDTH * 2 * SHIRT_SCALE;
 const LOW_TEXTURE = 512;
 const HOVER_TEXTURE = 1024;
@@ -150,6 +157,10 @@ export class HomeShowroomScene {
   private sharpTimer = 0;
   private keyboardHover = false;
   private lastSide: ShowroomSide = 'design';
+  /** Lado que muestra el perchero. */
+  private rackSide: ShowroomSide = 'front';
+  /** 0 = perchero mostrando el estampado, 1 = mostrando el frente; se anima entre ambos. */
+  private facing = 1;
 
   private readonly clothTime = { value: 0 };
   private time = 0;
@@ -228,13 +239,14 @@ export class HomeShowroomScene {
 
       this.geometry = createShirtGeometry();
       this.knit = createKnitNormalMap();
+      // Madera barnizada y cromo, como una percha de tienda.
       this.hangerMaterial = new THREE.MeshPhysicalMaterial({
-        color: '#1c1a19',
-        roughness: 0.4,
-        clearcoat: 0.6,
+        color: '#8a5a33',
+        roughness: 0.45,
+        clearcoat: 0.55,
         clearcoatRoughness: 0.3,
       });
-      this.hookMaterial = new THREE.MeshStandardMaterial({ color: '#d4d0ca', roughness: 0.22, metalness: 1 });
+      this.hookMaterial = new THREE.MeshStandardMaterial({ color: '#d8d2c8', roughness: 0.25, metalness: 1 });
 
       if (this.reducedMotion) this.intro = 1;
       this.applyCamera(this.intro);
@@ -284,7 +296,7 @@ export class HomeShowroomScene {
     this.selected = next;
     this.yawVelocity = 0;
     if (next) {
-      this.userYaw = 0;
+      this.userYaw = SIDE_YAW[this.rackSide];
       this.stageSince = this.time;
       this.scrollTarget = THREE.MathUtils.clamp(next.restX, this.bounds.min, this.bounds.max);
       this.scrollVelocity = 0;
@@ -319,8 +331,15 @@ export class HomeShowroomScene {
     if (this.hover) this.select(this.hover.id);
   }
 
+  /** Da vuelta todo el perchero; si hay una remera en el escenario, también la gira. */
+  setRackSide(side: ShowroomSide): void {
+    this.rackSide = side;
+    if (this.selected) this.showSide(side);
+    else this.emitSide();
+  }
+
   showSide(side: ShowroomSide): void {
-    const target = side === 'design' ? 0 : Math.PI;
+    const target = SIDE_YAW[side];
     this.userYaw = Math.round((this.userYaw - target) / (Math.PI * 2)) * Math.PI * 2 + target;
     this.yawVelocity = 0;
     this.emitSide();
@@ -414,17 +433,25 @@ export class HomeShowroomScene {
     const hanger = new THREE.Mesh(geometry.hanger, this.hangerMaterial as THREE.Material);
     const hook = new THREE.Mesh(geometry.hook, this.hookMaterial as THREE.Material);
     hook.castShadow = true;
+    hanger.castShadow = true;
+    hanger.receiveShadow = true;
 
-    // El grupo cuelga del punto de contacto del gancho con el riel.
+    // El gancho abraza el riel (origen del pivot) y queda cruzado a él; la remera gira debajo,
+    // alrededor del caño del gancho.
+    hook.position.copy(HOOK_CONTACT).multiplyScalar(-1);
+    const hookTurn = new THREE.Group();
+    hookTurn.scale.setScalar(SHIRT_SCALE);
+    hookTurn.rotation.y = HOOK_YAW;
+    hookTurn.add(hook);
     const shirt = new THREE.Group();
-    shirt.add(front, back, collar, hanger, hook);
-    shirt.position.copy(HOOK_CONTACT).multiplyScalar(-1);
+    shirt.add(front, back, collar, hanger);
+    shirt.position.y = -HOOK_CONTACT.y;
     const turn = new THREE.Group();
     turn.scale.setScalar(SHIRT_SCALE);
     turn.add(shirt);
     const pivot = new THREE.Group();
     pivot.position.y = RAIL_Y;
-    pivot.add(turn);
+    pivot.add(hookTurn, turn);
     this.rail.add(pivot);
 
     return {
@@ -432,6 +459,7 @@ export class HomeShowroomScene {
       group: entry.group,
       pivot,
       turn,
+      hookTurn,
       materials,
       meshes: [front, back],
       uniforms,
@@ -445,8 +473,8 @@ export class HomeShowroomScene {
       baseX: 0,
       pull: 0,
       stage: 0,
-      yaw: RACK.yaw,
-      lagYaw: RACK.yaw,
+      yaw: Math.PI - RACK.yaw,
+      lagYaw: Math.PI - RACK.yaw,
       lagYawVelocity: 0,
       lagRoll: 0,
       lagRollVelocity: 0,
@@ -733,7 +761,7 @@ export class HomeShowroomScene {
   }
 
   private emitSide(force = false): void {
-    const side = this.selected ? this.currentSide() : 'design';
+    const side = this.selected ? this.currentSide() : this.rackSide;
     if (!force && side === this.lastSide) return;
     this.lastSide = side;
     this.options.onSideChange(side);
@@ -994,7 +1022,13 @@ export class HomeShowroomScene {
     const out = this.items.filter((item) => item.pull > 0);
     // Casi recto hacia la cámara: el cursor permanece sobre la remera mientras esta sale.
     // El pequeño sesgo lateral conserva margen con la vecina durante el desplazamiento.
-    const directionX = RACK.pullXRatio;
+    // Mostrando el frente, el perchero es el espejo del original (yaw π - RACK.yaw): el sesgo
+    // también se refleja. Al darse vuelta, todas giran juntas pasando de canto: nunca se tocan.
+    this.facing = this.reducedMotion
+      ? Number(this.rackSide === 'front')
+      : approach(this.facing, Number(this.rackSide === 'front'), FACING_SPEED * dt);
+    const facing = smoothstep(this.facing);
+    const directionX = RACK.pullXRatio * (1 - 2 * facing);
     const directionZ = 1;
     const spinSide = this.selected ? this.userYaw : 0;
 
@@ -1014,7 +1048,8 @@ export class HomeShowroomScene {
       x += directionX * RACK.pull * slide;
       let y = 0;
       let z = directionZ * RACK.pull * slide;
-      let yaw = RACK.yaw * (1 - turn);
+      const hung = RACK.yaw * (1 - turn);
+      let yaw = THREE.MathUtils.lerp(hung, Math.PI - hung, facing);
       let scale = 1;
 
       if (item.stage > 0) {
@@ -1026,8 +1061,11 @@ export class HomeShowroomScene {
         scale = THREE.MathUtils.lerp(1, stage.scale, blend);
         // Solo gira cuando ya está delante de todo (ver verificación de RACK).
         const idle = this.reducedMotion ? 0 : Math.sin((this.time - this.stageSince) * 0.7) * 0.16;
-        const spin = item === this.selected ? spinSide + idle : 0;
-        yaw = spin * smoothstep((item.stage - 0.9) / 0.1);
+        const facingYaw = Math.PI * facing;
+        const spin = item === this.selected ? spinSide + idle : facingYaw;
+        // Vuelve al lado del perchero más cercano al giro actual, sin vueltas completas de más.
+        const rest = spin - normalizeAngle(spin - facingYaw);
+        yaw = THREE.MathUtils.lerp(rest, spin, smoothstep((item.stage - 0.9) / 0.1));
       }
 
       item.yaw = yaw;
@@ -1055,6 +1093,14 @@ export class HomeShowroomScene {
       item.pivot.position.set(x, RAIL_Y + y, z);
       item.pivot.rotation.z = roll;
       item.pivot.scale.setScalar(scale * Math.max(presence, 0.0001));
+      // Colgado, el gancho cruza el riel; afuera acompaña el giro de la remera.
+      const hookYaw = THREE.MathUtils.lerp(HOOK_YAW, yaw, turn);
+      item.hookTurn.rotation.y = hookYaw;
+      item.turn.position.set(
+        -HOOK_CONTACT.x * SHIRT_SCALE * Math.cos(hookYaw),
+        0,
+        HOOK_CONTACT.x * SHIRT_SCALE * Math.sin(hookYaw),
+      );
       item.turn.rotation.y = yaw;
     }
     this.emitSide();

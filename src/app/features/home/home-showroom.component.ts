@@ -50,7 +50,9 @@ export class HomeShowroomComponent {
   activeFilter = signal<ShowroomFilter>('all');
   hoveredId = signal<string | null>(null);
   selectedId = signal<string | null>(null);
-  selectedSide = signal<ShowroomSide>('design');
+  selectedSide = signal<ShowroomSide>('front');
+  /** Lado que muestra el perchero (y con el que llega cada remera al escenario). */
+  rackSide = signal<ShowroomSide>('front');
   sceneReady = signal(false);
   sceneFailed = signal(false);
   soundOn = signal(false);
@@ -94,8 +96,8 @@ export class HomeShowroomComponent {
   announcement = computed(() => {
     const selected = this.selectedProduct();
     if (selected) {
-      const side = this.selectedSide() === 'design' ? 'estampa principal' : 'frente';
-      return `${selected.name} en el escenario, mostrando la ${side}.`;
+      const side = this.selectedSide() === 'design' ? 'el dorso' : 'el frente';
+      return `${selected.name} en el escenario, mostrando ${side}.`;
     }
     const hovered = this.hoveredProduct();
     if (!hovered) return '';
@@ -128,10 +130,7 @@ export class HomeShowroomComponent {
         onFailure: () => this.sceneFailed.set(true),
         onReady: () => this.sceneReady.set(true),
         onHoverChange: (id) => this.hoveredId.set(id),
-        onSelectionChange: (id) => {
-          this.selectedId.set(id);
-          this.selectedSide.set('design');
-        },
+        onSelectionChange: (id) => this.selectedId.set(id),
         onSideChange: (side) => this.selectedSide.set(side),
       });
       this.scene.set(scene);
@@ -169,6 +168,11 @@ export class HomeShowroomComponent {
 
   showSide(side: ShowroomSide): void {
     this.scene()?.showSide(side);
+  }
+
+  setRackSide(side: ShowroomSide): void {
+    this.rackSide.set(side);
+    this.scene()?.setRackSide(side);
   }
 
   toggleSound(): void {
