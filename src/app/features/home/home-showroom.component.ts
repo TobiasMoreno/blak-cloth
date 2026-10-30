@@ -192,7 +192,10 @@ export class HomeShowroomComponent {
         onFailure: () => this.sceneFailed.set(true),
         onReady: () => this.sceneReady.set(true),
         onHoverChange: (id) => this.hoveredId.set(id),
-        onSelectionChange: (id) => this.selectedId.set(id),
+        onSelectionChange: (id) => {
+          this.selectedId.set(id);
+          if (id) this.revealStageFooter();
+        },
         onSideChange: (side) => this.selectedSide.set(side),
       });
       scene.setRackSide(this.rackSide(), true);
@@ -304,6 +307,15 @@ export class HomeShowroomComponent {
         return;
     }
     event.preventDefault();
+  }
+
+  /** En el celular el escenario es más alto que la pantalla: sin esto el "Agregar al carrito" queda abajo del borde. */
+  private revealStageFooter(): void {
+    const stage = this.stage().nativeElement;
+    if (stage.getBoundingClientRect().bottom <= window.innerHeight) return;
+    if (!window.matchMedia('(max-width: 700px)').matches) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    stage.scrollIntoView({ block: 'end', behavior: reduceMotion ? 'auto' : 'smooth' });
   }
 
   private findVisible(id: string | null): Product | null {

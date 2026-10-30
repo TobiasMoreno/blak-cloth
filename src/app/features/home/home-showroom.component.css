@@ -669,10 +669,6 @@
     bottom: 7.6rem;
   }
 
-  .touch-hint.is-stage {
-    bottom: calc(38% + 0.5rem);
-  }
-
   .arrow-controls button {
     width: 2.75rem;
     min-height: 2.75rem;
@@ -715,36 +711,82 @@
     display: none;
   }
 
+  /* Con una remera en el escenario la ficha baja hasta el borde (las flechas reemplazan a la
+     lista) y se arma en filas: la remera ocupa la franja del 24% al 60% (stagePose). */
+  .locker-stage.is-staged + .product-rail,
+  .stage-description,
+  .stage-panel dl,
+  .side-controls {
+    display: none;
+  }
+
   .stage-panel {
-    top: 62%;
-    right: 1rem;
-    bottom: 4.25rem;
-    left: 1rem;
+    top: 60%;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    left: 0.75rem;
     width: auto;
-    padding: 1.1rem 1.2rem;
+    flex-flow: row wrap;
+    align-content: flex-start;
+    column-gap: 1rem;
+    padding: 0.75rem 1rem 0;
     animation-name: stage-enter-mobile;
   }
 
-  .stage-panel h2 {
-    margin-top: 0.6rem;
-    font-size: 2rem;
+  .stage-panel > * {
+    flex: 1 0 100%;
   }
 
-  .stage-description,
-  .stage-panel dl {
-    display: none;
+  .stage-panel .stage-kicker {
+    order: 1;
+    flex: 1 1 auto;
+    align-self: center;
+  }
+
+  .stage-panel .stage-link {
+    order: 2;
+    flex: 0 0 auto;
+  }
+
+  .stage-panel h2 {
+    order: 3;
+    margin-top: 0.15rem;
+    font-size: 1.75rem;
+  }
+
+  .stage-choices,
+  .stage-note {
+    order: 4;
   }
 
   .stage-choices {
     margin-top: 0.6rem;
   }
 
-  .stage-navigation {
-    padding-top: 0.75rem;
+  /* Leyenda flotante: queda en la misma fila que los talles. */
+  .stage-choices legend {
+    float: left;
+    margin: 0 0.75rem 0 0;
+    line-height: 2.75rem;
   }
 
-  .stage-navigation .arrow-controls {
-    display: none;
+  /* Si no entra todo (pantallas bajas, varios colores), el botón queda visible al pie. */
+  .stage-action {
+    position: sticky;
+    bottom: 0;
+    order: 5;
+    margin-top: 0.6rem;
+  }
+
+  .stage-navigation {
+    order: 6;
+    margin-top: 0;
+    padding: 0.25rem 0 0.4rem;
+    white-space: nowrap;
+  }
+
+  .touch-hint.is-stage {
+    bottom: calc(40% + 0.5rem);
   }
 }
 
