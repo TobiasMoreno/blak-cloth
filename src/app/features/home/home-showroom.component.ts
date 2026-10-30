@@ -14,6 +14,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { Product } from '../../core/models/product.model';
 import { ProductService } from '../../core/services/product.service';
+import { readStorage, writeStorage } from '../../core/storage/local-storage';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
 import { HomeShowroomScene, RackEntry, ShowroomSide } from './home-showroom-scene';
 
@@ -25,6 +26,7 @@ interface FilterOption {
 }
 
 const GROUP_ORDER = ['Negras', 'Blancas', 'Color'];
+const RACK_SIDE_STORAGE_KEY = 'blak-rack-side';
 
 @Component({
   selector: 'app-home-showroom',
@@ -50,9 +52,9 @@ export class HomeShowroomComponent {
   activeFilter = signal<ShowroomFilter>('all');
   hoveredId = signal<string | null>(null);
   selectedId = signal<string | null>(null);
-  selectedSide = signal<ShowroomSide>('front');
-  /** Lado que muestra el perchero (y con el que llega cada remera al escenario). */
-  rackSide = signal<ShowroomSide>('front');
+  selectedSide = signal<ShowroomSide>('design');
+  /** Lado que muestra el perchero (y con el que llega cada remera al escenario); se recuerda. */
+  rackSide = signal<ShowroomSide>(readStorage(RACK_SIDE_STORAGE_KEY) === 'front' ? 'front' : 'design');
   sceneReady = signal(false);
   sceneFailed = signal(false);
   soundOn = signal(false);
@@ -133,6 +135,7 @@ export class HomeShowroomComponent {
         onSelectionChange: (id) => this.selectedId.set(id),
         onSideChange: (side) => this.selectedSide.set(side),
       });
+      scene.setRackSide(this.rackSide(), true);
       this.scene.set(scene);
       scene.initialize();
       this.destroyRef.onDestroy(() => scene.destroy());
@@ -172,6 +175,7 @@ export class HomeShowroomComponent {
 
   setRackSide(side: ShowroomSide): void {
     this.rackSide.set(side);
+    writeStorage(RACK_SIDE_STORAGE_KEY, side);
     this.scene()?.setRackSide(side);
   }
 

@@ -158,9 +158,9 @@ export class HomeShowroomScene {
   private keyboardHover = false;
   private lastSide: ShowroomSide = 'design';
   /** Lado que muestra el perchero. */
-  private rackSide: ShowroomSide = 'front';
+  private rackSide: ShowroomSide = 'design';
   /** 0 = perchero mostrando el estampado, 1 = mostrando el frente; se anima entre ambos. */
-  private facing = 1;
+  private facing = 0;
 
   private readonly clothTime = { value: 0 };
   private time = 0;
@@ -331,11 +331,23 @@ export class HomeShowroomScene {
     if (this.hover) this.select(this.hover.id);
   }
 
-  /** Da vuelta todo el perchero; si hay una remera en el escenario, también la gira. */
-  setRackSide(side: ShowroomSide): void {
+  /**
+   * Da vuelta todo el perchero; si hay una remera en el escenario, también la gira.
+   * `instant` lo deja ya girado (preferencia guardada al cargar), sin animación.
+   */
+  setRackSide(side: ShowroomSide, instant = false): void {
     this.rackSide = side;
+    if (instant) {
+      this.facing = Number(side === 'front');
+      for (const item of this.items) item.yaw = item.lagYaw = this.rackYaw();
+    }
     if (this.selected) this.showSide(side);
     else this.emitSide();
+  }
+
+  /** Giro de una remera colgada según el lado que muestra el perchero. */
+  private rackYaw(): number {
+    return THREE.MathUtils.lerp(RACK.yaw, Math.PI - RACK.yaw, smoothstep(this.facing));
   }
 
   showSide(side: ShowroomSide): void {
@@ -473,8 +485,8 @@ export class HomeShowroomScene {
       baseX: 0,
       pull: 0,
       stage: 0,
-      yaw: Math.PI - RACK.yaw,
-      lagYaw: Math.PI - RACK.yaw,
+      yaw: this.rackYaw(),
+      lagYaw: this.rackYaw(),
       lagYawVelocity: 0,
       lagRoll: 0,
       lagRollVelocity: 0,
