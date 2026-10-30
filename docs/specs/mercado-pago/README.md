@@ -48,6 +48,9 @@ un pago confirmado únicamente después de verificarlo desde el backend.
 - El checkout puede apagarse desde Decap CMS sin tocar código (`public/data/checkout.json`).
 - El aviso de venta nueva al comercio es la notificación nativa de la app de Mercado Pago; BLAK no
   envía emails.
+- El titular de la venta todavía no está definido. Sus datos viven en `public/data/seller.json`
+  (editable desde Decap) con valores provisorios, y el checkout productivo queda bloqueado hasta
+  confirmarlo.
 - Se incorporan los requisitos legales mínimos de comercio electrónico en Argentina: botón de
   arrepentimiento, términos y condiciones, política de privacidad y datos del vendedor visibles.
 

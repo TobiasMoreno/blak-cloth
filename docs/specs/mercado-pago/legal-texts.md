@@ -7,24 +7,59 @@ de todas las páginas.
 - Al cambiar cualquiera de los dos textos se publica una versión nueva, se actualiza `termsVersion` y
   los compradores vuelven a aceptar en su próxima compra. Los pedidos guardan la versión aceptada.
 - Los textos se implementan tal cual, con títulos `h1`/`h2` en el mismo orden y sin cambiar el
-  contenido. Los fragmentos `[entre corchetes]` son enlaces o datos que se completan al implementar.
+  contenido. Los fragmentos `[entre corchetes]` son enlaces que se completan al implementar.
+- Los fragmentos `{{seller.*}}` se reemplazan con los datos de `public/data/seller.json`. Ningún dato
+  del vendedor se escribe a mano en los textos ni en los componentes.
 
 ## Datos del vendedor
 
-| Campo | Valor |
-|---|---|
-| Nombre | Tobias Emiliano Moreno |
-| Nombre comercial | BLAK Streetwear |
-| CUIT | 20-42856378-7 |
-| Domicilio | Sánchez de Loria 4580, Córdoba, Argentina |
-| Email | tobiasmoreno.tm.21@gmail.com |
+El titular de la venta todavía no está definido. Sus datos viven en `public/data/seller.json`,
+editable desde Decap CMS (Configuración → Vendedor), para poder cambiarlo sin tocar código ni textos.
 
-La ciudad se tomó de `STORE_INFO.city`; confirmarla y agregar el código postal antes de publicar.
+```json
+{
+  "legalName": "Tobias Emiliano Moreno",
+  "tradeName": "BLAK Streetwear",
+  "cuit": "20-42856378-7",
+  "address": "Sánchez de Loria 4580",
+  "city": "Córdoba",
+  "province": "Córdoba",
+  "postalCode": null,
+  "email": "tobiasmoreno.tm.21@gmail.com",
+  "taxCondition": "monotributo",
+  "provisional": true
+}
+```
+
+| Campo | Uso |
+|---|---|
+| `legalName` | Nombre y apellido o razón social del titular |
+| `tradeName` | Nombre comercial que se muestra en el sitio |
+| `cuit` | CUIT con guiones |
+| `address`, `city`, `province`, `postalCode` | Domicilio; `{{seller.fullAddress}}` los une como "Calle 123, Ciudad (CP), Provincia, Argentina" y omite los vacíos |
+| `email` | Contacto para reclamos, arrepentimiento y datos personales |
+| `taxCondition` | `monotributo` o `responsable_inscripto`; define qué columna de `comisiones.md` aplica |
+| `provisional` | `true` mientras el titular no esté confirmado |
+
+Los valores actuales son provisorios: corresponden a Tobias Emiliano Moreno hasta que se defina el
+titular.
+
+Reglas:
+
+- **Un solo titular:** quien figura en `seller.json` debe ser el dueño de la cuenta de Mercado Pago
+  cuyas credenciales usa Netlify, y quien factura en ARCA.
+- **Bloqueo productivo:** con `provisional: true`, `create-checkout` responde `503 CHECKOUT_DISABLED`
+  cuando `MERCADO_PAGO_LIVE_MODE` es `true`. En pruebas no bloquea.
+- **Cambio de titular:** cambia la contraparte del contrato y el responsable de los datos personales.
+  Requiere actualizar `seller.json`, publicar una versión nueva de los textos (`termsVersion`),
+  cambiar las credenciales y el webhook de Mercado Pago, y revisar la inscripción en la AAIP. Los
+  pedidos anteriores conservan el vendedor que tenían (ver `sellerSnapshot` en la especificación
+  técnica).
 
 Texto del pie:
 
-> BLAK Streetwear · Tobias Emiliano Moreno · CUIT 20-42856378-7 · Sánchez de Loria 4580, Córdoba,
-> Argentina · tobiasmoreno.tm.21@gmail.com
+> {{seller.tradeName}} · {{seller.legalName}} · CUIT {{seller.cuit}} · {{seller.fullAddress}} ·
+> {{seller.email}}
 > [Botón de arrepentimiento] · [Términos y condiciones] · [Política de privacidad] ·
 > [Defensa de las y los consumidores]
 
@@ -46,9 +81,9 @@ Los enlaces abren en una pestaña nueva para no perder los datos del formulario,
 
 ### 1. Quién vende
 
-Este sitio, `blakstreetwear.web.app`, pertenece a **Tobias Emiliano Moreno**, CUIT 20-42856378-7,
-con domicilio en Sánchez de Loria 4580, Córdoba, Argentina, que opera con el nombre comercial **BLAK
-Streetwear**. Podés escribirnos a tobiasmoreno.tm.21@gmail.com o por WhatsApp desde el sitio.
+Este sitio, `blakstreetwear.web.app`, pertenece a **{{seller.legalName}}**, CUIT {{seller.cuit}},
+con domicilio en {{seller.fullAddress}}, que opera con el nombre comercial
+**{{seller.tradeName}}**. Podés escribirnos a {{seller.email}} o por WhatsApp desde el sitio.
 
 Al comprar aceptás estos términos. Si no estás de acuerdo con alguno, no realices la compra.
 
@@ -135,9 +170,9 @@ lavado inadecuados.
 ### 12. Reclamos y devoluciones de dinero
 
 Las devoluciones de dinero se hacen siempre por Mercado Pago, al mismo medio con el que pagaste. Para
-cualquier reclamo escribinos a tobiasmoreno.tm.21@gmail.com. También podés hacer un reclamo ante
-[Defensa de las y los consumidores] o ante la Dirección de Defensa del Consumidor de la Provincia de
-Córdoba.
+cualquier reclamo escribinos a {{seller.email}}. También podés hacer un reclamo ante
+[Defensa de las y los consumidores] o ante la autoridad de defensa del consumidor de la provincia de
+{{seller.province}}.
 
 ### 13. Uso del sitio
 
@@ -162,9 +197,8 @@ Defensa del Consumidor. Ante un conflicto, podés acudir a los tribunales de tu 
 
 ### 1. Responsable de tus datos
 
-El responsable de tus datos personales es **Tobias Emiliano Moreno** (BLAK Streetwear), CUIT
-20-42856378-7, con domicilio en Sánchez de Loria 4580, Córdoba, Argentina. Contacto:
-tobiasmoreno.tm.21@gmail.com.
+El responsable de tus datos personales es **{{seller.legalName}}** ({{seller.tradeName}}), CUIT
+{{seller.cuit}}, con domicilio en {{seller.fullAddress}}. Contacto: {{seller.email}}.
 
 Tratamos tus datos según la Ley 25.326 de Protección de los Datos Personales.
 
@@ -227,7 +261,7 @@ Podés borrar estos datos desde la configuración de tu navegador.
 ### 7. Tus derechos
 
 Podés pedirnos en cualquier momento acceder a tus datos, corregirlos, actualizarlos o eliminarlos.
-Escribinos a tobiasmoreno.tm.21@gmail.com indicando tu nombre y el número de pedido. Respondemos
+Escribinos a {{seller.email}} indicando tu nombre y el número de pedido. Respondemos
 dentro de los 10 días corridos para acceso y de los 5 días hábiles para corrección o eliminación.
 
 El acceso es gratuito si lo pedís con intervalos de al menos seis meses, salvo que acredites un
@@ -261,6 +295,8 @@ importante, te pedimos que la aceptes de nuevo en tu próxima compra.
 
 ## Pendientes del comercio (no se publican)
 
+- Definir el titular de la venta, completar sus datos en `seller.json` y pasar `provisional` a
+  `false`.
 - Confirmar ciudad y código postal del domicilio.
 - Inscribir la base de datos de clientes en el Registro Nacional de Bases de Datos de la AAIP
   (trámite gratuito con CUIT y clave fiscal).

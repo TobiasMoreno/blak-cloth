@@ -15,8 +15,9 @@ La tasa baja de dinero en cuenta (0,80%) existe sólo cobrando en persona con QR
 Córdoba está en el grupo de Buenos Aires, Chubut y Entre Ríos, que tiene las tasas más altas. Vigentes
 desde el 6 de marzo de 2026.
 
-Mercado Pago cobra siempre el IVA (21%) sobre la comisión. BLAK es monotributista y no lo recupera,
-así que el costo real es la tasa **con IVA**.
+Mercado Pago cobra siempre el IVA (21%) sobre la comisión. El titular provisorio es monotributista
+(`taxCondition` en `seller.json`) y no lo recupera, así que el costo real es la tasa **con IVA**. Si
+el titular definitivo fuera responsable inscripto, el costo real sería la tasa sin IVA.
 
 | Dinero disponible | Tasa | Con IVA (costo real) |
 |---|---:|---:|

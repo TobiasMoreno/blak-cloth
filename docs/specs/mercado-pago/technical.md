@@ -115,6 +115,10 @@ metadata             { order_id, schema_version }
   ```
 
   Reemplaza a `STORE_INFO.pickupLocation`. Es el interruptor para volver al flujo de WhatsApp.
+- `public/data/seller.json`, editable desde Decap CMS: datos del titular de la venta (nombre, CUIT,
+  domicilio, email, condición fiscal y marca `provisional`). Su forma y reglas están en
+  [Textos legales](./legal-texts.md#datos-del-vendedor). Lo consumen el pie, las páginas legales y
+  `create-checkout`. Ningún componente escribe datos del vendedor a mano.
 
 ### Pricing compartido
 
@@ -239,7 +243,8 @@ Comportamiento:
 
 1. Aplicar rate limit.
 2. Validar tamaño, tipos y longitudes del body antes de acceder a servicios externos.
-3. Leer `checkout.json`; si `mercadoPagoEnabled` es `false`, responder `503 CHECKOUT_DISABLED`.
+3. Leer `checkout.json` y `seller.json`. Responder `503 CHECKOUT_DISABLED` si `mercadoPagoEnabled`
+   es `false`, o si `seller.provisional` es `true` y `MERCADO_PAGO_LIVE_MODE` es `true`.
 4. Verificar que `acceptedTermsVersion` coincida con la vigente.
 5. Resolver cada producto desde el catálogo publicado (ver 7.1).
 6. Validar talle, color, disponibilidad, cantidad de 1 a 50 y como máximo 30 líneas.
@@ -395,6 +400,10 @@ orders/{orderId}
   status
   orderAccessTokenHash
   acceptedTermsVersion
+  sellerSnapshot           (copia de seller.json al crear el pedido)
+    legalName
+    cuit
+    taxCondition
   customer
     firstName
     lastName
@@ -448,6 +457,8 @@ Consideraciones:
 
 - Los artículos y precios son una captura histórica; no se resuelven nuevamente para mostrar un
   pedido viejo.
+- `sellerSnapshot` registra quién vendió, para facturar con el CUIT correcto aunque después cambie el
+  titular.
 - Los timestamps los genera el servidor.
 - El token de consulta nunca se guarda en texto plano.
 - Los datos personales no se copian a logs.
@@ -530,6 +541,7 @@ Las Functions **no** empaquetan el catálogo. Lo leen del sitio publicado:
 - `{APP_BASE_URL}/data/products.json`
 - `{APP_BASE_URL}/data/wholesale.json`
 - `{APP_BASE_URL}/data/checkout.json`
+- `{APP_BASE_URL}/data/seller.json`
 
 Motivos: es exactamente lo que ve el comprador, evita desfases entre los deploys de Firebase y
 Netlify, y un cambio de catálogo desde Decap no requiere rebuild de Netlify.

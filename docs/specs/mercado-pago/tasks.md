@@ -34,6 +34,7 @@ siguiente.
 - [ ] Agregar `Cache-Control: no-cache` a `/data/**` en `firebase.json`.
 - [ ] Crear `public/data/checkout.json` y su colección en Decap CMS.
 - [ ] Reemplazar `STORE_INFO.pickupLocation` por `checkout.json`.
+- [ ] Crear `public/data/seller.json` con los datos provisorios y su colección en Decap CMS.
 - [ ] Unificar el pricing por unidad en `src/app/core/pricing/` sin dependencias de Angular y ajustar
       `CartService` y sus pruebas.
 
@@ -78,7 +79,8 @@ siguiente.
 
 - [ ] Implementar `create-checkout`.
 - [ ] Validar el formulario completo y la versión de términos en backend.
-- [ ] Respetar `mercadoPagoEnabled`.
+- [ ] Respetar `mercadoPagoEnabled` y el bloqueo productivo de `seller.provisional`.
+- [ ] Guardar `sellerSnapshot` en el pedido.
 - [ ] Implementar idempotencia por `clientRequestId` con hash del body.
 - [ ] Crear el pedido antes de llamar a Mercado Pago.
 - [ ] Crear la preferencia según la sección 2.1 de la especificación técnica.
@@ -151,9 +153,11 @@ siguiente.
 ## 12. Legal
 
 - [ ] Implementar `withdrawal-request` y la página `/arrepentimiento`.
-- [x] Redactar textos legales y obtener datos del vendedor (`legal-texts.md`).
-- [ ] Agregar páginas `/terminos` y `/privacidad` con los textos de `legal-texts.md`.
-- [ ] Agregar al pie el botón de arrepentimiento, datos del vendedor y enlaces legales.
+- [x] Redactar textos legales (`legal-texts.md`).
+- [ ] Agregar páginas `/terminos` y `/privacidad` con los textos de `legal-texts.md`, completando los
+      `{{seller.*}}` desde `seller.json`.
+- [ ] Agregar al pie el botón de arrepentimiento, datos del vendedor desde `seller.json` y enlaces
+      legales.
 - [ ] Completar los pendientes del comercio de `legal-texts.md`.
 - [ ] Documentar la facturación manual en ARCA.
 - [ ] Crear el script de anonimización de datos personales.
@@ -171,6 +175,10 @@ siguiente.
 - [ ] Verificar uso dentro de los planes gratuitos.
 
 ## 14. Producción
+
+- [ ] **Bloqueante:** definir el titular de la venta, completar `seller.json` y pasar `provisional` a
+      `false`. Usar las credenciales, el `collector_id` y el webhook de la cuenta de Mercado Pago de
+      ese titular.
 
 - [ ] Configurar credenciales productivas en el contexto `production` de Netlify.
 - [ ] Configurar el webhook productivo y obtener su secreto.
