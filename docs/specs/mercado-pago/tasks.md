@@ -30,6 +30,9 @@ siguiente.
 
 ## 2. Prerrequisitos en el repositorio
 
+- [x] Apuntar el login de Decap al OAuth de `blakstreetwear.netlify.app` desde `config.yml`.
+- [ ] Verificar el proveedor OAuth de GitHub en Netlify e ingresar a
+      `https://blakstreetwear.web.app/admin/`.
 - [ ] Resolver el loader de imágenes que apunta a `/.netlify/images` en Firebase Hosting.
 - [ ] Agregar `Cache-Control: no-cache` a `/data/**` en `firebase.json`.
 - [ ] Crear `public/data/checkout.json` y su colección en Decap CMS.
@@ -40,7 +43,8 @@ siguiente.
 
 ## 3. Infraestructura backend (Netlify sólo-API)
 
-- [ ] Reescribir `netlify.toml` como sitio sólo-API con `ignore` por rutas.
+- [ ] Reescribir `netlify.toml` del sitio existente `blakstreetwear.netlify.app` como sólo-API, con
+      `ignore` por rutas, después de verificar el panel de Decap en Firebase.
 - [ ] Crear `netlify/static/index.html` mínimo y `netlify/functions/` con `tsconfig` propio.
 - [ ] Agregar SDK oficial de Mercado Pago y `firebase-admin`.
 - [ ] Crear una service account con rol `Cloud Datastore User`.

@@ -9,7 +9,7 @@ Firebase Hosting (web pública: blakstreetwear.web.app)
       |                                   ^
       | HTTPS + CORS                      | lectura del catálogo publicado
       v                                   |
-Netlify Functions (sitio sólo-API: blak-api.netlify.app)
+Netlify Functions (sitio sólo-API: blakstreetwear.netlify.app)
   create-checkout -------> Mercado Pago Preferences API
   order-status ----------> Mercado Pago Payments API (refresh acotado)
   mercado-pago-webhook --> Mercado Pago Payments API
@@ -102,7 +102,7 @@ metadata             { order_id, schema_version }
 
 ### Configuración
 
-- `apiBaseUrl` se define en una constante tipada por entorno (`https://blak-api.netlify.app` en
+- `apiBaseUrl` se define en una constante tipada por entorno (`https://blakstreetwear.netlify.app` en
   producción; `http://localhost:8888` con `netlify dev`). No contiene secretos.
 - `public/data/checkout.json`, editable desde Decap CMS:
 
@@ -573,7 +573,23 @@ Netlify, y un cambio de catálogo desde Decap no requiere rebuild de Netlify.
 - Las Functions están en TypeScript, con un `tsconfig` propio en `netlify/` y tests con Vitest.
 - Se quita `https://blakstreetwear.netlify.app/__/auth/handler` de `firebase.json` si deja de usarse.
 
-### 7.3 Imágenes
+- El sitio de Netlify que se convierte en sólo-API es el existente, `blakstreetwear.netlify.app`. No
+  se crea uno nuevo: ese sitio tiene configurado el proveedor OAuth de GitHub que usa Decap.
+
+### 7.3 Decap CMS desde Firebase Hosting
+
+El panel se usa en `https://blakstreetwear.web.app/admin/`. El login con GitHub sigue pasando por
+Netlify:
+
+- `public/admin/config.yml` declara `base_url: https://api.netlify.com` y
+  `site_domain: blakstreetwear.netlify.app`.
+- El sitio de Netlify mantiene instalado el proveedor OAuth de GitHub (Project configuration → Access
+  & security → OAuth), con una GitHub OAuth App cuyo callback es `https://api.netlify.com/auth/done`.
+- Convertir Netlify en sólo-API no afecta el login, porque el OAuth es una configuración del sitio y no
+  depende de lo que publique.
+- `blakstreetwear.netlify.app/admin` deja de existir; el único panel es el de Firebase.
+
+### 7.4 Imágenes
 
 El loader actual (`netlify-image-loader.ts`) apunta a `/.netlify/images`, que sólo existe en Netlify.
 En Firebase Hosting esa ruta devuelve el `index.html`. Esto es un problema actual, ajeno a esta
