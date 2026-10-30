@@ -2,25 +2,43 @@ import { inject, Injectable, signal, computed } from '@angular/core';
 import { CartItem } from '../models/cart-item.model';
 import { LEGACY_PRODUCT_IDS } from '../constants/legacy-products.constants';
 import { readStorage, writeStorage } from '../storage/local-storage';
+import { activeTierFor, discountAmountFor, nextTierFor } from '../pricing/volume-discount';
+import { VolumeDiscountService } from './volume-discount.service';
 
 const CART_STORAGE_KEY = 'blak-cart';
 const LEGACY_CART_STORAGE_KEY = 'lm-studio-cart';
-const MAX_QUANTITY = 5;
+// Alto para que un mayorista pueda llevar varias del mismo modelo y talle
+const MAX_QUANTITY = 50;
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
+  private volumeDiscount = inject(VolumeDiscountService);
   private cartItems = signal<CartItem[]>(this.loadCartFromStorage());
 
   // Computed signals
-  totalItems = computed(() => 
+  totalItems = computed(() =>
     this.cartItems().reduce((sum, item) => sum + item.quantity, 0)
   );
 
-  totalPrice = computed(() =>
+  subtotal = computed(() =>
     this.cartItems().reduce((sum, item) => sum + (item.price * item.quantity), 0)
   );
+
+  // Precio mayorista: cuentan todas las unidades del carrito, mezclando modelos y talles
+  activeTier = computed(() => activeTierFor(this.volumeDiscount.tiers(), this.totalItems()));
+
+  nextTier = computed(() => nextTierFor(this.volumeDiscount.tiers(), this.totalItems()));
+
+  unitsToNextTier = computed(() => {
+    const next = this.nextTier();
+    return next ? next.minQuantity - this.totalItems() : 0;
+  });
+
+  discountAmount = computed(() => discountAmountFor(this.subtotal(), this.activeTier()));
+
+  totalPrice = computed(() => this.subtotal() - this.discountAmount());
 
   isEmpty = computed(() => this.cartItems().length === 0);
 

@@ -28,15 +28,22 @@ const DELIVERY_ADDRESS_STORAGE_KEY = 'blak-delivery-address';
 /** Lo que se mandó a WhatsApp, para poder reabrirlo o recuperar el carrito. */
 interface SentOrder {
   items: CartItem[];
+  discount: OrderDiscount | null;
   total: number;
   url: string;
+}
+
+export interface OrderDiscount {
+  percent: number;
+  amount: number;
 }
 
 export function buildOrderMessage(
   items: CartItem[],
   total: number,
   deliveryType: DeliveryType,
-  address: string
+  address: string,
+  discount: OrderDiscount | null = null
 ): string {
   let message = 'Hola! Quiero comprar las siguientes remeras:\n\n';
 
@@ -47,6 +54,10 @@ export function buildOrderMessage(
     message += `   - Cantidad: ${item.quantity}\n\n`;
   });
 
+  if (discount) {
+    message += `Subtotal: $${(total + discount.amount).toLocaleString('es-AR')}\n`;
+    message += `Descuento mayorista ${discount.percent}%: -$${discount.amount.toLocaleString('es-AR')}\n`;
+  }
   message += `Total: $${total.toLocaleString('es-AR')}\n\n`;
 
   if (deliveryType === 'retiro') {
@@ -91,6 +102,12 @@ export function buildOrderMessage(
               </li>
             }
           </ul>
+          @if (order.discount; as discount) {
+            <p class="mt-4 flex max-w-lg justify-between tabular-nums text-smoke">
+              <span>Descuento mayorista {{ discount.percent }}%</span>
+              <span>−{{ discount.amount | currencyArs }}</span>
+            </p>
+          }
           <p class="mt-4 flex max-w-lg justify-between text-xl font-semibold tabular-nums">
             <span>Total</span>
             <span>{{ order.total | currencyArs }}</span>
@@ -199,11 +216,39 @@ export function buildOrderMessage(
               <div class="sticky top-24 bg-ink p-6 text-bone md:p-8">
                 <h2 class="mb-8 text-5xl font-black uppercase">Resumen</h2>
 
+                @if (cartService.nextTier(); as next) {
+                  <div class="mb-6">
+                    <p id="tier-progress-label" class="text-sm font-semibold">
+                      Sumá {{ cartService.unitsToNextTier() }} {{ cartService.unitsToNextTier() === 1 ? 'prenda' : 'prendas' }}
+                      más y todo el pedido tiene {{ next.discountPercent }}% off
+                    </p>
+                    <div
+                      role="progressbar"
+                      aria-labelledby="tier-progress-label"
+                      aria-valuemin="0"
+                      [attr.aria-valuemax]="next.minQuantity"
+                      [attr.aria-valuenow]="cartService.totalItems()"
+                      class="mt-2 h-2 bg-graphite"
+                    >
+                      <div class="h-full bg-accent-bright transition-[width] duration-300" [style.width.%]="tierProgress()"></div>
+                    </div>
+                    <a routerLink="/mayoristas" class="mt-2 inline-flex min-h-11 items-center text-sm text-ash underline decoration-2 underline-offset-4 hover:text-bone">
+                      Ver precios por cantidad
+                    </a>
+                  </div>
+                }
+
                 <dl class="mb-6 space-y-3">
                   <div class="flex justify-between gap-4 text-ash">
                     <dt>Subtotal</dt>
-                    <dd class="tabular-nums">{{ cartService.totalPrice() | currencyArs }}</dd>
+                    <dd class="tabular-nums">{{ cartService.subtotal() | currencyArs }}</dd>
                   </div>
+                  @if (cartService.activeTier(); as tier) {
+                    <div class="flex justify-between gap-4 text-bone">
+                      <dt>Descuento mayorista {{ tier.discountPercent }}%</dt>
+                      <dd class="tabular-nums">−{{ cartService.discountAmount() | currencyArs }}</dd>
+                    </div>
+                  }
                   <div class="flex justify-between gap-4 text-ash">
                     <dt>Envío</dt>
                     <dd class="text-right text-sm">{{ shippingLabel() }}</dd>
@@ -381,13 +426,24 @@ export class CartComponent {
     return STORE_INFO.shippingCost ?? 'Se coordina por WhatsApp';
   });
 
+  orderDiscount = computed<OrderDiscount | null>(() => {
+    const tier = this.cartService.activeTier();
+    return tier ? { percent: tier.discountPercent, amount: this.cartService.discountAmount() } : null;
+  });
+
+  tierProgress = computed(() => {
+    const next = this.cartService.nextTier();
+    return next ? Math.min(100, (this.cartService.totalItems() / next.minQuantity) * 100) : 100;
+  });
+
   whatsAppUrl = computed(() =>
     getWhatsAppUrl(
       buildOrderMessage(
         this.cartService.getCartItems()(),
         this.cartService.totalPrice(),
         this.deliveryType(),
-        this.deliveryAddress()
+        this.deliveryAddress(),
+        this.orderDiscount()
       )
     )
   );
@@ -427,6 +483,7 @@ export class CartComponent {
 
     this.sentOrder.set({
       items: this.cartService.getCartItems()(),
+      discount: this.orderDiscount(),
       total: this.cartService.totalPrice(),
       url: this.whatsAppUrl()
     });

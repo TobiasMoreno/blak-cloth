@@ -1,0 +1,7 @@
+{
+  "tiers": [
+    { "minQuantity": 5, "discountPercent": 10 },
+    { "minQuantity": 12, "discountPercent": 15 },
+    { "minQuantity": 24, "discountPercent": 20 }
+  ]
+}

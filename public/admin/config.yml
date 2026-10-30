@@ -108,3 +108,33 @@ collections:
                 widget: string
                 pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', 'Solo minúsculas, números y guiones']
               - { name: description, label: Descripción, widget: text, required: false }
+      - name: wholesale
+        label: Mayoristas (precios por cantidad)
+        file: public/data/wholesale.json
+        format: json
+        editor:
+          preview: false
+        fields:
+          - name: tiers
+            label: Descuentos por cantidad
+            label_singular: descuento
+            hint: >-
+              Cada fila es una regla "desde X prendas, Y% de descuento", p. ej. desde 5 prendas → 10%.
+              Se cuentan todas las prendas del carrito (remeras, chombas, buzos…) y se aplica la regla
+              más alta alcanzada a todo el pedido. Sin filas, no hay descuento.
+            widget: list
+            summary: 'Desde {{fields.minQuantity}} prendas → {{fields.discountPercent}}% de descuento'
+            fields:
+              - name: minQuantity
+                label: Desde cuántas prendas
+                hint: Cantidad total del carrito a partir de la cual se aplica, p. ej. 5
+                widget: number
+                value_type: int
+                min: 2
+              - name: discountPercent
+                label: Descuento (%)
+                hint: Porcentaje que se descuenta del precio de cada prenda, p. ej. 10
+                widget: number
+                value_type: int
+                min: 1
+                max: 99

@@ -33,6 +33,11 @@ import { getWhatsAppUrl } from '../../core/constants/whatsapp.constants';
               >Para equipos</a
             >
             <a
+              routerLink="/mayoristas"
+              class="flex min-h-11 items-center text-ash hover:text-white"
+              >Mayoristas</a
+            >
+            <a
               routerLink="/about"
               class="flex min-h-11 items-center text-ash hover:text-white"
               >El estudio</a

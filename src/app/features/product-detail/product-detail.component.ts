@@ -16,6 +16,7 @@ import { map } from 'rxjs';
 import { ProductService } from '../../core/services/product.service';
 import { CartService } from '../../core/services/cart.service';
 import { WishlistService } from '../../core/services/wishlist.service';
+import { VolumeDiscountService } from '../../core/services/volume-discount.service';
 import { Product, ProductSize } from '../../core/models/product.model';
 import { CartItem } from '../../core/models/cart-item.model';
 import { CurrencyArsPipe } from '../../shared/pipes/currency-ars.pipe';
@@ -96,9 +97,19 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
               </h1>
 
               <div class="mt-8 flex items-center justify-between gap-4">
-                <p class="text-2xl font-semibold tabular-nums">
-                  {{ productData.price | currencyArs }}
-                </p>
+                <div>
+                  <p class="text-2xl font-semibold tabular-nums">
+                    {{ productData.price | currencyArs }}
+                  </p>
+                  @if (firstTier(); as tier) {
+                    <a
+                      routerLink="/mayoristas"
+                      class="mt-1 inline-flex min-h-11 items-center text-sm font-semibold underline decoration-2 underline-offset-4 hover:text-accent-deep"
+                    >
+                      {{ volumeDiscount.fromPrice(productData.price) | currencyArs }} c/u llevando {{ tier.minQuantity }}+
+                    </a>
+                  }
+                </div>
                 <button
                   type="button"
                   (click)="toggleFavorite()"
@@ -257,7 +268,12 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
                         </p>
                       }
                     } @else {
-                      <p id="quantity-hint" class="mt-2 text-sm text-muted">Hasta {{ MAX_QUANTITY }} por pedido. Para más, consultanos por WhatsApp.</p>
+                      <p id="quantity-hint" class="mt-2 text-sm text-muted">
+                        Hasta {{ MAX_QUANTITY }} por pedido.
+                        @if (firstTier(); as tier) {
+                          Llevando {{ tier.minQuantity }} prendas o más, aunque sean distintas, tenés {{ tier.discountPercent }}% off.
+                        }
+                      </p>
                     }
                   </div>
 
@@ -355,6 +371,8 @@ export class ProductDetailComponent {
   private title = inject(Title);
   private meta = inject(Meta);
   private wishlistService = inject(WishlistService);
+  protected volumeDiscount = inject(VolumeDiscountService);
+  protected firstTier = this.volumeDiscount.firstTier;
 
   // Señal y no snapshot: al ir de una remera a otra (relacionadas) Angular reutiliza el componente
   private productId = toSignal(this.route.paramMap.pipe(map(params => params.get('id'))), {

@@ -96,4 +96,14 @@ describe('CartComponent', () => {
     expect(message).toContain('Envío a domicilio');
     expect(message).toContain('Dirección: Av. Colón 100\n');
   });
+
+  it('detalla el descuento mayorista en el mensaje', () => {
+    const message = buildOrderMessage([{ ...MEDUSA, quantity: 5 }], 90000, 'retiro', '', {
+      percent: 10,
+      amount: 10000
+    });
+    expect(message).toContain('Subtotal: $100.000\n');
+    expect(message).toContain('Descuento mayorista 10%: -$10.000\n');
+    expect(message).toContain('Total: $90.000\n');
+  });
 });
