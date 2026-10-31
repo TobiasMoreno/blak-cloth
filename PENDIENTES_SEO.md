@@ -74,8 +74,12 @@ estructurados.
       conectar el dominio en Firebase y crear la propiedad nueva en Search Console.
 - [ ] **Copia en Netlify** (`blakstreetwear.netlify.app`): dejarla como está (el canonical ya apunta a Firebase) o
       redirigir todo con 301 a Firebase, salvo `/.netlify/functions/*`, que usa el login del CMS.
-- [ ] **Página de mayoristas**: menciona "chombas o buzos", pero el catálogo tiene solo remeras. ¿Corregir el texto?
-- [ ] **H1 de la home**: hoy dice solo "BLAK". ¿Sumar "remeras de autor de Córdoba"? Cambia el diseño del vestuario.
+- [x] **Página de mayoristas**: el texto ya no menciona chombas ni buzos (el ejemplo es "remeras de un diseño + de otro").
+- [x] **H1 de la home**: "BLAK · Remeras estampadas de autor en Córdoba". En el vestuario se sigue viendo solo "BLAK";
+      el resto es texto para lectores de pantalla y buscadores.
+- [x] **H1 de cada remera**: "Remera Medusa" (en la página, "Remera" va chico arriba del nombre). También en el JSON-LD.
+- [x] **Fotos en Firebase**: `scripts/build-images.mjs` genera WebP en 5 anchos (`/img/…`) y una imagen 1200×630
+      para compartir. Antes se servían los JPEG/PNG originales (1,7 MB las 11 fotos; ahora ~144 KB en 640 px).
 - [ ] **Google Business Profile**: solo si atienden en persona o tienen zona de entrega definida (se puede crear sin
       mostrar la dirección).
 

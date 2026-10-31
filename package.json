@@ -8,7 +8,7 @@
     "start": "ng serve",
     "prebuild": "npm run catalog",
     "build": "ng build",
-    "postbuild": "node scripts/build-static-pages.mjs",
+    "postbuild": "node scripts/build-images.mjs && node scripts/build-static-pages.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "cms": "npx decap-server@3.11.5"
@@ -50,6 +50,7 @@
     "@angular/compiler-cli": "^21.0.0",
     "@types/three": "^0.186.0",
     "jsdom": "^27.1.0",
+    "sharp": "^0.34.4",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }

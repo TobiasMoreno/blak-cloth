@@ -26,6 +26,10 @@ const LEGACY_IDS = [
   ...readSource('src/app/core/constants/legacy-products.constants.ts').matchAll(/'(\d+)':\s*'([a-z0-9-]+)'/g)
 ].map(([, id, slug]) => ({ id, slug }));
 
+const imageSource = readSource('src/app/core/constants/image.constants.ts');
+const IMAGE_WIDTHS = JSON.parse(imageSource.match(/IMAGE_WIDTHS\s*=\s*(\[[^\]]+\])/)[1]);
+const OPTIMIZED_IMAGE_DIR = readConstant(imageSource, 'OPTIMIZED_IMAGE_DIR');
+
 const SIZE_ORDER = ['S', 'M', 'L', 'XL'];
 const MAX_DESCRIPTION_LENGTH = 160;
 
@@ -64,9 +68,22 @@ function shareImage(path) {
     const url = `${DEPLOY_URL}/.netlify/images?url=${encodeURIComponent('/' + path)}&w=1200&h=630&fit=cover&fm=jpg&q=80`;
     return { url, width: 1200, height: 630 };
   }
-  // En Firebase va la foto original: no se conocen sus medidas, así que no se declaran
-  return { url: absoluteUrl(path) };
+  // En Firebase, la versión recortada que genera scripts/build-images.mjs
+  return { url: absoluteUrl(optimizedPath(path, 'share.jpg')), width: 1200, height: 630 };
 }
+
+/** Archivo generado por scripts/build-images.mjs, p. ej. `img/products/medusa/mockup-640.webp`. */
+const optimizedPath = (path, suffix) =>
+  `${OPTIMIZED_IMAGE_DIR}/${path.replace(/^\//, '').replace(/\.(jpe?g|png|webp)$/i, '')}-${suffix}`;
+
+/** <img> con el srcset de los WebP generados, igual que el que arma NgOptimizedImage en la app. */
+function responsiveImage(path, alt, sizes) {
+  const srcset = IMAGE_WIDTHS.map((w) => `/${optimizedPath(path, `${w}.webp`)} ${w}w`).join(', ');
+  return `<img src="/${optimizedPath(path, '1280.webp')}" srcset="${srcset}" sizes="${sizes}" width="1200" height="900" alt="${escape(alt)}" fetchpriority="high">`;
+}
+
+/** "Medusa" → "Remera Medusa", sin duplicar si el nombre ya empieza con "Remera". */
+const productName = (product) => (/^remera\b/i.test(product.name) ? product.name : `Remera ${product.name}`);
 
 function truncate(text, max) {
   if (text.length <= max) return text;
@@ -83,8 +100,7 @@ function toSentence(text) {
 
 // Mismo texto que src/app/core/seo/product-seo.ts: si cambia uno, cambiar el otro
 function productTitle(product) {
-  const name = /^remera\b/i.test(product.name) ? product.name : `Remera ${product.name}`;
-  return `${name} · ${SITE_NAME}`;
+  return `${productName(product)} · ${SITE_NAME}`;
 }
 
 function productDescription(product) {
@@ -150,7 +166,7 @@ function productSchema(product, url) {
   return {
     '@type': 'Product',
     '@id': `${url}#product`,
-    name: product.name,
+    name: productName(product),
     description: toSentence(product.description) || productDescription(product),
     sku: product.slug,
     image: product.images.map(absoluteUrl),
@@ -269,7 +285,7 @@ writePage(
     image: coverImage,
     imageAlt: `Remeras ${SITE_NAME}`,
     schema: [organizationSchema, websiteSchema],
-    content: `<h1>${BRAND_NAME}</h1><p>Remeras estampadas de autor, creadas en ${STORE_CITY}.</p>
+    content: `<h1>${BRAND_NAME} · Remeras estampadas de autor en ${STORE_CITY}</h1><p>Diseños propios, gráfica urbana y pedidos directos por WhatsApp.</p>
 <h2>El drop actual</h2>${productListHtml(products)}<p><a href="/products">Ver la colección completa</a></p>`
   })
 );
@@ -317,7 +333,7 @@ for (const product of products) {
         breadcrumbSchema([['Inicio', '/'], ['Colección', '/products'], [product.name, path]])
       ],
       content: `<nav aria-label="Breadcrumb"><ol><li><a href="/">Inicio</a></li><li><a href="/products">Colección</a></li><li aria-current="page">${escape(product.name)}</li></ol></nav>
-<h1>${escape(product.name)}</h1><img src="/${product.images[0]}" alt="Remera ${escape(product.name)}" fetchpriority="high">${facts.join('')}
+<h1>${escape(productName(product))}</h1>${responsiveImage(product.images[0], productName(product), '(min-width: 1024px) 58vw, 100vw')}${facts.join('')}
 ${related.length > 0 ? `<h2>También te puede gustar</h2>${productListHtml(related)}` : ''}`
     })
   );

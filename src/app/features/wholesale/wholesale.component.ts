@@ -33,11 +33,11 @@ import { STORE_INFO } from '../../core/constants/store-info.constants';
               Cuánto ahorrás
             </h2>
             <p class="mt-6 max-w-[42ch] text-lg leading-relaxed text-muted">
-              El porcentaje se descuenta del precio de cada prenda, sea remera, chomba o buzo, y el carrito lo calcula solo.
+              El porcentaje se descuenta del precio de cada prenda, y el carrito lo calcula solo.
             </p>
             @if (example(); as ex) {
               <p class="mt-4 max-w-[42ch] text-lg leading-relaxed">
-                Por ejemplo: {{ ex.first }} remeras + {{ ex.second }} chombas = {{ ex.minQuantity }} prendas, y todo el pedido tiene
+                Por ejemplo: {{ ex.first }} remeras de un diseño + {{ ex.second }} de otro = {{ ex.minQuantity }} prendas, y todo el pedido tiene
                 {{ ex.discountPercent }}% off.
               </p>
             }

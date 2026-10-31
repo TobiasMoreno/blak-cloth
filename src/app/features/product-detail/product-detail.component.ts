@@ -94,6 +94,9 @@ const SIZE_ORDER: ProductSize[] = ['S', 'M', 'L', 'XL'];
             <!-- Información del producto -->
             <div class="lg:col-span-4 lg:col-start-9 lg:pt-6">
               <h1 class="max-w-[11ch] text-6xl font-black uppercase leading-[0.86] md:text-8xl">
+                @if (showGarmentPrefix()) {
+                  <span class="mb-3 block text-lg font-semibold tracking-wide text-muted md:text-xl">Remera</span>
+                }
                 {{ productData.name }}
               </h1>
 
@@ -392,6 +395,9 @@ export class ProductDetailComponent {
     const id = this.productId();
     return id ? this.productService.getProductById(id) ?? null : null;
   });
+
+  /** El H1 dice "Remera Medusa" (lo que se busca), salvo que el nombre ya empiece con "Remera". */
+  showGarmentPrefix = computed(() => !/^remera\b/i.test(this.product()?.name ?? ''));
 
   isSoldOut = computed(() => (this.product()?.colors.length ?? 0) === 0);
 
